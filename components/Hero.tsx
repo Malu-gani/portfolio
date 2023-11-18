@@ -1,6 +1,7 @@
 import React from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import BackgroundCircles from "./BackgroundCircles";
+import Link from "next/link";
 
 type Props = {};
 
@@ -20,10 +21,10 @@ export default function Hero({}: Props) {
       <BackgroundCircles />
       <img
         className="relative rounded-full h-32 w-32 mx-auto object-cover "
-        src=""
+        src="https://lh3.googleusercontent.com/a/ACg8ocKSRhIYOeFXPnAzyYfevofH8-x9K00Wt-XSRczKicqYikI=s360-c-no"
         alt=""
       />
-      <div>
+      <div className="z-20">
         <h2 className="text-sm uppercase text-gray-500 pb-2 tracking-[15px] ">
           Software Enginer
         </h2>
@@ -31,7 +32,24 @@ export default function Hero({}: Props) {
           <span className="mr-3">{text}</span>
           <Cursor cursorColor="#F7AB0A" />
         </h1>
+
+        <div className="pt-5">
+          <Link href="@about">
+          <button className="heroButton">  About</button>
+          </Link>
+          <Link href="@experience">
+          <button className="heroButton">  Experience</button>
+          </Link>
+          <Link href="@skills">
+          <button className="heroButton">  Skills</button>
+          </Link>
+          <Link href="@porjects">
+          <button className="heroButton">  Porjects</button>
+          </Link>
+        </div>
       </div>
+
+
     </div>
   );
 }
