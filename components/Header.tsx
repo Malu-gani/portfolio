@@ -52,7 +52,6 @@ export default function Header({}: Props) {
         }}
         transition={{
           duration: 1.5,
-          
         }}
         className="flex flex-row items-center text-gray-300 cursor-pointer"
       >
