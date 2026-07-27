@@ -1,17 +1,15 @@
 ---
-import { getCollection, render } from 'astro:content';
-import CaseLayout from '../../../layouts/CaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+import { getCasoStaticPaths } from '../../../i18n/casos';
+import CasoDetalle from '../../../components/CasoDetalle.astro';
 
 export async function getStaticPaths() {
-  const casos = await getCollection('casos-qa');
-  return casos
-    .filter((c) => c.id.startsWith('en/'))
-    .map((caso) => ({ params: { slug: caso.id.replace('en/', '') }, props: { caso } }));
+  return getCasoStaticPaths('en');
 }
 
+interface Props {
+  caso: CollectionEntry<'casos-qa'>;
+}
 const { caso } = Astro.props;
-const { Content } = await render(caso);
 ---
-<CaseLayout lang="en" datos={caso.data}>
-  <Content />
-</CaseLayout>
+<CasoDetalle lang="en" caso={caso} />
