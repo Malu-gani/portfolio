@@ -24,7 +24,7 @@ export function pendientesDeColecciones(baseDir = process.cwd()) {
       const dir = join(baseDir, 'src', 'content', coleccion, lang);
       let archivos;
       try {
-        archivos = readdirSync(dir).filter((f) => f.endsWith('.md'));
+        archivos = readdirSync(dir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
       } catch (error) {
         throw new Error(`No se pudo leer el directorio "${dir}": ${error.message}`);
       }

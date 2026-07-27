@@ -8,7 +8,7 @@ const tags = z.enum([
 ]);
 
 const casosQa = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/casos-qa' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/casos-qa' }),
   schema: z.object({
     titulo: z.string().min(1),
     resumen: z.string().min(20).max(200),
@@ -24,7 +24,7 @@ const casosQa = defineCollection({
 });
 
 const proyectos = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/proyectos' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/proyectos' }),
   schema: z.object({
     titulo: z.string().min(1),
     resumen: z.string().min(20).max(200),

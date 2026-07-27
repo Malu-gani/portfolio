@@ -16,7 +16,7 @@ export class ComponentesPage extends BasePage {
   }
 
   async abrir(): Promise<void> {
-    await this.page.goto('/es/demo-componentes');
+    await this.page.goto('/es/qa/suite-e2e-portfolio');
   }
 
   matrizCaption(): Locator {

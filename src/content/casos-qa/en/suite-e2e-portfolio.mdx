@@ -10,6 +10,10 @@ ejemplo: true
 repo: "https://github.com/Malu-gani/portfolio"
 ---
 
+import BugReport from '../../../components/BugReport.astro';
+import TestMatrix from '../../../components/TestMatrix.astro';
+import Metricas from '../../../components/Metricas.astro';
+
 ## Context
 
 This portfolio is a bilingual static site with two content tracks. It has no backend, but it still concentrates several points where a silent failure would wreck its one job: a recruiter opens it and it works.
@@ -31,11 +35,28 @@ Playwright suite using the Page Object Model, running on Chromium, Firefox, WebK
 
 ## Findings
 
-To be replaced with the real bugs found during development, using the BugReport component.
+<BugReport id="BUG-001" titulo="The language toggle drops the current section"
+  severidad="alto" prioridad="P2" entorno="Chrome 130 · Windows 11"
+  pasos={['Open /en/about', 'Click the ES toggle', 'Observe the resulting URL']}
+  esperado="Redirects to /es/sobre-mi keeping the section."
+  obtenido="Redirects to /es/ dropping the section." />
+
+<TestMatrix titulo="Navigation cases" casos={[
+  { id: 'TC-01', escenario: 'Language switch on home', tipo: 'E2E', estado: 'paso' },
+  { id: 'TC-02', escenario: 'Theme persistence', tipo: 'E2E', estado: 'paso' },
+  { id: 'TC-03', escenario: 'English CV download', tipo: 'E2E', estado: 'bloqueado' },
+]} />
+
+<Metricas items={[
+  { etiqueta: 'Cases', valor: '24' }, { etiqueta: 'Bugs', valor: '7' },
+  { etiqueta: 'Automated', valor: '82%' }, { etiqueta: 'Duration', valor: '48s' },
+]} />
 
 ## Automation
 
 I automated what repeats on every deploy and what a human doesn't catch at a glance: broken links, contrast, and visual regressions.
+
+[View the report from the latest run](https://malu-gani.github.io/portfolio/reporte/)
 
 ## Outcome and takeaways
 

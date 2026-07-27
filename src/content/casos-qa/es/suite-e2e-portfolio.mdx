@@ -10,6 +10,10 @@ ejemplo: true
 repo: "https://github.com/Malu-gani/portfolio"
 ---
 
+import BugReport from '../../../components/BugReport.astro';
+import TestMatrix from '../../../components/TestMatrix.astro';
+import Metricas from '../../../components/Metricas.astro';
+
 ## Contexto
 
 Este portfolio es un sitio estático bilingüe con dos carriles de contenido. Aunque no tiene backend, concentra varios puntos donde un fallo silencioso arruinaría su único objetivo: que un reclutador lo abra y funcione.
@@ -31,11 +35,28 @@ Suite en Playwright con Page Object Model, corriendo en Chromium, Firefox, WebKi
 
 ## Hallazgos
 
-Reemplazar por los bugs reales encontrados durante el desarrollo, usando el componente BugReport.
+<BugReport id="BUG-001" titulo="El toggle de idioma pierde la sección actual"
+  severidad="alto" prioridad="P2" entorno="Chrome 130 · Windows 11"
+  pasos={['Abrir /es/sobre-mi', 'Hacer clic en el toggle EN', 'Observar la URL resultante']}
+  esperado="Redirige a /en/about manteniendo la sección."
+  obtenido="Redirige a /en/ perdiendo la sección." />
+
+<TestMatrix titulo="Casos de navegación" casos={[
+  { id: 'TC-01', escenario: 'Cambio de idioma en home', tipo: 'E2E', estado: 'paso' },
+  { id: 'TC-02', escenario: 'Persistencia de tema', tipo: 'E2E', estado: 'paso' },
+  { id: 'TC-03', escenario: 'Descarga de CV en inglés', tipo: 'E2E', estado: 'bloqueado' },
+]} />
+
+<Metricas items={[
+  { etiqueta: 'Casos', valor: '24' }, { etiqueta: 'Bugs', valor: '7' },
+  { etiqueta: 'Automatizados', valor: '82%' }, { etiqueta: 'Duración', valor: '48s' },
+]} />
 
 ## Automatización
 
 Automaticé lo que se repite en cada deploy y lo que un humano no detecta a simple vista: enlaces rotos, contraste y regresiones visuales.
+
+[Ver el reporte de la última corrida](https://malu-gani.github.io/portfolio/reporte/)
 
 ## Resultado y aprendizajes
 

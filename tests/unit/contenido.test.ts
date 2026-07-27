@@ -7,8 +7,8 @@ const colecciones = ['casos-qa', 'proyectos'];
 describe('Integridad del contenido', () => {
   for (const coleccion of colecciones) {
     const base = join('src', 'content', coleccion);
-    const es = readdirSync(join(base, 'es')).filter((f) => f.endsWith('.md'));
-    const en = readdirSync(join(base, 'en')).filter((f) => f.endsWith('.md'));
+    const es = readdirSync(join(base, 'es')).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
+    const en = readdirSync(join(base, 'en')).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
 
     it(`cada archivo de ${coleccion}/es existe también en en/`, () => {
       expect(es.length).toBeGreaterThan(0);

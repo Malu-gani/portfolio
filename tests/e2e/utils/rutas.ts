@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
  *
  * 1. `src/pages/{lang}/**​/*.astro` — páginas estáticas. Se excluyen los templates
  *    dinámicos (`[...slug].astro`): sus rutas concretas salen de las colecciones.
- * 2. `src/content/{coleccion}/{lang}/*.md` — un archivo por caso o proyecto; el
+ * 2. `src/content/{coleccion}/{lang}/*.{md,mdx}` — un archivo por caso o proyecto; el
  *    nombre de archivo es el slug (confirmado en `src/i18n/casos.ts` y
  *    `src/i18n/proyectos.ts`, que arman los `getStaticPaths` a partir del `id`
  *    del entry, que es exactamente `{lang}/{nombre-de-archivo}`).
@@ -62,8 +62,8 @@ function paginasDeColeccion(coleccion: string, prefijoRuta: string, lang: Lang):
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter((e) => e.isFile() && e.name.endsWith('.md'))
-    .map((e) => `/${lang}/${prefijoRuta}/${e.name.replace(/\.md$/, '')}`);
+    .filter((e) => e.isFile() && (e.name.endsWith('.md') || e.name.endsWith('.mdx')))
+    .map((e) => `/${lang}/${prefijoRuta}/${e.name.replace(/\.mdx?$/, '')}`);
 }
 
 /** Todas las rutas reales del sitio, en ambos idiomas. */
