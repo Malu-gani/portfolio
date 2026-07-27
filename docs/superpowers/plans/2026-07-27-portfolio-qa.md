@@ -2577,6 +2577,9 @@ import { test, expect } from '@playwright/test';
 const paginas = ['/es/', '/es/qa', '/es/qa/suite-e2e-portfolio', '/es/contacto'];
 
 test.describe('Regresión visual', () => {
+  test.skip(({ browserName }) => browserName !== 'chromium',
+    'Las capturas de referencia se generan solo en Chromium');
+
   for (const tema of ['light', 'dark'] as const) {
     for (const ruta of paginas) {
       test(`${ruta} en tema ${tema}`, async ({ page }) => {
