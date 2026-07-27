@@ -1,0 +1,11 @@
+---
+import { getLangFromUrl, useTranslations, getAlternateUrl } from '../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const destino = lang === 'es' ? 'en' : 'es';
+const href = getAlternateUrl(Astro.url.pathname, destino);
+---
+<a href={href} data-testid="lang-toggle" aria-label={t('idioma.cambiar')} hreflang={destino}
+  class="rounded-md border border-border px-2 py-1 font-mono text-sm text-text hover:bg-surface">
+  {destino.toUpperCase()}
+</a>

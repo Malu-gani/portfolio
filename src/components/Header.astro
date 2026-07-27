@@ -1,0 +1,33 @@
+---
+import ThemeToggle from './ThemeToggle.tsx';
+import LangToggle from './LangToggle.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { rutas } from '../i18n/routes';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const enlaces = [
+  { testid: 'nav-inicio', href: `/${lang}/`, texto: t('nav.inicio') },
+  { testid: 'nav-qa', href: rutas.qa[lang], texto: t('nav.qa') },
+  { testid: 'nav-dev', href: rutas.dev[lang], texto: t('nav.dev') },
+  { testid: 'nav-sobre', href: rutas.about[lang], texto: t('nav.sobre') },
+  { testid: 'nav-contacto', href: rutas.contact[lang], texto: t('nav.contacto') },
+];
+---
+<header class="border-b border-border">
+  <nav data-testid="nav-principal" aria-label={t('nav.principal')}
+    class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+    <ul class="flex flex-wrap gap-4">
+      {enlaces.map((e) => (
+        <li>
+          <a href={e.href} data-testid={e.testid}
+            class="text-muted hover:text-accent focus-visible:text-accent">{e.texto}</a>
+        </li>
+      ))}
+    </ul>
+    <div class="flex gap-2">
+      <LangToggle />
+      <ThemeToggle etiqueta={t('tema.cambiar')} client:load />
+    </div>
+  </nav>
+</header>

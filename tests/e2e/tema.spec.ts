@@ -23,4 +23,13 @@ test.describe('Toggle de tema', () => {
     await base.recargar();
     expect(await base.temaActual()).toBe('dark');
   });
+
+  test('el toggle sigue funcionando después de navegar', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/es/');
+    await page.getByTestId('lang-toggle').click();
+    await expect(page).toHaveURL(/\/en\/$/);
+    await page.getByTestId('theme-toggle').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  });
 });

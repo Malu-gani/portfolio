@@ -1,7 +1,15 @@
 ---
 import '../styles/global.css';
-interface Props { lang: 'es' | 'en'; title: string; description: string }
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getAlternateUrl } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; title: string; description: string }
 const { lang, title, description } = Astro.props;
+const otro: Lang = lang === 'es' ? 'en' : 'es';
+const urlOtro = getAlternateUrl(Astro.url.pathname, otro);
 ---
 <html lang={lang}>
   <head>
@@ -9,6 +17,13 @@ const { lang, title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="alternate" hreflang={lang} href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="alternate" hreflang={otro} href={new URL(urlOtro, Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL('/es/', Astro.site)} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <ClientRouter />
     <script is:inline>
       (() => {
         const guardado = localStorage.getItem('theme');
@@ -16,8 +31,22 @@ const { lang, title, description } = Astro.props;
         document.documentElement.dataset.theme = guardado ?? (prefiereOscuro ? 'dark' : 'light');
       })();
     </script>
+    <script>
+      document.addEventListener('astro:after-swap', () => {
+        const guardado = localStorage.getItem('theme');
+        const prefiereOscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = guardado ?? (prefiereOscuro ? 'dark' : 'light');
+      });
+    </script>
   </head>
-  <body class="bg-bg text-text">
-    <slot />
+  <body class="flex min-h-screen flex-col bg-bg text-text">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:p-4">
+      {lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}
+    </a>
+    <Header />
+    <main id="contenido" class="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
+      <slot />
+    </main>
+    <Footer />
   </body>
 </html>
