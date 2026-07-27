@@ -6,7 +6,7 @@
 
 **Architecture:** Astro 5 en modo estático puro compila todo a HTML servido desde CDN. El idioma vive en la URL mediante carpetas espejo (`/es/`, `/en/`). El contenido son archivos Markdown en dos colecciones validadas por esquema Zod, de modo que publicar un caso nuevo no requiere tocar código. El sistema visual usa tokens CSS semánticos, lo que permite el toggle claro/oscuro sin duplicar estilos. La suite Playwright vive en el mismo repo y es a la vez garantía de calidad y pieza del portfolio.
 
-**Tech Stack:** Astro 5, TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
+**Tech Stack:** Astro 5, React 19 (solo islands), TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
 
 ## Global Constraints
 
@@ -14,7 +14,7 @@
 - **Astro 5** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
 - **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`.
 - **Tailwind CSS 4** vía plugin de Vite (`@tailwindcss/vite`). No existe `tailwind.config.js`: la configuración es CSS-first mediante `@theme inline` en `src/styles/global.css`.
-- **Cero JavaScript de framework en v1.** La interactividad (toggle de tema, copiar email) se resuelve con `<script>` vanilla dentro de componentes `.astro`. Ver "Desviaciones respecto del spec" más abajo.
+- **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
 - **Fuentes servidas localmente** con paquetes `@fontsource-variable`. Prohibido enlazar Google Fonts u otro CDN de fuentes.
 - **Todo elemento interactivo o verificable lleva `data-testid`.** Los selectores de Playwright usan exclusivamente `data-testid`; nunca clases de Tailwind ni texto visible (el texto cambia según idioma).
 - **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` fuera de `tests/e2e/pages/`.
@@ -24,16 +24,14 @@
 - **Todo contenido de ejemplo lleva `ejemplo: true` en el frontmatter** y se renderiza con un aviso visible. El script `npm run check:listo` falla si queda alguno.
 - **Mensajes de commit en español, formato Conventional Commits** (`feat:`, `test:`, `docs:`, `chore:`, `style:`).
 
-## Desviaciones respecto del spec
+## Nota sobre el uso de React
 
-El spec (sección 3) preveía islands de React para el toggle de tema y el de idioma. Este plan **no instala React**, por dos motivos:
+El spec (sección 3) prevé islands de React para el toggle de tema, el de idioma y los futuros filtros. Este plan los implementa así, con dos precisiones:
 
-1. **El toggle de idioma no necesita JavaScript.** Es un enlace `<a>` a la ruta equivalente en el otro idioma, resuelto en tiempo de compilación. Ponerle React sería agregar un runtime para renderizar un link.
-2. **El toggle de tema pesa ~1 KB en vanilla y ~45 KB con React**, y además necesita igual un script inline en el `<head>` para evitar el parpadeo de tema al cargar. React no elimina ese script; lo duplica.
+1. **El toggle de idioma queda como `.astro`.** No es una excepción por conveniencia: es un enlace `<a href>` cuya URL destino se calcula al compilar. No tiene estado ni maneja eventos, así que no hay nada que hidratar. Envolverlo en React agregaría un componente cliente que solo renderizaría un link.
+2. **El script inline anti-parpadeo del `<head>` es obligatorio igual.** React hidrata después del primer pintado, así que sin ese script se vería un destello blanco al entrar en modo oscuro. El island de React lee el tema que ese script ya dejó puesto en `<html data-theme>`, y a partir de ahí lo gobierna.
 
-React se incorporará cuando aparezca la primera interacción que lo justifique — los filtros de casos, que están fuera del alcance de v1. Astro permite agregarlo con `npx astro add react` sin refactorizar nada de lo construido.
-
-**Esta desviación requiere confirmación del usuario antes de ejecutar la Task 1.**
+Componentes que son islands de React: `ThemeToggle.tsx` y `CopyEmail.tsx`. Todo el resto es `.astro`.
 
 ---
 
@@ -64,8 +62,9 @@ src/
     BaseLayout.astro         html/head/body, hreflang, script anti-parpadeo
     CaseLayout.astro         Envoltorio de páginas de detalle
   components/
-    Header.astro  Footer.astro  ThemeToggle.astro  LangToggle.astro
-    Hero.astro  StackGrid.astro  CvButton.astro  CopyEmail.astro
+    Header.astro  Footer.astro  LangToggle.astro
+    ThemeToggle.tsx  CopyEmail.tsx          ← islands de React
+    Hero.astro  StackGrid.astro  CvButton.astro
     CasoCard.astro  ProyectoCard.astro  Tag.astro  EjemploBanner.astro
     BugReport.astro  TestMatrix.astro  Metricas.astro
   pages/
@@ -104,6 +103,7 @@ cd C:/Users/maluganiJ/Desktop/proyects/portoflio
 npm create astro@latest . -- --template minimal --no-install --no-git --skip-houston --typescript strict
 npm install
 npm install tailwindcss @tailwindcss/vite @astrojs/sitemap
+npx astro add react --yes
 npm install @fontsource-variable/inter @fontsource-variable/jetbrains-mono
 npm install -D @playwright/test @axe-core/playwright vitest
 npx playwright install --with-deps chromium firefox webkit
@@ -117,14 +117,17 @@ npx playwright install --with-deps chromium firefox webkit
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import react from '@astrojs/react';
 
 export default defineConfig({
   site: 'https://portfolio.vercel.app',
   output: 'static',
-  integrations: [sitemap()],
+  integrations: [react(), sitemap()],
   vite: { plugins: [tailwindcss()] },
 });
 ```
+
+Este archivo sobrescribe lo que dejó `astro add react`, así que la integración de React tiene que estar declarada acá explícitamente.
 
 - [ ] **Step 3: Crear la hoja de estilos base**
 
@@ -238,7 +241,7 @@ Define los tokens semánticos de color en ambos temas y el toggle sin parpadeo, 
 
 **Files:**
 - Modify: `src/styles/global.css`
-- Create: `src/layouts/BaseLayout.astro`, `src/components/ThemeToggle.astro`
+- Create: `src/layouts/BaseLayout.astro`, `src/components/ThemeToggle.tsx`
 - Modify: `src/pages/es/index.astro`
 - Test: `tests/e2e/tema.spec.ts`, `tests/e2e/pages/BasePage.ts`
 
@@ -413,35 +416,51 @@ body {
 
 Los tamaños con `clamp()` sobrescriben la escala de Tailwind: `text-4xl` pasa a ser fluido entre 2.125rem y 3rem según el ancho del viewport, sin necesidad de breakpoints. El bloque de `prefers-reduced-motion` cancela también las transiciones de vista, que se activan en la Task 4.
 
-- [ ] **Step 5: Crear el componente de toggle**
+- [ ] **Step 5: Crear el island de toggle de tema**
 
-`src/components/ThemeToggle.astro`:
+`src/components/ThemeToggle.tsx`:
 
-```astro
----
-interface Props { etiqueta: string }
-const { etiqueta } = Astro.props;
----
-<button type="button" data-testid="theme-toggle" aria-label={etiqueta}
-  class="rounded-md border border-border p-2 text-text hover:bg-surface">
-  <span aria-hidden="true" data-icono-claro>☀</span>
-  <span aria-hidden="true" data-icono-oscuro>☾</span>
-</button>
+```tsx
+import { useEffect, useState } from 'react';
 
-<style>
-  [data-theme='light'] [data-icono-claro], [data-theme='dark'] [data-icono-oscuro] { display: none; }
-</style>
+type Tema = 'light' | 'dark';
 
-<script>
-  const boton = document.querySelector('[data-testid="theme-toggle"]');
-  boton?.addEventListener('click', () => {
-    const actual = document.documentElement.dataset.theme;
-    const nuevo = actual === 'dark' ? 'light' : 'dark';
+interface Props {
+  etiqueta: string;
+}
+
+export default function ThemeToggle({ etiqueta }: Props) {
+  const [tema, setTema] = useState<Tema | null>(null);
+
+  useEffect(() => {
+    setTema((document.documentElement.dataset.theme as Tema | undefined) ?? 'light');
+  }, []);
+
+  function alternar(): void {
+    const nuevo: Tema = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = nuevo;
     localStorage.setItem('theme', nuevo);
-  });
-</script>
+    setTema(nuevo);
+  }
+
+  return (
+    <button
+      type="button"
+      data-testid="theme-toggle"
+      aria-label={etiqueta}
+      aria-pressed={tema === 'dark'}
+      onClick={alternar}
+      className="rounded-md border border-border p-2 text-text hover:bg-surface"
+    >
+      <span aria-hidden="true">{tema === 'dark' ? '☾' : '☀'}</span>
+    </button>
+  );
+}
 ```
+
+El estado arranca en `null` y se completa en el `useEffect` a propósito. Si se inicializara leyendo `document` directamente, el HTML generado en compilación y el primer render del cliente diferirían y React tiraría un error de hidratación. Con `null`, ambos coinciden y el ícono correcto aparece en el siguiente frame.
+
+La fuente de verdad del tema es el atributo `data-theme` del `<html>`, no el estado de React: el estado solo refleja el ícono. Así el script inline del `<head>` y el island nunca se contradicen.
 
 - [ ] **Step 6: Crear el layout con el script anti-parpadeo**
 
@@ -482,13 +501,15 @@ El script va `is:inline` y antes del `<body>` a propósito: se ejecuta de forma 
 ```astro
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ThemeToggle from '../../components/ThemeToggle.astro';
+import ThemeToggle from '../../components/ThemeToggle.tsx';
 ---
 <BaseLayout lang="es" title="Portfolio" description="Portfolio QA">
-  <ThemeToggle etiqueta="Cambiar tema" />
+  <ThemeToggle etiqueta="Cambiar tema" client:load />
   <h1 data-testid="titulo">Portfolio</h1>
 </BaseLayout>
 ```
+
+`client:load` hidrata el island apenas carga la página. Es la directiva correcta acá: el toggle está en la cabecera, visible de entrada, y con `client:visible` habría una ventana en la que el botón está a la vista pero no responde al clic.
 
 - [ ] **Step 8: Correr los tests**
 
@@ -839,7 +860,7 @@ Es un `<a>`, no un botón: la equivalencia de ruta se resuelve al compilar, así
 
 ```astro
 ---
-import ThemeToggle from './ThemeToggle.astro';
+import ThemeToggle from './ThemeToggle.tsx';
 import LangToggle from './LangToggle.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import { rutas } from '../i18n/routes';
@@ -867,7 +888,7 @@ const enlaces = [
     </ul>
     <div class="flex gap-2">
       <LangToggle />
-      <ThemeToggle etiqueta={t('tema.cambiar')} />
+      <ThemeToggle etiqueta={t('tema.cambiar')} client:load />
     </div>
   </nav>
 </header>
@@ -955,7 +976,7 @@ import { ClientRouter } from 'astro:transitions';
 <ClientRouter />
 ```
 
-**Atención a este efecto secundario:** con `ClientRouter`, las navegaciones no recargan la página, así que el script inline del tema y el listener del `ThemeToggle` dejan de ejecutarse a partir de la segunda página. El resultado es un toggle que deja de responder tras navegar — un bug silencioso que los tests de la Task 2 no detectan porque solo cargan una página.
+**Atención a este efecto secundario:** con `ClientRouter` las navegaciones no recargan la página, así que el script inline del `<head>` se ejecuta una sola vez. Al navegar, el `<html>` de la página nueva llega sin `data-theme` y el sitio vuelve al tema por defecto — un bug silencioso que los tests de la Task 2 no detectan porque solo cargan una página.
 
 Corrección en `BaseLayout.astro`, después del script inline:
 
@@ -969,26 +990,7 @@ Corrección en `BaseLayout.astro`, después del script inline:
 </script>
 ```
 
-Y en `src/components/ThemeToggle.astro`, reemplazar el bloque `<script>` por una versión que se rearme en cada navegación:
-
-```astro
-<script>
-  function conectarToggle() {
-    const boton = document.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"]');
-    if (!boton || boton.dataset.conectado) return;
-    boton.dataset.conectado = 'si';
-    boton.addEventListener('click', () => {
-      const nuevo = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = nuevo;
-      localStorage.setItem('theme', nuevo);
-    });
-  }
-  conectarToggle();
-  document.addEventListener('astro:page-load', conectarToggle);
-</script>
-```
-
-El `data-conectado` evita registrar el listener dos veces, que haría que un clic alternara el tema y lo devolviera de inmediato.
+El island de React **no** necesita corrección: Astro rehidrata los componentes `client:load` en cada navegación, así que el `useEffect` de `ThemeToggle` vuelve a correr solo y el ícono queda sincronizado. Esa es una ventaja concreta de haberlo hecho island en vez de script suelto — un listener vanilla sí habría que rearmarlo a mano.
 
 Agregar el test que cubre este caso en `tests/e2e/tema.spec.ts`:
 
@@ -2171,14 +2173,14 @@ git commit -m "feat: carril de proyectos de desarrollo"
 
 **Files:**
 - Create: `src/pages/es/sobre-mi.astro`, `src/pages/en/about.astro`, `src/pages/es/contacto.astro`, `src/pages/en/contact.astro`
-- Create: `src/components/CopyEmail.astro`, `src/components/CvButton.astro`
+- Create: `src/components/CopyEmail.tsx`, `src/components/CvButton.astro`
 - Create: `public/cv/cv-es.pdf`, `public/cv/cv-en.pdf`
 - Test: `tests/e2e/pages/ContactoPage.ts`, `tests/e2e/contacto.spec.ts`
 
 **Interfaces:**
 - Consumes: `BaseLayout` (Task 4)
 - Produces:
-  - `<CopyEmail email lang />`, `<CvButton lang />`
+  - `<CopyEmail email textoCopiar textoCopiado />` (island de React, requiere `client:load`), `<CvButton lang />`
   - `data-testid`: `email-copiar`, `email-texto`, `link-linkedin`, `link-github`, `cv-descargar`, `sobre-mi`
 
 - [ ] **Step 1: Escribir el Page Object**
@@ -2269,36 +2271,55 @@ Expected: FAIL — 404 en `/es/contacto`.
 
 - [ ] **Step 4: Crear CopyEmail y CvButton**
 
-`src/components/CopyEmail.astro`:
+`src/components/CopyEmail.tsx`:
 
-```astro
----
-import { useTranslations } from '../i18n/utils';
-import type { Lang } from '../i18n/ui';
-interface Props { email: string; lang: Lang }
-const { email, lang } = Astro.props;
-const t = useTranslations(lang);
----
-<div class="flex flex-wrap items-center gap-3">
-  <a href={`mailto:${email}`} data-testid="email-texto" class="font-mono text-lg text-accent hover:underline">{email}</a>
-  <button type="button" data-testid="email-copiar" data-email={email}
-    data-copiar={t('contacto.copiar')} data-copiado={t('contacto.copiado')}
-    class="rounded-md border border-border px-3 py-1 text-sm hover:bg-surface">
-    {t('contacto.copiar')}
-  </button>
-</div>
+```tsx
+import { useState } from 'react';
 
-<script>
-  const boton = document.querySelector<HTMLButtonElement>('[data-testid="email-copiar"]');
-  boton?.addEventListener('click', async () => {
-    await navigator.clipboard.writeText(boton.dataset.email ?? '');
-    boton.textContent = boton.dataset.copiado ?? 'Copiado';
-    setTimeout(() => { boton.textContent = boton.dataset.copiar ?? 'Copiar'; }, 2000);
-  });
-</script>
+interface Props {
+  email: string;
+  textoCopiar: string;
+  textoCopiado: string;
+}
+
+export default function CopyEmail({ email, textoCopiar, textoCopiado }: Props) {
+  const [copiado, setCopiado] = useState(false);
+
+  async function copiar(): Promise<void> {
+    await navigator.clipboard.writeText(email);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <a
+        href={`mailto:${email}`}
+        data-testid="email-texto"
+        className="font-mono text-lg text-accent hover:underline"
+      >
+        {email}
+      </a>
+      <button
+        type="button"
+        data-testid="email-copiar"
+        onClick={copiar}
+        className="rounded-md border border-border px-3 py-1 text-sm hover:bg-surface"
+      >
+        {copiado ? textoCopiado : textoCopiar}
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {copiado ? textoCopiado : ''}
+      </span>
+    </div>
+  );
+}
 ```
 
-Los textos viajan en `data-*` en vez de estar escritos en el script: así el componente funciona en los dos idiomas sin duplicar código ni exponer strings fuera del diccionario de i18n.
+Dos decisiones acá:
+
+- **Los textos entran por props ya traducidos**, en vez de que el island importe `useTranslations`. Si importara el diccionario, los textos de **los dos idiomas** viajarían en el bundle del cliente. Traduciendo en la página `.astro` y pasando strings, al navegador solo llegan las dos palabras que se usan.
+- **El `<span role="status">`** anuncia "Copiado" a los lectores de pantalla. Sin él, el cambio de texto del botón es invisible para quien no ve la pantalla, y axe lo marcaría en la Task 11.
 
 `src/components/CvButton.astro`:
 
@@ -2335,10 +2356,12 @@ Generar dos PDFs mínimos válidos (una página con el texto "CV de ejemplo — 
 ```astro
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CopyEmail from '../../components/CopyEmail.astro';
+import CopyEmail from '../../components/CopyEmail.tsx';
 import CvButton from '../../components/CvButton.astro';
+import { useTranslations } from '../../i18n/utils';
 
 const lang = 'es' as const;
+const t = useTranslations(lang);
 const email = 'maluganijuanmanuel@gmail.com';
 ---
 <BaseLayout lang={lang} title="Contacto · Juan Manuel Malugani" description="Cómo contactarme.">
@@ -2346,7 +2369,9 @@ const email = 'maluganijuanmanuel@gmail.com';
   <p class="mt-3 max-w-prose text-muted">
     Estoy buscando mi primer puesto full-time en QA. Escribime y respondo dentro de las 24 horas.
   </p>
-  <div class="mt-8"><CopyEmail email={email} lang={lang} /></div>
+  <div class="mt-8">
+    <CopyEmail email={email} textoCopiar={t('contacto.copiar')} textoCopiado={t('contacto.copiado')} client:load />
+  </div>
   <ul class="mt-6 flex gap-4">
     <li><a href="https://www.linkedin.com/in/maluganijuanmanuel" data-testid="link-linkedin" class="text-accent hover:underline">LinkedIn</a></li>
     <li><a href="https://github.com/maluganiJ" data-testid="link-github" class="text-accent hover:underline">GitHub</a></li>
@@ -2863,7 +2888,7 @@ El sitio queda funcionando, testeado y publicado, pero con contenido de ejemplo.
 
 ## Fuera de alcance de v1
 
-- Filtros de casos por etiqueta (se incorporan cuando haya volumen; requieren agregar React).
+- Filtros de casos por etiqueta (se incorporan cuando haya volumen; React ya está instalado, así que solo hace falta el island).
 - Blog o sección de notas.
 - Analítica de visitas.
 - Formulario de contacto (descartado en el spec).
