@@ -795,12 +795,6 @@ test.describe('Cambio de idioma', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   });
 
-  test('el toggle preserva la sección aunque el slug cambie', async ({ page }) => {
-    await page.goto('/es/sobre-mi');
-    await page.getByTestId('lang-toggle').click();
-    await expect(page).toHaveURL(/\/en\/about$/);
-  });
-
   test('la página declara su alternativa con hreflang', async ({ page }) => {
     await page.goto('/es/');
     const alterno = page.locator('link[rel="alternate"][hreflang="en"]');
@@ -1048,7 +1042,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 - [ ] **Step 10: Correr los tests**
 
 Run: `npm run test:e2e -- --project=chromium tests/e2e/idioma.spec.ts tests/e2e/navegacion.spec.ts tests/e2e/tema.spec.ts`
-Expected: PASS, 11 tests (4 de idioma, 3 de navegación, 4 de tema).
+Expected: PASS, 10 tests (3 de idioma, 3 de navegación, 4 de tema).
+
+**Nota:** la verificación de que el toggle preserva la sección cuando el slug difiere entre idiomas (`/es/sobre-mi` → `/en/about`) **no** va acá: esas páginas recién existen en la Task 10, y en modo estático una ruta inexistente sirve un 404 sin cabecera, así que el test daría timeout esperando el toggle. La lógica ya está cubierta por los tests unitarios de `getAlternateUrl` (Task 3); el test E2E equivalente se agrega en la Task 10.
 
 - [ ] **Step 11: Commit**
 
@@ -2268,6 +2264,23 @@ test.describe('Contacto y CV', () => {
   });
 });
 ```
+
+Y agregar a `tests/e2e/idioma.spec.ts` el test que la Task 4 no podía correr, porque recién ahora existen las páginas con slug distinto en cada idioma:
+
+```ts
+test('el toggle preserva la sección aunque el slug cambie', async ({ page }) => {
+  await page.goto('/es/sobre-mi');
+  await page.getByTestId('lang-toggle').click();
+  await expect(page).toHaveURL(/\/en\/about$/);
+  await expect(page.getByTestId('sobre-mi')).toBeVisible();
+
+  await page.goto('/es/contacto');
+  await page.getByTestId('lang-toggle').click();
+  await expect(page).toHaveURL(/\/en\/contact$/);
+});
+```
+
+Este es el caso que en producción rompe más seguido: el toggle de idioma funciona en la home, donde el slug es igual en los dos idiomas, y falla justo en las secciones traducidas.
 
 El test del portapapeles solo pasa en Chromium; los otros navegadores no dan permisos de clipboard a Playwright. Agregar al inicio del test: `test.skip(({ browserName }) => browserName !== 'chromium', 'Clipboard solo en Chromium');`
 
