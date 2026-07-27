@@ -1219,11 +1219,16 @@ Reemplazar al completar la implementación.
 
 - [ ] **Step 6: Crear los otros dos casos y el proyecto**
 
-Con la misma estructura de seis bloques, en ambos idiomas y todos con `ejemplo: true`:
+En ambos idiomas y todos con `ejemplo: true`.
+
+Con la estructura de seis bloques:
 
 - `testing-freelance.md` — `tags: [manual, exploratorio]`, `estado: completo`, `destacado: true`
 - `gestor-operaciones.md` — `tags: [manual, automation, api]`, `estado: en-progreso`, `destacado: true`
-- `proyectos/{es,en}/gestor-operaciones.md` — `stack: [React, TypeScript, Node]`, `destacado: true`
+
+Con estructura propia, más simple (la colección `proyectos` no tiene `tags` ni `estado`, así que bloques como "Estrategia de prueba" o "Hallazgos" no tendrían sentido ahí):
+
+- `proyectos/{es,en}/gestor-operaciones.md` — `stack: [React, TypeScript, Node]`, `destacado: true`. Bloques: descripción, motivación y estado actual.
 
 - [ ] **Step 7: Crear el guardián de publicación**
 
