@@ -1,29 +1,36 @@
 import { test, expect } from '@playwright/test';
+import { ComponentesPage } from './pages/ComponentesPage';
 
 test.describe('Componentes de dominio QA', () => {
-  test.beforeEach(async ({ page }) => { await page.goto('/es/demo-componentes'); });
+  let componentes: ComponentesPage;
 
-  test('el reporte de bug muestra todos sus campos', async ({ page }) => {
-    const bug = page.getByTestId('bug-report').first();
-    await expect(bug).toContainText('BUG-001');
-    await expect(bug).toContainText('Pasos para reproducir');
-    await expect(bug).toContainText('Resultado esperado');
-    await expect(bug).toContainText('Resultado obtenido');
+  test.beforeEach(async ({ page }) => {
+    componentes = new ComponentesPage(page);
+    await componentes.abrir();
   });
 
-  test('la severidad se comunica con texto, no solo con color', async ({ page }) => {
-    const severidad = page.getByTestId('bug-severidad').first();
-    await expect(severidad).toHaveText(/Crítica|Alta|Media|Baja/);
+  test('el reporte de bug muestra todos sus campos', async () => {
+    await expect(componentes.bug).toContainText('BUG-001');
+    await expect(componentes.bug).toContainText('Pasos para reproducir');
+    await expect(componentes.bug).toContainText('Resultado esperado');
+    await expect(componentes.bug).toContainText('Resultado obtenido');
   });
 
-  test('la matriz de casos renderiza una tabla accesible', async ({ page }) => {
-    const matriz = page.getByTestId('test-matrix');
-    await expect(matriz.locator('caption')).toBeVisible();
-    await expect(matriz.locator('th')).toHaveCount(4);
+  test('la severidad muestra la etiqueta exacta que corresponde al valor', async () => {
+    // La demo pasa severidad="alto", cuya etiqueta es "Alta".
+    await expect(componentes.severidad).toContainText('Alta');
+    await expect(componentes.severidad).not.toContainText('Crítica');
+    await expect(componentes.severidad).not.toContainText('Media');
+    await expect(componentes.severidad).not.toContainText('Baja');
   });
 
-  test('las métricas muestran etiqueta y valor', async ({ page }) => {
-    await expect(page.getByTestId('metricas').locator('dt').first()).toBeVisible();
-    await expect(page.getByTestId('metricas').locator('dd').first()).toBeVisible();
+  test('la matriz de casos renderiza una tabla accesible', async () => {
+    await expect(componentes.matrizCaption()).toBeVisible();
+    await expect(componentes.matrizEncabezados()).toHaveCount(4);
+  });
+
+  test('las métricas muestran etiqueta y valor', async () => {
+    await expect(componentes.metricaEtiquetas().first()).toBeVisible();
+    await expect(componentes.metricaValores().first()).toBeVisible();
   });
 });
