@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BugReport from '../../components/BugReport.astro';
+import TestMatrix from '../../components/TestMatrix.astro';
+import Metricas from '../../components/Metricas.astro';
+---
+<BaseLayout lang="es" title="Demo de componentes" description="Página interna de verificación">
+  <BugReport id="BUG-001" titulo="El toggle de idioma pierde la sección actual"
+    severidad="alto" prioridad="P2" entorno="Chrome 130 · Windows 11"
+    pasos={['Abrir /es/sobre-mi', 'Hacer clic en el toggle EN', 'Observar la URL resultante']}
+    esperado="Redirige a /en/about manteniendo la sección."
+    obtenido="Redirige a /en/ perdiendo la sección." />
+
+  <TestMatrix titulo="Casos de navegación" casos={[
+    { id: 'TC-01', escenario: 'Cambio de idioma en home', tipo: 'E2E', estado: 'paso' },
+    { id: 'TC-02', escenario: 'Persistencia de tema', tipo: 'E2E', estado: 'paso' },
+    { id: 'TC-03', escenario: 'Descarga de CV en inglés', tipo: 'E2E', estado: 'bloqueado' },
+  ]} />
+
+  <Metricas items={[
+    { etiqueta: 'Casos', valor: '24' }, { etiqueta: 'Bugs', valor: '7' },
+    { etiqueta: 'Automatizados', valor: '82%' }, { etiqueta: 'Duración', valor: '48s' },
+  ]} />
+</BaseLayout>
