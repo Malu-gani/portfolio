@@ -1,7 +1,8 @@
 ---
-import '../../styles/global.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ThemeToggle from '../../components/ThemeToggle.tsx';
 ---
-<html lang="es">
-  <head><meta charset="utf-8" /><title>Portfolio</title></head>
-  <body><h1 data-testid="titulo">Portfolio</h1></body>
-</html>
+<BaseLayout lang="es" title="Portfolio" description="Portfolio QA">
+  <ThemeToggle etiqueta="Cambiar tema" client:load />
+  <h1 data-testid="titulo">Portfolio</h1>
+</BaseLayout>

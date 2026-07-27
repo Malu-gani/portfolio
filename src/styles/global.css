@@ -1,3 +1,82 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
+
+:root,
+[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --text: #0b0f14;
+  --text-muted: #5a6672;
+  --border: #e3e8ee;
+  --accent: #0f766e;
+  --sev-critico: #b42318;
+  --sev-alto: #c2410c;
+  --sev-medio: #a16207;
+  --sev-bajo: #3f6212;
+  --est-paso: #15803d;
+  --est-fallo: #b42318;
+  --est-bloqueado: #57534e;
+}
+
+[data-theme='dark'] {
+  --bg: #0b0f14;
+  --surface: #141a21;
+  --text: #e6edf3;
+  --text-muted: #9aa7b4;
+  --border: #242c35;
+  --accent: #2dd4bf;
+  --sev-critico: #ff6b6b;
+  --sev-alto: #fb923c;
+  --sev-medio: #fbbf24;
+  --sev-bajo: #a3e635;
+  --est-paso: #4ade80;
+  --est-fallo: #ff6b6b;
+  --est-bloqueado: #a8a29e;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-sev-critico: var(--sev-critico);
+  --color-sev-alto: var(--sev-alto);
+  --color-sev-medio: var(--sev-medio);
+  --color-sev-bajo: var(--sev-bajo);
+  --color-est-paso: var(--est-paso);
+  --color-est-fallo: var(--est-fallo);
+  --color-est-bloqueado: var(--est-bloqueado);
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --text-2xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --text-3xl: clamp(1.75rem, 1.45rem + 1.4vw, 2.25rem);
+  --text-4xl: clamp(2.125rem, 1.7rem + 2vw, 3rem);
+  --text-5xl: clamp(2.5rem, 1.9rem + 3vw, 3.75rem);
+}
+
+html { color-scheme: light dark; }
+[data-theme='dark'] { color-scheme: dark; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
