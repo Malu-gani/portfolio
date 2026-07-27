@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AboutContent from '../../components/AboutContent.astro';
+
+const lang = 'en' as const;
+---
+<BaseLayout lang={lang} title="About · Juan Manuel Malugani" description="Background, motivation and way of working in QA.">
+  <AboutContent lang={lang} />
+</BaseLayout>

@@ -1,0 +1,61 @@
+---
+import EjemploBanner from './EjemploBanner.astro';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const textos: Record<Lang, {
+  titulo: string;
+  recorrido: string;
+  motivacion: string;
+  formaTrabajo: string;
+  formacionTitulo: string;
+  formacion: string[];
+}> = {
+  es: {
+    titulo: 'Sobre mí',
+    recorrido:
+      'Vengo de [ejemplo: reemplazar con el recorrido real — carrera previa, cómo llegué a QA, hitos relevantes].',
+    motivacion:
+      '[Ejemplo: por qué QA — qué me atrae de encontrar el caso que rompe el sistema antes que el usuario, y de dejar esa evidencia documentada de forma clara].',
+    formaTrabajo:
+      '[Ejemplo: forma de trabajo — cómo priorizo qué testear, cómo documento una estrategia de prueba, cuándo automatizo y cuándo no].',
+    formacionTitulo: 'Formación y certificaciones',
+    formacion: [
+      '[Ejemplo: título o curso — institución, año]',
+      '[Ejemplo: certificación — entidad emisora, año]',
+    ],
+  },
+  en: {
+    titulo: 'About me',
+    recorrido:
+      '[Example: replace with the real background — previous career, how I got into QA, relevant milestones].',
+    motivacion:
+      '[Example: why QA — what draws me to finding the bug that breaks the system before the user does, and documenting that evidence clearly].',
+    formaTrabajo:
+      '[Example: way of working — how I prioritize what to test, how I document a test strategy, when I automate and when I don\'t].',
+    formacionTitulo: 'Education and certifications',
+    formacion: [
+      '[Example: degree or course — institution, year]',
+      '[Example: certification — issuing body, year]',
+    ],
+  },
+};
+const c = textos[lang];
+---
+<div data-testid="sobre-mi">
+  <EjemploBanner texto={t('ejemplo.aviso')} />
+  <h1 class="text-3xl font-bold sm:text-4xl">{c.titulo}</h1>
+  <div class="mt-6 max-w-prose space-y-4 text-muted">
+    <p>{c.recorrido}</p>
+    <p>{c.motivacion}</p>
+    <p>{c.formaTrabajo}</p>
+  </div>
+  <h2 class="mt-8 text-xl font-semibold">{c.formacionTitulo}</h2>
+  <ul class="mt-3 max-w-prose list-disc space-y-1 pl-5 text-muted">
+    {c.formacion.map((item) => <li>{item}</li>)}
+  </ul>
+</div>

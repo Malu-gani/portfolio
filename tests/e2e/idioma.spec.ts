@@ -20,4 +20,15 @@ test.describe('Cambio de idioma', () => {
     const alterno = new BasePage(page).hreflangAlterno('en');
     await expect(alterno).toHaveAttribute('href', /\/en\/$/);
   });
+
+  test('el toggle preserva la sección aunque el slug cambie', async ({ page }) => {
+    await page.goto('/es/sobre-mi');
+    await page.getByTestId('lang-toggle').click();
+    await expect(page).toHaveURL(/\/en\/about$/);
+    await expect(page.getByTestId('sobre-mi')).toBeVisible();
+
+    await page.goto('/es/contacto');
+    await page.getByTestId('lang-toggle').click();
+    await expect(page).toHaveURL(/\/en\/contact$/);
+  });
 });

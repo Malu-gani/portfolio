@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Hero from './Hero.astro';
 import StackGrid from './StackGrid.astro';
 import CasoCard from './CasoCard.astro';
+import CvButton from './CvButton.astro';
 import { useTranslations } from '../i18n/utils';
 import { rutas } from '../i18n/routes';
 import type { Lang } from '../i18n/ui';
@@ -37,7 +38,8 @@ const casos = (await getCollection('casos-qa'))
 
 <StackGrid lang={lang} />
 
-<section class="py-10">
+<section class="flex flex-wrap gap-3 py-10">
   <a href={rutas.contact[lang]} data-testid="cta-contacto"
     class="inline-block rounded-md bg-accent px-5 py-3 font-medium text-bg">{t('nav.contacto')}</a>
+  <CvButton lang={lang} />
 </section>

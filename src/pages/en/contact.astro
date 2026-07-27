@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactContent from '../../components/ContactContent.astro';
+
+const lang = 'en' as const;
+---
+<BaseLayout lang={lang} title="Contact · Juan Manuel Malugani" description="How to get in touch.">
+  <ContactContent lang={lang} />
+</BaseLayout>
