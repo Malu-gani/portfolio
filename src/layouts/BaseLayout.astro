@@ -40,7 +40,16 @@ const urlOtro = getAlternateUrl(Astro.url.pathname, otro);
     </script>
   </head>
   <body class="flex min-h-screen flex-col bg-bg text-text">
-    <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:p-4">
+    <!--
+      tabindex="0" es intencional, no redundante: Safari/WebKit no incluye
+      enlaces en el tab-order por defecto ("Press Tab to highlight each item
+      on a webpage" viene apagado de fábrica), así que sin esto el skip-link
+      es inalcanzable con teclado en ese navegador y queda inútil para el
+      caso que justifica su existencia. No se aplica el mismo tratamiento a
+      nav/footer/tarjetas: ahí sí sería sobreescribir una preferencia del
+      usuario. Ver .superpowers/sdd/2026-07-27-portfolio-qa/cross-browser-diagnostico.md
+    -->
+    <a href="#contenido" tabindex="0" class="sr-only focus:not-sr-only focus:absolute focus:p-4">
       {lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}
     </a>
     <Header />
