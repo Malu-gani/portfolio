@@ -1,44 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Hero from '../../components/Hero.astro';
-import StackGrid from '../../components/StackGrid.astro';
-import CasoCard from '../../components/CasoCard.astro';
-import { useTranslations } from '../../i18n/utils';
-import { rutas } from '../../i18n/routes';
+import HomeContent from '../../components/HomeContent.astro';
 
 const lang = 'es' as const;
-const t = useTranslations(lang);
-const casos = (await getCollection('casos-qa'))
-  .filter((c) => c.id.startsWith('es/') && c.data.destacado)
-  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
 ---
 <BaseLayout lang={lang} title="Juan Manuel Malugani · QA Engineer"
   description="Portfolio de testing manual y automatización.">
-  <Hero lang={lang} />
-
-  <section data-testid="bloque-qa" class="py-10">
-    <h2 class="text-2xl font-semibold">{t('home.qa.titulo')}</h2>
-    <div class="mt-6 grid gap-4 sm:grid-cols-2">
-      {casos.map((c) => (
-        <div class="relative">
-          <CasoCard lang={lang} slug={c.id.replace('es/', '')} datos={c.data} />
-        </div>
-      ))}
-    </div>
-    <a href={rutas.qa[lang]} class="mt-4 inline-block text-accent hover:underline">{t('qa.titulo')} →</a>
-  </section>
-
-  <section data-testid="bloque-dev" class="border-t border-border py-8">
-    <h2 class="text-lg font-semibold text-muted">{t('home.dev.titulo')}</h2>
-    <p class="mt-1 max-w-prose text-sm text-muted">{t('home.dev.bajada')}</p>
-    <a href={rutas.dev[lang]} class="mt-2 inline-block text-accent hover:underline">{t('dev.titulo')} →</a>
-  </section>
-
-  <StackGrid lang={lang} />
-
-  <section class="py-10">
-    <a href={rutas.contact[lang]} data-testid="cta-contacto"
-      class="inline-block rounded-md bg-accent px-5 py-3 font-medium text-bg">{t('nav.contacto')}</a>
-  </section>
+  <HomeContent lang={lang} />
 </BaseLayout>

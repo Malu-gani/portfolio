@@ -4,9 +4,6 @@ import type { Lang } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const posicionamiento = lang === 'es'
-  ? 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.'
-  : 'Manual testing and automation with Playwright. Looking for my first full-time QA role.';
 ---
 <section data-testid="hero" class="py-10">
   <p data-testid="badge-disponible"
@@ -15,5 +12,5 @@ const posicionamiento = lang === 'es'
   </p>
   <h1 class="mt-4 text-4xl font-bold sm:text-5xl">Juan Manuel Malugani</h1>
   <p class="mt-2 font-mono text-accent">{t('home.rol')}</p>
-  <p class="mt-4 max-w-prose text-lg text-muted">{posicionamiento}</p>
+  <p class="mt-4 max-w-prose text-lg text-muted">{t('home.posicionamiento')}</p>
 </section>

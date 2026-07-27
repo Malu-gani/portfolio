@@ -32,6 +32,6 @@ test.describe('Home', () => {
 
   test('hay un único h1', async ({ page }) => {
     await page.goto('/es/');
-    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
 });

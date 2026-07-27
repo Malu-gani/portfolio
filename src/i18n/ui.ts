@@ -13,6 +13,7 @@ export type ClaveUI =
   | 'idioma.cambiar'
   | 'home.rol'
   | 'home.disponible'
+  | 'home.posicionamiento'
   | 'home.qa.titulo'
   | 'home.dev.titulo'
   | 'home.dev.bajada'
@@ -43,6 +44,7 @@ const es = {
   'idioma.cambiar': 'Ver en inglés',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
+  'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
   'home.qa.titulo': 'Trabajo en QA',
   'home.dev.titulo': 'También escribo código',
   'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
@@ -72,6 +74,7 @@ const en = {
   'idioma.cambiar': 'View in Spanish',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',
+  'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
   'home.qa.titulo': 'QA work',
   'home.dev.titulo': 'I also write code',
   'home.dev.bajada': 'I write code, and that makes me a better tester.',

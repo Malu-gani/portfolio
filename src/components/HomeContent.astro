@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Hero from './Hero.astro';
+import StackGrid from './StackGrid.astro';
+import CasoCard from './CasoCard.astro';
+import { useTranslations } from '../i18n/utils';
+import { rutas } from '../i18n/routes';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const prefijo = `${lang}/`;
+const casos = (await getCollection('casos-qa'))
+  .filter((c) => c.id.startsWith(prefijo) && c.data.destacado)
+  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
+---
+<Hero lang={lang} />
+
+<section data-testid="bloque-qa" class="py-10">
+  <h2 class="text-2xl font-semibold">{t('home.qa.titulo')}</h2>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    {casos.map((c) => (
+      <div class="relative">
+        <CasoCard lang={lang} slug={c.id.replace(prefijo, '')} datos={c.data} />
+      </div>
+    ))}
+  </div>
+  <a href={rutas.qa[lang]} class="mt-4 inline-block text-accent hover:underline">{t('qa.titulo')} →</a>
+</section>
+
+<section data-testid="bloque-dev" class="border-t border-border py-8">
+  <h2 class="text-lg font-semibold text-muted">{t('home.dev.titulo')}</h2>
+  <p class="mt-1 max-w-prose text-sm text-muted">{t('home.dev.bajada')}</p>
+  <a href={rutas.dev[lang]} class="mt-2 inline-block text-accent hover:underline">{t('dev.titulo')} →</a>
+</section>
+
+<StackGrid lang={lang} />
+
+<section class="py-10">
+  <a href={rutas.contact[lang]} data-testid="cta-contacto"
+    class="inline-block rounded-md bg-accent px-5 py-3 font-medium text-bg">{t('nav.contacto')}</a>
+</section>
