@@ -2,63 +2,92 @@ export const languages = { es: 'Español', en: 'English' } as const;
 export type Lang = keyof typeof languages;
 export const defaultLang: Lang = 'es';
 
-export const ui = {
-  es: {
-    'nav.inicio': 'Inicio',
-    'nav.qa': 'QA',
-    'nav.dev': 'Desarrollo',
-    'nav.sobre': 'Sobre mí',
-    'nav.contacto': 'Contacto',
-    'nav.principal': 'Navegación principal',
-    'tema.cambiar': 'Cambiar tema',
-    'idioma.cambiar': 'Ver en inglés',
-    'home.rol': 'QA Engineer · Manual & Automation',
-    'home.disponible': 'Disponible para trabajar',
-    'home.qa.titulo': 'Trabajo en QA',
-    'home.dev.titulo': 'También escribo código',
-    'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
-    'home.stack': 'Stack',
-    'qa.titulo': 'Casos de QA',
-    'dev.titulo': 'Proyectos de desarrollo',
-    'caso.estrategia': 'Estrategia de prueba',
-    'caso.enProgreso': 'En progreso',
-    'caso.completo': 'Completo',
-    'caso.verRepo': 'Ver repositorio',
-    'caso.verDemo': 'Ver demo',
-    'cv.descargar': 'Descargar CV',
-    'contacto.copiar': 'Copiar email',
-    'contacto.copiado': 'Copiado',
-    'ejemplo.aviso': 'Contenido de ejemplo — pendiente de reemplazo.',
-    'volver': 'Volver',
-  },
-  en: {
-    'nav.inicio': 'Home',
-    'nav.qa': 'QA',
-    'nav.dev': 'Development',
-    'nav.sobre': 'About',
-    'nav.contacto': 'Contact',
-    'nav.principal': 'Main navigation',
-    'tema.cambiar': 'Toggle theme',
-    'idioma.cambiar': 'View in Spanish',
-    'home.rol': 'QA Engineer · Manual & Automation',
-    'home.disponible': 'Available for hire',
-    'home.qa.titulo': 'QA work',
-    'home.dev.titulo': 'I also write code',
-    'home.dev.bajada': 'I write code, and that makes me a better tester.',
-    'home.stack': 'Stack',
-    'qa.titulo': 'QA case studies',
-    'dev.titulo': 'Development projects',
-    'caso.estrategia': 'Test strategy',
-    'caso.enProgreso': 'In progress',
-    'caso.completo': 'Complete',
-    'caso.verRepo': 'View repository',
-    'caso.verDemo': 'View demo',
-    'cv.descargar': 'Download CV',
-    'contacto.copiar': 'Copy email',
-    'contacto.copiado': 'Copied',
-    'ejemplo.aviso': 'Sample content — pending replacement.',
-    'volver': 'Back',
-  },
-} as const;
+export type ClaveUI =
+  | 'nav.inicio'
+  | 'nav.qa'
+  | 'nav.dev'
+  | 'nav.sobre'
+  | 'nav.contacto'
+  | 'nav.principal'
+  | 'tema.cambiar'
+  | 'idioma.cambiar'
+  | 'home.rol'
+  | 'home.disponible'
+  | 'home.qa.titulo'
+  | 'home.dev.titulo'
+  | 'home.dev.bajada'
+  | 'home.stack'
+  | 'qa.titulo'
+  | 'dev.titulo'
+  | 'caso.estrategia'
+  | 'caso.enProgreso'
+  | 'caso.completo'
+  | 'caso.verRepo'
+  | 'caso.verDemo'
+  | 'cv.descargar'
+  | 'contacto.copiar'
+  | 'contacto.copiado'
+  | 'ejemplo.aviso'
+  | 'volver';
 
-export type ClaveUI = keyof (typeof ui)['es'];
+type Diccionario = Record<ClaveUI, string>;
+
+const es = {
+  'nav.inicio': 'Inicio',
+  'nav.qa': 'QA',
+  'nav.dev': 'Desarrollo',
+  'nav.sobre': 'Sobre mí',
+  'nav.contacto': 'Contacto',
+  'nav.principal': 'Navegación principal',
+  'tema.cambiar': 'Cambiar tema',
+  'idioma.cambiar': 'Ver en inglés',
+  'home.rol': 'QA Engineer · Manual & Automation',
+  'home.disponible': 'Disponible para trabajar',
+  'home.qa.titulo': 'Trabajo en QA',
+  'home.dev.titulo': 'También escribo código',
+  'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
+  'home.stack': 'Stack',
+  'qa.titulo': 'Casos de QA',
+  'dev.titulo': 'Proyectos de desarrollo',
+  'caso.estrategia': 'Estrategia de prueba',
+  'caso.enProgreso': 'En progreso',
+  'caso.completo': 'Completo',
+  'caso.verRepo': 'Ver repositorio',
+  'caso.verDemo': 'Ver demo',
+  'cv.descargar': 'Descargar CV',
+  'contacto.copiar': 'Copiar email',
+  'contacto.copiado': 'Copiado',
+  'ejemplo.aviso': 'Contenido de ejemplo — pendiente de reemplazo.',
+  'volver': 'Volver',
+} as const satisfies Diccionario;
+
+const en = {
+  'nav.inicio': 'Home',
+  'nav.qa': 'QA',
+  'nav.dev': 'Development',
+  'nav.sobre': 'About',
+  'nav.contacto': 'Contact',
+  'nav.principal': 'Main navigation',
+  'tema.cambiar': 'Toggle theme',
+  'idioma.cambiar': 'View in Spanish',
+  'home.rol': 'QA Engineer · Manual & Automation',
+  'home.disponible': 'Available for hire',
+  'home.qa.titulo': 'QA work',
+  'home.dev.titulo': 'I also write code',
+  'home.dev.bajada': 'I write code, and that makes me a better tester.',
+  'home.stack': 'Stack',
+  'qa.titulo': 'QA case studies',
+  'dev.titulo': 'Development projects',
+  'caso.estrategia': 'Test strategy',
+  'caso.enProgreso': 'In progress',
+  'caso.completo': 'Complete',
+  'caso.verRepo': 'View repository',
+  'caso.verDemo': 'View demo',
+  'cv.descargar': 'Download CV',
+  'contacto.copiar': 'Copy email',
+  'contacto.copiado': 'Copied',
+  'ejemplo.aviso': 'Sample content — pending replacement.',
+  'volver': 'Back',
+} as const satisfies Diccionario;
+
+export const ui = { es, en };
