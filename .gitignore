@@ -6,3 +6,10 @@ playwright-report/
 .vercel/
 .DS_Store
 .superpowers/
+.env
+.env.*
+!.env.example
+*.local
+blob-report/
+playwright/.cache/
+Thumbs.db
