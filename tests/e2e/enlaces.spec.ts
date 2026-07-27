@@ -67,6 +67,14 @@ test.describe('Enlaces externos abren con rel de seguridad', () => {
       await page.goto(ruta);
       const enlaces = new EnlacesPage(page).targetBlank();
       const total = await enlaces.count();
+
+      // Falsificabilidad: el footer (presente en las 19 rutas) lleva un
+      // enlace target="_blank" a GitHub, así que siempre debería haber al
+      // menos uno. Sin esta guarda, si alguien le saca el target="_blank"
+      // al footer el día de mañana, este test sigue en verde con cero
+      // elementos en vez de detectar la regresión.
+      expect(total, `no se encontró ningún enlace target="_blank" en ${ruta}`).toBeGreaterThan(0);
+
       for (let i = 0; i < total; i++) {
         await expect(enlaces.nth(i)).toHaveAttribute('rel', /noopener/);
       }
