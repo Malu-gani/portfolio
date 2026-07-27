@@ -14,9 +14,13 @@ describe('getLangFromUrl', () => {
 });
 
 describe('useTranslations', () => {
-  it('devuelve el texto en el idioma pedido', () => {
+  it('devuelve texto en inglés', () => {
     expect(useTranslations('en')('nav.qa')).toBe('QA');
+  });
+  it('devuelve texto en español', () => {
     expect(useTranslations('es')('nav.sobre')).toBe('Sobre mí');
+  });
+  it('traduce claves al idioma solicitado', () => {
     expect(useTranslations('en')('nav.sobre')).toBe('About');
   });
 });
@@ -40,5 +44,14 @@ describe('getAlternateUrl', () => {
   });
   it('cae a la home del idioma destino si la sección es desconocida', () => {
     expect(getAlternateUrl('/es/inexistente', 'en')).toBe('/en/');
+  });
+  it('preserva query string', () => {
+    expect(getAlternateUrl('/es/qa?tag=e2e', 'en')).toBe('/en/qa?tag=e2e');
+  });
+  it('preserva fragmento', () => {
+    expect(getAlternateUrl('/es/sobre-mi#formacion', 'en')).toBe('/en/about#formacion');
+  });
+  it('preserva query string y fragmento juntos', () => {
+    expect(getAlternateUrl('/es/qa?tag=e2e#resultados', 'en')).toBe('/en/qa?tag=e2e#resultados');
   });
 });

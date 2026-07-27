@@ -9,9 +9,13 @@ export const seccionSlugs: Record<SeccionKey, Record<Lang, string>> = {
   contact: { es: 'contacto', en: 'contact' },
 };
 
-export const rutas: Record<SeccionKey, Record<Lang, string>> = {
-  qa: { es: '/es/qa', en: '/en/qa' },
-  dev: { es: '/es/dev', en: '/en/dev' },
-  about: { es: '/es/sobre-mi', en: '/en/about' },
-  contact: { es: '/es/contacto', en: '/en/contact' },
-};
+export const rutas: Record<SeccionKey, Record<Lang, string>> = Object.entries(seccionSlugs).reduce(
+  (acc, [seccion, slugs]) => ({
+    ...acc,
+    [seccion]: {
+      es: `/es/${slugs.es}`,
+      en: `/en/${slugs.en}`,
+    },
+  }),
+  {} as Record<SeccionKey, Record<Lang, string>>,
+);
