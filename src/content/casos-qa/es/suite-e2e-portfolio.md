@@ -7,7 +7,7 @@ fecha: 2026-07-27
 destacado: true
 estado: completo
 ejemplo: true
-repo: "https://github.com/maluganiJ/portfolio"
+repo: "https://github.com/Malu-gani/portfolio"
 ---
 
 ## Contexto
