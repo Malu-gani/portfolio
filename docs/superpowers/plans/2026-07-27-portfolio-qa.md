@@ -746,7 +746,7 @@ export function getAlternateUrl(pathname: string, destino: Lang): string {
 - [ ] **Step 7: Correr los tests**
 
 Run: `npm run test:unit`
-Expected: PASS, 11 tests.
+Expected: PASS, 10 tests (3 de `getLangFromUrl`, 1 de `useTranslations`, 6 de `getAlternateUrl`).
 
 - [ ] **Step 8: Commit**
 
@@ -1252,7 +1252,7 @@ Este script **no corre en CI**: si lo hiciera, el pipeline estaría en rojo desd
 - [ ] **Step 8: Correr los tests**
 
 Run: `npm run test:unit && npm run build`
-Expected: unit PASS (13 tests); build PASS sin errores de esquema.
+Expected: unit PASS (12 tests: 10 de i18n + 2 de contenido); build PASS sin errores de esquema.
 
 - [ ] **Step 9: Commit**
 
