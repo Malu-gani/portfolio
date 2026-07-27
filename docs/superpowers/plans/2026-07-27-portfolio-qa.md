@@ -1298,39 +1298,93 @@ Las tres piezas que hacen que un caso se lea como trabajo profesional de QA y no
 
 - [ ] **Step 1: Escribir los tests (fallan)**
 
+`tests/e2e/pages/ComponentesPage.ts`:
+
+```ts
+import type { Page, Locator } from '@playwright/test';
+import { BasePage } from './BasePage';
+
+export class ComponentesPage extends BasePage {
+  readonly bug: Locator;
+  readonly severidad: Locator;
+  readonly matriz: Locator;
+  readonly metricas: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.bug = page.getByTestId('bug-report').first();
+    this.severidad = page.getByTestId('bug-severidad').first();
+    this.matriz = page.getByTestId('test-matrix');
+    this.metricas = page.getByTestId('metricas');
+  }
+
+  async abrir(): Promise<void> {
+    await this.page.goto('/es/demo-componentes');
+  }
+
+  matrizCaption(): Locator {
+    return this.matriz.locator('caption');
+  }
+
+  matrizEncabezados(): Locator {
+    return this.matriz.locator('th');
+  }
+
+  metricaEtiquetas(): Locator {
+    return this.metricas.locator('dt');
+  }
+
+  metricaValores(): Locator {
+    return this.metricas.locator('dd');
+  }
+}
+```
+
 `tests/e2e/componentes.spec.ts`:
 
 ```ts
 import { test, expect } from '@playwright/test';
+import { ComponentesPage } from './pages/ComponentesPage';
 
 test.describe('Componentes de dominio QA', () => {
-  test.beforeEach(async ({ page }) => { await page.goto('/es/demo-componentes'); });
+  let componentes: ComponentesPage;
 
-  test('el reporte de bug muestra todos sus campos', async ({ page }) => {
-    const bug = page.getByTestId('bug-report').first();
-    await expect(bug).toContainText('BUG-001');
-    await expect(bug).toContainText('Pasos para reproducir');
-    await expect(bug).toContainText('Resultado esperado');
-    await expect(bug).toContainText('Resultado obtenido');
+  test.beforeEach(async ({ page }) => {
+    componentes = new ComponentesPage(page);
+    await componentes.abrir();
   });
 
-  test('la severidad se comunica con texto, no solo con color', async ({ page }) => {
-    const severidad = page.getByTestId('bug-severidad').first();
-    await expect(severidad).toHaveText(/Crítica|Alta|Media|Baja/);
+  test('el reporte de bug muestra todos sus campos', async () => {
+    await expect(componentes.bug).toContainText('BUG-001');
+    await expect(componentes.bug).toContainText('Pasos para reproducir');
+    await expect(componentes.bug).toContainText('Resultado esperado');
+    await expect(componentes.bug).toContainText('Resultado obtenido');
   });
 
-  test('la matriz de casos renderiza una tabla accesible', async ({ page }) => {
-    const matriz = page.getByTestId('test-matrix');
-    await expect(matriz.locator('caption')).toBeVisible();
-    await expect(matriz.locator('th')).toHaveCount(4);
+  test('la severidad muestra la etiqueta exacta que corresponde al valor', async () => {
+    // La demo pasa severidad="alto", cuya etiqueta es "Alta".
+    await expect(componentes.severidad).toContainText('Alta');
+    await expect(componentes.severidad).not.toContainText('Crítica');
+    await expect(componentes.severidad).not.toContainText('Media');
+    await expect(componentes.severidad).not.toContainText('Baja');
   });
 
-  test('las métricas muestran etiqueta y valor', async ({ page }) => {
-    await expect(page.getByTestId('metricas').locator('dt').first()).toBeVisible();
-    await expect(page.getByTestId('metricas').locator('dd').first()).toBeVisible();
+  test('la matriz de casos renderiza una tabla accesible', async () => {
+    await expect(componentes.matrizCaption()).toBeVisible();
+    await expect(componentes.matrizEncabezados()).toHaveCount(4);
+  });
+
+  test('las métricas muestran etiqueta y valor', async () => {
+    await expect(componentes.metricaEtiquetas().first()).toBeVisible();
+    await expect(componentes.metricaValores().first()).toBeVisible();
   });
 });
 ```
+
+Dos correcciones respecto de la primera versión de este bloque, ambas detectadas en revisión:
+
+- **La aserción de severidad usaba `toHaveText(/Crítica|Alta|Media|Baja/)`**, que solo verifica que aparezca *alguna* etiqueta válida. Si el mapa de `etiquetas` de `BugReport` estuviera cruzado (`alto: 'Baja'`), el test seguiría en verde. Ahora exige la etiqueta correcta y descarta explícitamente las otras tres.
+- **Los selectores CSS (`caption`, `th`, `dt`, `dd`) vivían en el spec**, violando la restricción de Page Object Model. Se movieron a `ComponentesPage`.
 
 - [ ] **Step 2: Correr para verificar que fallan**
 
