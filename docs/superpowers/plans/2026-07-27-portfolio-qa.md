@@ -19,7 +19,7 @@
 - **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
 - **Fuentes servidas localmente** con paquetes `@fontsource-variable`. Prohibido enlazar Google Fonts u otro CDN de fuentes.
 - **Todo elemento interactivo o verificable lleva `data-testid`.** Los selectores de Playwright usan exclusivamente `data-testid`; nunca clases de Tailwind ni texto visible (el texto cambia según idioma).
-- **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` fuera de `tests/e2e/pages/`.
+- **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` con selector CSS fuera de `tests/e2e/pages/`: si un test necesita alcanzar el `<html>`, un `<link>` del `<head>` o cualquier nodo por CSS, eso se expone como método o locator del Page Object. `page.getByTestId(...)` y `page.getByRole(...)` **sí** están permitidos directamente en los specs — son selectores semánticos, estables frente a cambios de markup, y encapsularlos no aporta nada.
 - **Los slugs de contenido son idénticos en ambos idiomas.** `src/content/casos-qa/es/mi-caso.md` exige `src/content/casos-qa/en/mi-caso.md`. Hay un test que lo verifica.
 - **WCAG AA como mínimo, en ambos temas**, verificado por axe-core en CI.
 - **Severidad y estado nunca se comunican solo por color:** siempre color + ícono + texto.
@@ -288,8 +288,18 @@ export class BasePage {
   async recargar(): Promise<void> {
     await this.page.reload();
   }
+
+  async idiomaDelDocumento(): Promise<string | null> {
+    return this.page.locator('html').getAttribute('lang');
+  }
+
+  hreflangAlterno(lang: Lang): Locator {
+    return this.page.locator(`link[rel="alternate"][hreflang="${lang}"]`);
+  }
 }
 ```
+
+Los tres métodos que tocan el `<html>` o el `<head>` viven acá y no en los specs: son los únicos lugares del proyecto que necesitan selectores CSS, y encapsularlos evita que el patrón se filtre a cada spec nuevo.
 
 - [ ] **Step 2: Escribir los tests de tema (fallan)**
 
