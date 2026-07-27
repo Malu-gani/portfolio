@@ -5,9 +5,16 @@ const pendientes = [];
 for (const coleccion of ['casos-qa', 'proyectos']) {
   for (const lang of ['es', 'en']) {
     const dir = join('src', 'content', coleccion, lang);
-    for (const archivo of readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+    let archivos;
+    try {
+      archivos = readdirSync(dir).filter((f) => f.endsWith('.md'));
+    } catch (error) {
+      console.error(`\n✖ No se pudo leer el directorio "${dir}": ${error.message}\n`);
+      process.exit(1);
+    }
+    for (const archivo of archivos) {
       const texto = readFileSync(join(dir, archivo), 'utf8');
-      if (/^ejemplo:\s*true\s*$/m.test(texto)) pendientes.push(join(dir, archivo));
+      if (/^ejemplo:\s*true\s*$/im.test(texto)) pendientes.push(join(dir, archivo));
     }
   }
 }
