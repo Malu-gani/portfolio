@@ -19,6 +19,7 @@
 - **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
 - **Fuentes servidas localmente** con paquetes `@fontsource-variable`. Prohibido enlazar Google Fonts u otro CDN de fuentes.
 - **Todo elemento interactivo o verificable lleva `data-testid`.** Los selectores de Playwright usan exclusivamente `data-testid`; nunca clases de Tailwind ni texto visible (el texto cambia según idioma).
+- **Las páginas espejo ES/EN no duplican contenido.** Cada par de páginas equivalentes delega en un componente compartido que recibe `lang` como prop (`HomeContent.astro`, `QaContent.astro`, …), de modo que `src/pages/es/x.astro` y `src/pages/en/x.astro` quedan como envoltorios de tres líneas. Sin esto, cada cambio de contenido hay que hacerlo dos veces y las dos versiones se desincronizan en silencio.
 - **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` con selector CSS fuera de `tests/e2e/pages/`: si un test necesita alcanzar el `<html>`, un `<link>` del `<head>` o cualquier nodo por CSS, eso se expone como método o locator del Page Object. `page.getByTestId(...)` y `page.getByRole(...)` **sí** están permitidos directamente en los specs — son selectores semánticos, estables frente a cambios de markup, y encapsularlos no aporta nada.
 - **Los slugs de contenido son idénticos en ambos idiomas.** `src/content/casos-qa/es/mi-caso.md` exige `src/content/casos-qa/en/mi-caso.md`. Hay un test que lo verifica.
 - **WCAG AA como mínimo, en ambos temas**, verificado por axe-core en CI.
@@ -1661,7 +1662,7 @@ test.describe('Home', () => {
 
   test('hay un único h1', async ({ page }) => {
     await page.goto('/es/');
-    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
 });
 ```
