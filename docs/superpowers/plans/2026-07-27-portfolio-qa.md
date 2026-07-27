@@ -14,7 +14,7 @@
 - **Astro 7** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
 - **Zod se importa desde `astro/zod`, no desde `astro:content`.** Astro 7 usa Zod 4, donde los validadores de string son funciones de primer nivel: `z.url()` en vez de `z.string().url()`, `z.email()` en vez de `z.string().email()`.
 - **El compilador Rust de Astro 7 es estricto con el HTML.** Toda etiqueta no vacía debe cerrarse explícitamente y el HTML semánticamente inválido ya no se autocorrige: un `<div>` sin cerrar o un `<p>` anidando un `<div>` ahora es un error de compilación, no una advertencia.
-- **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`.
+- **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`. El gate es `npm run check` (`astro check`), que corre en CI: `astro build` **no** verifica tipos en archivos `.tsx` porque Vite los borra sin chequearlos.
 - **Tailwind CSS 4** vía plugin de Vite (`@tailwindcss/vite`). No existe `tailwind.config.js`: la configuración es CSS-first mediante `@theme inline` en `src/styles/global.css`.
 - **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
 - **Fuentes servidas localmente** con paquetes `@fontsource-variable`. Prohibido enlazar Google Fonts u otro CDN de fuentes.
@@ -2723,6 +2723,9 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Verificación de tipos
+        run: npm run check
 
       - name: Tests unitarios
         run: npm run test:unit
