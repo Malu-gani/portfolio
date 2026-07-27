@@ -24,4 +24,12 @@ export class BasePage {
   async recargar(): Promise<void> {
     await this.page.reload();
   }
+
+  async idiomaDelDocumento(): Promise<string | null> {
+    return this.page.locator('html').getAttribute('lang');
+  }
+
+  hreflangAlterno(lang: Lang): Locator {
+    return this.page.locator(`link[rel="alternate"][hreflang="${lang}"]`);
+  }
 }

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { BasePage } from './pages/BasePage';
 
 test.describe('Cambio de idioma', () => {
   test('la raíz redirige a español', async ({ page }) => {
@@ -8,14 +9,15 @@ test.describe('Cambio de idioma', () => {
 
   test('el toggle lleva a la home equivalente', async ({ page }) => {
     await page.goto('/es/');
-    await page.getByTestId('lang-toggle').click();
+    const base = new BasePage(page);
+    await base.langToggle.click();
     await expect(page).toHaveURL(/\/en\/$/);
-    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    expect(await base.idiomaDelDocumento()).toBe('en');
   });
 
   test('la página declara su alternativa con hreflang', async ({ page }) => {
     await page.goto('/es/');
-    const alterno = page.locator('link[rel="alternate"][hreflang="en"]');
+    const alterno = new BasePage(page).hreflangAlterno('en');
     await expect(alterno).toHaveAttribute('href', /\/en\/$/);
   });
 });
