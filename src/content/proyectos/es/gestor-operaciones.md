@@ -5,6 +5,7 @@ stack: [React, TypeScript, Node]
 fecha: 2026-07-20
 destacado: true
 ejemplo: true
+repo: "https://github.com/Malu-gani/portfolio"
 ---
 
 ## Descripción

@@ -1,0 +1,17 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import CaseLayout from '../layouts/CaseLayout.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  proyecto: CollectionEntry<'proyectos'>;
+}
+const { lang, proyecto } = Astro.props;
+const { Content } = await render(proyecto);
+---
+<CaseLayout lang={lang} datos={{ ...proyecto.data, tags: [], estado: 'completo' }}>
+  <div data-testid="proyecto-detalle">
+    <Content />
+  </div>
+</CaseLayout>

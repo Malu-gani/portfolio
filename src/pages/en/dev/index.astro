@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProyectoListado from '../../../components/ProyectoListado.astro';
+
+const lang = 'en' as const;
+---
+<BaseLayout lang={lang} title="Development projects · Juan Manuel Malugani"
+  description="Personal development projects.">
+  <ProyectoListado lang={lang} />
+</BaseLayout>
