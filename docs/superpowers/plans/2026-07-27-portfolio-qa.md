@@ -686,6 +686,8 @@ export const ui = {
 export type ClaveUI = keyof (typeof ui)['es'];
 ```
 
+**Corregido durante la ejecución:** derivar `ClaveUI` de `es` deja la paridad asimétrica — si a `es` le falta una clave que está en `en`, el tipo se achica junto con el diccionario y nadie se queja; la clave queda muerta e inaccesible sin ninguna señal. La versión implementada declara `ClaveUI` como unión explícita de literales, define `type Diccionario = Record<ClaveUI, string>` y aplica `as const satisfies Diccionario` a **ambos** diccionarios, de modo que a cualquiera de los dos al que le falte una clave el compilador lo marca.
+
 - [ ] **Step 5: Crear el mapa de rutas**
 
 `src/i18n/routes.ts`:
