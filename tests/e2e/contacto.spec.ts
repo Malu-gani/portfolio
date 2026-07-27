@@ -25,6 +25,25 @@ test.describe('Contacto y CV', () => {
     expect(copiado).toContain('@');
   });
 
+  test('si falla la copia, avisa en vez de quedarse en silencio', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Sobrescribe navigator.clipboard; se verificó estable solo en Chromium');
+    const contacto = new ContactoPage(page);
+    // Sobrescribimos el clipboard ANTES de que cargue la página para forzar
+    // el camino de error sin depender de permisos del navegador: simula un
+    // contexto sin `navigator.clipboard` disponible (no seguro / navegador viejo)
+    // o una escritura rechazada.
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: () => Promise.reject(new Error('permiso denegado')) },
+      });
+    });
+    await contacto.abrir('es');
+    await contacto.botonCopiar.click();
+    await expect(page.getByRole('status')).toHaveText('No se pudo copiar. Copialo a mano.');
+    await expect(contacto.botonCopiar).toHaveText('No se pudo copiar. Copialo a mano.');
+  });
+
   test('el CV en español se descarga', async ({ page }) => {
     await page.goto('/es/');
     const [descarga] = await Promise.all([

@@ -4,16 +4,25 @@ interface Props {
   email: string;
   textoCopiar: string;
   textoCopiado: string;
+  textoError: string;
 }
 
-export default function CopyEmail({ email, textoCopiar, textoCopiado }: Props) {
-  const [copiado, setCopiado] = useState(false);
+type Estado = 'inicial' | 'copiado' | 'error';
+
+export default function CopyEmail({ email, textoCopiar, textoCopiado, textoError }: Props) {
+  const [estado, setEstado] = useState<Estado>('inicial');
 
   async function copiar(): Promise<void> {
-    await navigator.clipboard.writeText(email);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+    try {
+      await navigator.clipboard.writeText(email);
+      setEstado('copiado');
+    } catch {
+      setEstado('error');
+    }
+    setTimeout(() => setEstado('inicial'), 2000);
   }
+
+  const textoBoton = estado === 'copiado' ? textoCopiado : estado === 'error' ? textoError : textoCopiar;
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -30,10 +39,10 @@ export default function CopyEmail({ email, textoCopiar, textoCopiado }: Props) {
         onClick={copiar}
         className="rounded-md border border-border px-3 py-1 text-sm hover:bg-surface"
       >
-        {copiado ? textoCopiado : textoCopiar}
+        {textoBoton}
       </button>
       <span role="status" aria-live="polite" className="sr-only">
-        {copiado ? textoCopiado : ''}
+        {estado !== 'inicial' ? textoBoton : ''}
       </span>
     </div>
   );

@@ -28,6 +28,7 @@ export type ClaveUI =
   | 'cv.descargar'
   | 'contacto.copiar'
   | 'contacto.copiado'
+  | 'contacto.errorCopiar'
   | 'ejemplo.aviso'
   | 'volver';
 
@@ -59,6 +60,7 @@ const es = {
   'cv.descargar': 'Descargar CV',
   'contacto.copiar': 'Copiar email',
   'contacto.copiado': 'Copiado',
+  'contacto.errorCopiar': 'No se pudo copiar. Copialo a mano.',
   'ejemplo.aviso': 'Contenido de ejemplo — pendiente de reemplazo.',
   'volver': 'Volver',
 } as const satisfies Diccionario;
@@ -89,6 +91,7 @@ const en = {
   'cv.descargar': 'Download CV',
   'contacto.copiar': 'Copy email',
   'contacto.copiado': 'Copied',
+  'contacto.errorCopiar': "Couldn't copy. Copy it manually.",
   'ejemplo.aviso': 'Sample content — pending replacement.',
   'volver': 'Back',
 } as const satisfies Diccionario;
