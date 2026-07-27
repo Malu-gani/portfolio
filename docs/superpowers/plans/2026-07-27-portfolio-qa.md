@@ -1260,7 +1260,9 @@ Este script **no corre en CI**: si lo hiciera, el pipeline estaría en rojo desd
 - [ ] **Step 8: Correr los tests**
 
 Run: `npm run test:unit && npm run build`
-Expected: unit PASS (12 tests: 10 de i18n + 2 de contenido); build PASS sin errores de esquema.
+Expected: unit PASS (17 tests: 15 de i18n + 2 de contenido); build PASS sin errores de esquema.
+
+El total de i18n subió de 10 a 15 durante la ejecución: la ronda de arreglo de la Task 3 sumó 3 tests de query/fragmento en `getAlternateUrl` y separó el test de `useTranslations` en tres.
 
 - [ ] **Step 9: Commit**
 
