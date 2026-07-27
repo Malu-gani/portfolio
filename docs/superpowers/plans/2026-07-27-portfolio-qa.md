@@ -6,12 +6,14 @@
 
 **Architecture:** Astro 5 en modo estático puro compila todo a HTML servido desde CDN. El idioma vive en la URL mediante carpetas espejo (`/es/`, `/en/`). El contenido son archivos Markdown en dos colecciones validadas por esquema Zod, de modo que publicar un caso nuevo no requiere tocar código. El sistema visual usa tokens CSS semánticos, lo que permite el toggle claro/oscuro sin duplicar estilos. La suite Playwright vive en el mismo repo y es a la vez garantía de calidad y pieza del portfolio.
 
-**Tech Stack:** Astro 5, React 19 (solo islands), TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
+**Tech Stack:** Astro 7, React 19 (solo islands), TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
 
 ## Global Constraints
 
-- **Node.js 20 o superior.** El proyecto usa ESM en todos los archivos de configuración.
-- **Astro 5** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
+- **Node.js 22.12 o superior** (requisito de Astro 7; local hay v24.14.1). El proyecto usa ESM en todos los archivos de configuración. El CI debe declarar Node 22 o mayor: un runtime viejo en el host es la forma más común de que un build que pasa en local falle al desplegar.
+- **Astro 7** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
+- **Zod se importa desde `astro/zod`, no desde `astro:content`.** Astro 7 usa Zod 4, donde los validadores de string son funciones de primer nivel: `z.url()` en vez de `z.string().url()`, `z.email()` en vez de `z.string().email()`.
+- **El compilador Rust de Astro 7 es estricto con el HTML.** Toda etiqueta no vacía debe cerrarse explícitamente y el HTML semánticamente inválido ya no se autocorrige: un `<div>` sin cerrar o un `<p>` anidando un `<div>` ahora es un error de compilación, no una advertencia.
 - **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`.
 - **Tailwind CSS 4** vía plugin de Vite (`@tailwindcss/vite`). No existe `tailwind.config.js`: la configuración es CSS-first mediante `@theme inline` en `src/styles/global.css`.
 - **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
@@ -106,8 +108,10 @@ npm install tailwindcss @tailwindcss/vite @astrojs/sitemap
 npx astro add react --yes
 npm install @fontsource-variable/inter @fontsource-variable/jetbrains-mono
 npm install -D @playwright/test @axe-core/playwright vitest
-npx playwright install --with-deps chromium firefox webkit
+npx playwright install chromium firefox webkit
 ```
+
+El flag `--with-deps` se omite a propósito: instala librerías de sistema con `apt` y solo aplica en Linux. En el CI (Task 13), que corre sobre Ubuntu, sí se usa.
 
 - [ ] **Step 2: Configurar Astro**
 
@@ -1108,8 +1112,9 @@ Expected: FAIL — el directorio `src/content/casos-qa/es` no existe.
 `src/content.config.ts`:
 
 ```ts
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const tags = z.enum([
   'manual', 'automation', 'e2e', 'api', 'exploratorio',
@@ -1127,8 +1132,8 @@ const casosQa = defineCollection({
     destacado: z.boolean().default(false),
     estado: z.enum(['completo', 'en-progreso']),
     ejemplo: z.boolean().default(false),
-    repo: z.string().url().optional(),
-    demo: z.string().url().optional(),
+    repo: z.url().optional(),
+    demo: z.url().optional(),
   }),
 });
 
@@ -1141,8 +1146,8 @@ const proyectos = defineCollection({
     fecha: z.coerce.date(),
     destacado: z.boolean().default(false),
     ejemplo: z.boolean().default(false),
-    repo: z.string().url().optional(),
-    demo: z.string().url().optional(),
+    repo: z.url().optional(),
+    demo: z.url().optional(),
   }),
 });
 
@@ -2638,6 +2643,8 @@ Para poder usar componentes dentro del contenido, renombrar los archivos de `.md
 npx astro add mdx --yes
 ```
 
+En Astro 7 el procesador Markdown por defecto es Sätteri, no remark/rehype. `@astrojs/mdx` sigue siendo compatible y los componentes importados dentro del propio `.mdx` funcionan sin configuración extra. La única limitación es que Sätteri no soporta plugins Recma; este proyecto no usa ninguno, así que no aplica.
+
 En `src/content.config.ts`, cambiar ambos `pattern: '**/*.md'` por `pattern: '**/*.{md,mdx}'`.
 
 En `tests/unit/contenido.test.ts`, cambiar los dos `.endsWith('.md')` por `.endsWith('.mdx')`.
@@ -2711,7 +2718,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Instalar dependencias
