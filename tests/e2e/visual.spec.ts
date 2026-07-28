@@ -16,6 +16,17 @@ test.describe('Regresión visual', () => {
   // con esa condición, `mobile` generaba sus propias capturas sin querer y
   // fallaba en la corrida siguiente por falta de referencia versionada,
   // exactamente el escenario que esta guarda existe para evitar.
+  //
+  // Además, estas 8 capturas están atadas a la plataforma donde se generaron
+  // (el nombre de archivo incluye `-win32`: Playwright versiona un snapshot
+  // por plataforma). El job de CI corre en `ubuntu-latest`, que buscaría
+  // `-linux` y no la encontraría -- escribiría una captura nueva como
+  // baseline y fallaría esa corrida, pasando en el reintento porque ya
+  // compara contra la que acaba de escribir (falso verde). Por eso la
+  // regresión visual es un gate **local**, explícitamente excluido de CI,
+  // igual que ya se hace con los enlaces externos (ver enlaces.spec.ts).
+  test.skip(!!process.env.CI, 'Capturas de referencia atadas a la plataforma donde se generaron (win32); gate local, no de CI. Ver comentario arriba.');
+
   test.beforeEach(({}, testInfo) => {
     test.skip(testInfo.project.name !== 'chromium',
       'Las capturas de referencia se generan solo en el proyecto chromium');
