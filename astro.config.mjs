@@ -6,7 +6,7 @@ import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://portfolio.vercel.app',
+  site: 'https://portfolio-lovat-five-65.vercel.app',
   output: 'static',
   integrations: [react(), sitemap(), mdx()],
   vite: { plugins: [tailwindcss()] },
