@@ -1,7 +1,5 @@
 # Portfolio QA — Plan de implementación
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Construir un portfolio personal bilingüe ES/EN, estático y accesible, con dos carriles (`/qa` dominante y `/dev` secundario), testeado por su propia suite E2E corriendo en CI.
 
 **Architecture:** Astro 5 en modo estático puro compila todo a HTML servido desde CDN. El idioma vive en la URL mediante carpetas espejo (`/es/`, `/en/`). El contenido son archivos Markdown en dos colecciones validadas por esquema Zod, de modo que publicar un caso nuevo no requiere tocar código. El sistema visual usa tokens CSS semánticos, lo que permite el toggle claro/oscuro sin duplicar estilos. La suite Playwright vive en el mismo repo y es a la vez garantía de calidad y pieza del portfolio.
