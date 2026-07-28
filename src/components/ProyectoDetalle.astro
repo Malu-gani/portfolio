@@ -10,7 +10,7 @@ interface Props {
 const { lang, proyecto } = Astro.props;
 const { Content } = await render(proyecto);
 ---
-<CaseLayout lang={lang} datos={{ ...proyecto.data, tags: [], estado: 'completo' }}>
+<CaseLayout lang={lang} datos={{ ...proyecto.data, tags: [] }}>
   <div data-testid="proyecto-detalle">
     <Content />
   </div>

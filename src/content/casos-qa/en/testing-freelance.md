@@ -4,7 +4,7 @@ resumen: "Exploratory testing for a small online store with no QA team, prioriti
 tags: [manual, exploratorio]
 stack: [Session charters, Google Sheets, DevTools]
 fecha: 2026-05-10
-destacado: true
+destacado: false
 estado: completo
 ejemplo: true
 ---

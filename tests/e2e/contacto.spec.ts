@@ -1,18 +1,23 @@
 import { test, expect } from '@playwright/test';
 import { ContactoPage } from './pages/ContactoPage';
 
+const EMAIL = 'maluganijuanmanuel@gmail.com';
+
 test.describe('Contacto y CV', () => {
   test('muestra email, LinkedIn y GitHub', async ({ page }) => {
     const contacto = new ContactoPage(page);
     await contacto.abrir('es');
-    await expect(contacto.emailTexto).toContainText('@');
+    await expect(contacto.emailTexto).toHaveText(EMAIL);
+    await expect(contacto.emailTexto).toHaveAttribute('href', `mailto:${EMAIL}`);
     await expect(contacto.linkedin).toHaveAttribute('href', /linkedin\.com/);
     await expect(contacto.github).toHaveAttribute('href', /github\.com/);
   });
 
   test('no hay formulario de contacto', async ({ page }) => {
-    await page.goto('/es/contacto');
-    await expect(page.locator('form')).toHaveCount(0);
+    const contacto = new ContactoPage(page);
+    await contacto.abrir('es');
+    await expect(page.getByTestId('contacto')).toBeVisible();
+    await expect(contacto.formularios()).toHaveCount(0);
   });
 
   test('el botón copia el email al portapapeles', async ({ context, page, browserName }) => {
@@ -22,7 +27,7 @@ test.describe('Contacto y CV', () => {
     await contacto.abrir('es');
     await contacto.botonCopiar.click();
     const copiado = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copiado).toContain('@');
+    expect(copiado).toBe(EMAIL);
   });
 
   test('si falla la copia, avisa en vez de quedarse en silencio', async ({ page, browserName }) => {

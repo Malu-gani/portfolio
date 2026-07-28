@@ -32,4 +32,14 @@ export class BasePage {
   hreflangAlterno(lang: Lang): Locator {
     return this.page.locator(`link[rel="alternate"][hreflang="${lang}"]`);
   }
+
+  /** El elemento que tiene el foco del teclado en este momento. */
+  elementoEnfocado(): Locator {
+    return this.page.locator(':focus');
+  }
+
+  /** Formularios `<form>` presentes en la página (se usa para probar ausencia). */
+  formularios(): Locator {
+    return this.page.locator('form');
+  }
 }

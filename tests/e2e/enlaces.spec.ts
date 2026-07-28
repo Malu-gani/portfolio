@@ -68,7 +68,7 @@ test.describe('Enlaces externos abren con rel de seguridad', () => {
       const enlaces = new EnlacesPage(page).targetBlank();
       const total = await enlaces.count();
 
-      // Falsificabilidad: el footer (presente en las 19 rutas) lleva un
+      // Falsificabilidad: el footer (presente en todas las rutas del sitio) lleva un
       // enlace target="_blank" a GitHub, así que siempre debería haber al
       // menos uno. Sin esta guarda, si alguien le saca el target="_blank"
       // al footer el día de mañana, este test sigue en verde con cero

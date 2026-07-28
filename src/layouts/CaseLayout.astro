@@ -9,8 +9,8 @@ interface Props {
   lang: Lang;
   datos: {
     titulo: string; resumen: string; tags: string[]; stack: string[];
-    fecha: Date; estado: 'completo' | 'en-progreso'; ejemplo: boolean;
-    repo?: string; demo?: string;
+    fecha: Date; estado?: 'completo' | 'en-progreso'; ejemplo: boolean;
+    repo?: string;
   };
 }
 const { lang, datos } = Astro.props;
@@ -23,8 +23,8 @@ const t = useTranslations(lang);
     <header class="border-b border-border pb-6">
       <h1 data-testid="caso-titulo" class="text-3xl font-bold sm:text-4xl">{datos.titulo}</h1>
       <p data-testid="caso-estado" class="mt-2 text-sm text-muted">
-        {datos.estado === 'completo' ? t('caso.completo') : t('caso.enProgreso')}
-        · <time datetime={datos.fecha.toISOString()}>
+        {datos.estado && <>{datos.estado === 'completo' ? t('caso.completo') : t('caso.enProgreso')} · </>}
+        <time datetime={datos.fecha.toISOString()}>
             {datos.fecha.toLocaleDateString(lang === 'es' ? 'es-AR' : 'en-US')}
           </time>
       </p>

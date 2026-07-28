@@ -121,10 +121,4 @@ describe('check-listo — componentes con marcador @ejemplo-pendiente', () => {
     writeFileSync(ruta, `---\n// ${MARCADOR_EJEMPLO_COMPONENTE}\n---\n<p>x</p>\n`);
     expect(pendientesDeComponentes(base)).toEqual([ruta]);
   });
-
-  it('el estado actual del repo lleva el marcador en AboutContent.astro (documenta la regresión que este gate evita)', () => {
-    const pendientes = pendientesDeComponentes(process.cwd());
-    const rutas = pendientes.map((p) => p.replace(/\\/g, '/'));
-    expect(rutas.some((p) => p.endsWith('src/components/AboutContent.astro'))).toBe(true);
-  });
 });

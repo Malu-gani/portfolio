@@ -4,7 +4,7 @@ resumen: "Testing exploratorio de una tienda online chica, sin equipo de QA, pri
 tags: [manual, exploratorio]
 stack: [Charter de sesión, Google Sheets, DevTools]
 fecha: 2026-05-10
-destacado: true
+destacado: false
 estado: completo
 ejemplo: true
 ---

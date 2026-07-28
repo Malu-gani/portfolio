@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { rutasDelSitio } from './utils/rutas';
+import { BasePage } from './pages/BasePage';
 
 // Las rutas se derivan del filesystem (páginas estáticas + colecciones de
 // contenido, ver `./utils/rutas.ts`) en vez de copiarse a mano: si se agrega una
@@ -27,27 +28,29 @@ for (const tema of ['light', 'dark'] as const) {
 
 test.describe('Navegación por teclado', () => {
   test('el primer tabulador revela el enlace de salto al contenido', async ({ page }) => {
+    const base = new BasePage(page);
     await page.goto('/es/');
     await page.keyboard.press('Tab');
-    const enfocado = page.locator(':focus');
-    await expect(enfocado).toHaveAttribute('href', '#contenido');
+    await expect(base.elementoEnfocado()).toHaveAttribute('href', '#contenido');
   });
 
   test('se llega al toggle de tema solo con el teclado', async ({ page }) => {
+    const base = new BasePage(page);
     await page.goto('/es/');
     for (let i = 0; i < 20; i++) {
       await page.keyboard.press('Tab');
-      const testid = await page.locator(':focus').getAttribute('data-testid');
+      const testid = await base.elementoEnfocado().getAttribute('data-testid');
       if (testid === 'theme-toggle') return;
     }
     throw new Error('No se alcanzó el toggle de tema con el teclado en 20 tabulaciones');
   });
 
   test('el foco siempre es visible', async ({ page }) => {
+    const base = new BasePage(page);
     await page.goto('/es/');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
-    const outline = await page.locator(':focus').evaluate(
+    const outline = await base.elementoEnfocado().evaluate(
       (el) => getComputedStyle(el).outlineStyle
     );
     expect(outline).not.toBe('none');
