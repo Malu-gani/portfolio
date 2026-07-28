@@ -17,7 +17,7 @@ Astro 7 (`output: 'static'`) · React 19 solo en islands puntuales (el toggle de
 Esto es lo que distingue este repo de un portfolio estático cualquiera: viene con su propia suite de calidad, corrida en CI en cada push y cada pull request a `main` (ver el badge arriba y `.github/workflows/ci.yml`).
 
 - **Tipos:** `npm run check` (Astro Check) — 0 errores, 0 warnings sobre 76 archivos `.astro`/`.ts`/`.tsx` al momento de escribir esto. Es el gate real de tipos: `astro build` no chequea los `.tsx`, por eso este comando existe como paso separado.
-- **Unitarios:** `npm run test:unit` (Vitest) — 35 tests en 4 archivos, todos verdes.
+- **Unitarios:** `npm run test:unit` (Vitest) — 34 tests en 4 archivos, todos verdes.
 - **Build:** `npm run build` genera todas las páginas estáticas del sitio (ambos idiomas, ambos carriles, derivadas del filesystem — ver `tests/e2e/utils/rutas.ts`) sin errores.
 - **End-to-end:** `npm run test:e2e` (Playwright), suite propia de 120 tests que cubre navegación, cambio de idioma, tema claro/oscuro, contenido de los carriles QA y Dev, integridad de enlaces internos (los externos se saltan en CI, ver abajo) con `rel="noopener"` en los que abren pestaña nueva, y los componentes de dominio QA (reporte de bug, matriz de casos, métricas). Corre en 4 proyectos de navegador: Chromium, Firefox, WebKit y un perfil mobile (Pixel 7).
 - **Accesibilidad:** `axe-core` integrado en la suite E2E — cero violaciones WCAG AA en todas las rutas del sitio, en tema claro y en tema oscuro, en los 4 navegadores.
