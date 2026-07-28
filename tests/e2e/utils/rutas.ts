@@ -56,9 +56,24 @@ function paginasEstaticas(lang: Lang): string[] {
   });
 }
 
-/** Rutas de detalle derivadas de los archivos de una colección de contenido. */
-function paginasDeColeccion(coleccion: string, prefijoRuta: string, lang: Lang): string[] {
-  const dir = path.join(RAIZ, 'src', 'content', coleccion, lang);
+/**
+ * Rutas de detalle derivadas de los archivos de una colección de contenido.
+ *
+ * `raiz` es parametrizable (default: la raíz real del repo) para que
+ * `tests/unit/rutas.test.ts` pueda ejercitarla contra un directorio temporal
+ * con `mkdtempSync`, igual que `check-listo-lib.mjs` recibe `baseDir` — sin
+ * esto, la única forma de probar el filtro de extensión era leer el
+ * contenido real del repo, lo que hubiera obligado a fijar un número de
+ * rutas en el test (frágil: se rompe con cada caso/proyecto nuevo sin que
+ * haya nada mal).
+ */
+export function paginasDeColeccion(
+  coleccion: string,
+  prefijoRuta: string,
+  lang: Lang,
+  raiz: string = RAIZ,
+): string[] {
+  const dir = path.join(raiz, 'src', 'content', coleccion, lang);
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir, { withFileTypes: true })

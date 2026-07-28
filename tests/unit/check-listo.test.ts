@@ -54,6 +54,34 @@ describe('check-listo — colecciones de contenido', () => {
     writeFileSync(ruta, '---\ntitle: Sample\nejemplo: True\n---\ncontent');
     expect(pendientesDeColecciones(base)).toEqual([ruta]);
   });
+
+  // Task 13 migró suite-e2e-portfolio.md a .mdx (para poder importar
+  // componentes Astro dentro del contenido) y cambió el filtro de
+  // `readdirSync(...).filter(...)` en check-listo-lib.mjs de aceptar solo
+  // `.md` a aceptar `.md` y `.mdx`. Sin este test, revertir ese filtro a
+  // `.endsWith('.md')` (por ejemplo al "simplificar" el código sin ver por
+  // qué acepta las dos extensiones) deja pasar en silencio cualquier .mdx
+  // con `ejemplo: true` — exactamente el falso negativo que este gate existe
+  // para evitar.
+  it('detecta ejemplo: true en un archivo .mdx', () => {
+    const base = fixtureBase();
+    dirs.push(base);
+    crearColecciones(base);
+    const ruta = join(base, 'src', 'content', 'casos-qa', 'es', 'uno.mdx');
+    writeFileSync(ruta, '---\ntitulo: Ejemplo\nejemplo: true\n---\nimport Algo from "../x.astro";\ncontenido');
+    expect(pendientesDeColecciones(base)).toEqual([ruta]);
+  });
+
+  it('detecta .md y .mdx a la vez, sin que uno tape al otro', () => {
+    const base = fixtureBase();
+    dirs.push(base);
+    crearColecciones(base);
+    const rutaMd = join(base, 'src', 'content', 'casos-qa', 'es', 'uno.md');
+    const rutaMdx = join(base, 'src', 'content', 'casos-qa', 'es', 'dos.mdx');
+    writeFileSync(rutaMd, '---\ntitulo: Uno\nejemplo: true\n---\ncontenido');
+    writeFileSync(rutaMdx, '---\ntitulo: Dos\nejemplo: true\n---\ncontenido');
+    expect(pendientesDeColecciones(base).sort()).toEqual([rutaMd, rutaMdx].sort());
+  });
 });
 
 describe('check-listo — componentes con marcador @ejemplo-pendiente', () => {
