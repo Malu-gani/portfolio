@@ -26,6 +26,29 @@ for (const tema of ['light', 'dark'] as const) {
   });
 }
 
+// axe-core clasifica `heading-order` como "best-practice", no como WCAG A/AA,
+// así que el barrido de arriba (withTags wcag2a/wcag2aa/wcag21a/wcag21aa) no
+// lo evalúa y puede dar cero violaciones aunque haya un salto de nivel real.
+// Lighthouse sí lo audita y lo detectó en producción (h1 de la página seguido
+// de un h3 en las tarjetas, sin h2 intermedio). Esta aserción propia cierra
+// ese agujero de cobertura sin ensanchar los tags de axe para toda la suite.
+test.describe('Orden de headings', () => {
+  for (const ruta of paginas) {
+    test(`${ruta} no salta niveles de heading`, async ({ page }) => {
+      await page.goto(ruta);
+      const niveles = await page.$$eval('h1, h2, h3, h4, h5, h6', (elementos) =>
+        elementos.map((el) => Number(el.tagName.slice(1)))
+      );
+      let nivelMaximoVisto = 0;
+      for (const nivel of niveles) {
+        expect(nivel, `salto de heading detectado en ${ruta}: niveles ${niveles.join(',')}`)
+          .toBeLessThanOrEqual(nivelMaximoVisto + 1);
+        nivelMaximoVisto = Math.max(nivelMaximoVisto, nivel);
+      }
+    });
+  }
+});
+
 test.describe('Navegación por teclado', () => {
   test('el primer tabulador revela el enlace de salto al contenido', async ({ page }) => {
     const base = new BasePage(page);

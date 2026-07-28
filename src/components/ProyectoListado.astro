@@ -17,7 +17,7 @@ const proyectos = (await getCollection('proyectos'))
 <div data-testid="lista-proyectos" class="mt-8 grid gap-4 sm:grid-cols-2">
   {proyectos.map((p) => (
     <div class="relative">
-      <ProyectoCard lang={lang} slug={p.id.replace(prefijo, '')} datos={p.data} />
+      <ProyectoCard lang={lang} slug={p.id.replace(prefijo, '')} datos={p.data} nivelTitulo={2} />
     </div>
   ))}
 </div>

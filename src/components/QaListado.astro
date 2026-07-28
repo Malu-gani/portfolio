@@ -21,7 +21,7 @@ const bajada = lang === 'es'
 <div data-testid="lista-casos" class="mt-8 grid gap-4 sm:grid-cols-2">
   {casos.map((c) => (
     <div class="relative">
-      <CasoCard lang={lang} slug={c.id.replace(prefijo, '')} datos={c.data} />
+      <CasoCard lang={lang} slug={c.id.replace(prefijo, '')} datos={c.data} nivelTitulo={2} />
     </div>
   ))}
 </div>
