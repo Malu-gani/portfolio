@@ -108,13 +108,39 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Descargar los reportes de los 4 proyectos
+        # Sin merge-multiple: cada artefacto (uno por proyecto de Playwright)
+        # cae en su propio subdirectorio "reporte-descargado/<nombre-del-
+        # artefacto>/". Con merge-multiple:true los 4 reportes HTML comparten
+        # nombres de archivo (index.html, data/) y se pisan entre sí -- lo
+        # publicado terminaba siendo una mezcla de un solo proyecto. Así se
+        # publican los 4 reportes completos, cada uno en su propia carpeta.
+        # if-no-artifact-found: warn (el default) para que este paso no falle
+        # cuando `e2e` fue saltado por `needs: verificar` y no subió nada; el
+        # siguiente paso decide si hay algo que publicar.
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-report-*
           path: reporte-descargado
-          merge-multiple: true
+          if-no-artifact-found: warn
+
+      - name: Verificar si hay reporte para publicar
+        # `e2e` corre con `if: always() && ref == main`, así que este job se
+        # ejecuta aunque `e2e` haya quedado `skipped` (p. ej. si `verificar`
+        # falló). En ese caso no hay artefactos y el directorio no existe o
+        # queda vacío. Publicar en ese estado no tiene sentido y antes hacía
+        # fallar el job entero con ENOENT al intentar leerlo. Se detecta acá
+        # y se salta el paso de publicación sin marcar el job en rojo.
+        id: chequeo
+        run: |
+          if [ -d reporte-descargado ] && [ -n "$(find reporte-descargado -mindepth 1 -print -quit)" ]; then
+            echo "hay_reporte=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hay_reporte=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::e2e no produjo artefactos para publicar (job saltado o sin reportes)."
+          fi
 
       - name: Publicar el reporte en Pages
+        if: steps.chequeo.outputs.hay_reporte == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
