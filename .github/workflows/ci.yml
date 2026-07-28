@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificación de tipos
+        run: npm run check
+
+      - name: Tests unitarios
+        run: npm run test:unit
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Lighthouse
+        run: npm run test:lighthouse
+
+      - name: Contenido pendiente de reemplazo (no bloqueante)
+        # El sitio todavía tiene contenido de ejemplo (`ejemplo: true` en varias
+        # colecciones); check:listo está pensado para dar rojo hasta que se
+        # reemplace por casos y proyectos reales antes de publicar. Bloquear el
+        # pipeline con esto haría que el CI nazca rojo, así que se corre en modo
+        # informativo (continue-on-error) para que el estado quede visible en
+        # el resumen del job sin tumbar el badge. Sacar `continue-on-error`
+        # cuando el contenido real reemplace al de ejemplo.
+        run: npm run check:listo
+        continue-on-error: true
+
+  e2e:
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit, mobile]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar navegadores
+        run: npx playwright install --with-deps
+
+      - name: Tests E2E y de accesibilidad (${{ matrix.project }})
+        # --workers=1: correr los 4 proyectos de Playwright en paralelo (o un
+        # solo proyecto con sus workers por defecto) contra un único
+        # `npm run preview` local satura ese servidor y produce
+        # NS_ERROR_CONNECTION_REFUSED de forma intermitente en una ruta
+        # distinta cada vez -- diagnosticado y reproducido en
+        # docs/cross-browser-diagnostico.md.
+        # Cada proyecto ya corre aislado en su propio job de esta matriz (cada
+        # uno con su propio runner y su propio `npm run preview`), lo que
+        # elimina la contención ENTRE proyectos; --workers=1 elimina también
+        # la contención DENTRO de un mismo proyecto, que es la que de hecho
+        # disparó el error en el diagnóstico (firefox solo, con sus 3 workers
+        # por defecto, ya lo reproducía). Es una decisión conservadora --
+        # cambia paralelismo por estabilidad -- y no está probada en un
+        # runner de CI real, solo en local.
+        #
+        # No se excluyen "enlaces externos" ni la regresión visual acá: ambos
+        # describes ya se saltan solos con `test.skip(!!process.env.CI, ...)`
+        # (en enlaces.spec.ts y visual.spec.ts respectivamente), así que
+        # excluirlos también por CLI sería redundante y frágil (dependería de
+        # la capitalización exacta de un título en español).
+        run: npx playwright test --project=${{ matrix.project }} --workers=1
+
+      - name: Publicar reporte de Playwright (${{ matrix.project }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report/
+          retention-days: 30
+
+  publicar-reporte:
+    needs: e2e
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar los reportes de los 4 proyectos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-*
+          path: reporte-descargado
+          merge-multiple: true
+
+      - name: Publicar el reporte en Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reporte-descargado
+          destination_dir: reporte

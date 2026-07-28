@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import QaListado from '../../../components/QaListado.astro';
+
+const lang = 'es' as const;
+---
+<BaseLayout lang={lang} title="Casos de QA · Juan Manuel Malugani"
+  description="Casos de testing manual y automatización, documentados de punta a punta.">
+  <QaListado lang={lang} />
+</BaseLayout>

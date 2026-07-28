@@ -1,0 +1,15 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCasoStaticPaths } from '../../../i18n/casos';
+import CasoDetalle from '../../../components/CasoDetalle.astro';
+
+export async function getStaticPaths() {
+  return getCasoStaticPaths('en');
+}
+
+interface Props {
+  caso: CollectionEntry<'casos-qa'>;
+}
+const { caso } = Astro.props;
+---
+<CasoDetalle lang="en" caso={caso} />

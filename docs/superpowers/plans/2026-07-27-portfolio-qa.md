@@ -6,18 +6,21 @@
 
 **Architecture:** Astro 5 en modo estático puro compila todo a HTML servido desde CDN. El idioma vive en la URL mediante carpetas espejo (`/es/`, `/en/`). El contenido son archivos Markdown en dos colecciones validadas por esquema Zod, de modo que publicar un caso nuevo no requiere tocar código. El sistema visual usa tokens CSS semánticos, lo que permite el toggle claro/oscuro sin duplicar estilos. La suite Playwright vive en el mismo repo y es a la vez garantía de calidad y pieza del portfolio.
 
-**Tech Stack:** Astro 5, React 19 (solo islands), TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
+**Tech Stack:** Astro 7, React 19 (solo islands), TypeScript (strict), Tailwind CSS 4, Vitest, Playwright, @axe-core/playwright, Lighthouse CI, GitHub Actions, Vercel.
 
 ## Global Constraints
 
-- **Node.js 20 o superior.** El proyecto usa ESM en todos los archivos de configuración.
-- **Astro 5** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
-- **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`.
+- **Node.js 22.12 o superior** (requisito de Astro 7; local hay v24.14.1). El proyecto usa ESM en todos los archivos de configuración. El CI debe declarar Node 22 o mayor: un runtime viejo en el host es la forma más común de que un build que pasa en local falle al desplegar.
+- **Astro 7** con `output: 'static'`. Nunca cambiar a SSR: no hay backend en este proyecto.
+- **Zod se importa desde `astro/zod`, no desde `astro:content`.** Astro 7 usa Zod 4, donde los validadores de string son funciones de primer nivel: `z.url()` en vez de `z.string().url()`, `z.email()` en vez de `z.string().email()`.
+- **El compilador Rust de Astro 7 es estricto con el HTML.** Toda etiqueta no vacía debe cerrarse explícitamente y el HTML semánticamente inválido ya no se autocorrige: un `<div>` sin cerrar o un `<p>` anidando un `<div>` ahora es un error de compilación, no una advertencia.
+- **TypeScript en modo `strict`** (`astro/tsconfigs/strict`). No usar `any`. El gate es `npm run check` (`astro check`), que corre en CI: `astro build` **no** verifica tipos en archivos `.tsx` porque Vite los borra sin chequearlos.
 - **Tailwind CSS 4** vía plugin de Vite (`@tailwindcss/vite`). No existe `tailwind.config.js`: la configuración es CSS-first mediante `@theme inline` en `src/styles/global.css`.
 - **La interactividad se implementa como islands de React** (`.tsx` con `client:load`). Todo lo demás es `.astro` estático. Un componente solo se vuelve island si tiene estado o maneja eventos: si únicamente renderiza, va en `.astro`.
 - **Fuentes servidas localmente** con paquetes `@fontsource-variable`. Prohibido enlazar Google Fonts u otro CDN de fuentes.
 - **Todo elemento interactivo o verificable lleva `data-testid`.** Los selectores de Playwright usan exclusivamente `data-testid`; nunca clases de Tailwind ni texto visible (el texto cambia según idioma).
-- **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` fuera de `tests/e2e/pages/`.
+- **Las páginas espejo ES/EN no duplican contenido.** Cada par de páginas equivalentes delega en un componente compartido que recibe `lang` como prop (`HomeContent.astro`, `QaContent.astro`, …), de modo que `src/pages/es/x.astro` y `src/pages/en/x.astro` quedan como envoltorios de tres líneas. Sin esto, cada cambio de contenido hay que hacerlo dos veces y las dos versiones se desincronizan en silencio.
+- **Los tests E2E usan Page Object Model.** Ningún `page.locator(...)` con selector CSS fuera de `tests/e2e/pages/`: si un test necesita alcanzar el `<html>`, un `<link>` del `<head>` o cualquier nodo por CSS, eso se expone como método o locator del Page Object. `page.getByTestId(...)` y `page.getByRole(...)` **sí** están permitidos directamente en los specs — son selectores semánticos, estables frente a cambios de markup, y encapsularlos no aporta nada.
 - **Los slugs de contenido son idénticos en ambos idiomas.** `src/content/casos-qa/es/mi-caso.md` exige `src/content/casos-qa/en/mi-caso.md`. Hay un test que lo verifica.
 - **WCAG AA como mínimo, en ambos temas**, verificado por axe-core en CI.
 - **Severidad y estado nunca se comunican solo por color:** siempre color + ícono + texto.
@@ -106,8 +109,10 @@ npm install tailwindcss @tailwindcss/vite @astrojs/sitemap
 npx astro add react --yes
 npm install @fontsource-variable/inter @fontsource-variable/jetbrains-mono
 npm install -D @playwright/test @axe-core/playwright vitest
-npx playwright install --with-deps chromium firefox webkit
+npx playwright install chromium firefox webkit
 ```
+
+El flag `--with-deps` se omite a propósito: instala librerías de sistema con `apt` y solo aplica en Linux. En el CI (Task 13), que corre sobre Ubuntu, sí se usa.
 
 - [ ] **Step 2: Configurar Astro**
 
@@ -284,8 +289,18 @@ export class BasePage {
   async recargar(): Promise<void> {
     await this.page.reload();
   }
+
+  async idiomaDelDocumento(): Promise<string | null> {
+    return this.page.locator('html').getAttribute('lang');
+  }
+
+  hreflangAlterno(lang: Lang): Locator {
+    return this.page.locator(`link[rel="alternate"][hreflang="${lang}"]`);
+  }
 }
 ```
+
+Los tres métodos que tocan el `<html>` o el `<head>` viven acá y no en los specs: son los únicos lugares del proyecto que necesitan selectores CSS, y encapsularlos evita que el patrón se filtre a cada spec nuevo.
 
 - [ ] **Step 2: Escribir los tests de tema (fallan)**
 
@@ -682,6 +697,8 @@ export const ui = {
 export type ClaveUI = keyof (typeof ui)['es'];
 ```
 
+**Corregido durante la ejecución:** derivar `ClaveUI` de `es` deja la paridad asimétrica — si a `es` le falta una clave que está en `en`, el tipo se achica junto con el diccionario y nadie se queja; la clave queda muerta e inaccesible sin ninguna señal. La versión implementada declara `ClaveUI` como unión explícita de literales, define `type Diccionario = Record<ClaveUI, string>` y aplica `as const satisfies Diccionario` a **ambos** diccionarios, de modo que a cualquiera de los dos al que le falte una clave el compilador lo marca.
+
 - [ ] **Step 5: Crear el mapa de rutas**
 
 `src/i18n/routes.ts`:
@@ -742,7 +759,7 @@ export function getAlternateUrl(pathname: string, destino: Lang): string {
 - [ ] **Step 7: Correr los tests**
 
 Run: `npm run test:unit`
-Expected: PASS, 11 tests.
+Expected: PASS, 10 tests (3 de `getLangFromUrl`, 1 de `useTranslations`, 6 de `getAlternateUrl`).
 
 - [ ] **Step 8: Commit**
 
@@ -787,12 +804,6 @@ test.describe('Cambio de idioma', () => {
     await page.getByTestId('lang-toggle').click();
     await expect(page).toHaveURL(/\/en\/$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  });
-
-  test('el toggle preserva la sección aunque el slug cambie', async ({ page }) => {
-    await page.goto('/es/sobre-mi');
-    await page.getByTestId('lang-toggle').click();
-    await expect(page).toHaveURL(/\/en\/about$/);
   });
 
   test('la página declara su alternativa con hreflang', async ({ page }) => {
@@ -1042,7 +1053,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 - [ ] **Step 10: Correr los tests**
 
 Run: `npm run test:e2e -- --project=chromium tests/e2e/idioma.spec.ts tests/e2e/navegacion.spec.ts tests/e2e/tema.spec.ts`
-Expected: PASS, 11 tests (4 de idioma, 3 de navegación, 4 de tema).
+Expected: PASS, 10 tests (3 de idioma, 3 de navegación, 4 de tema).
+
+**Nota:** la verificación de que el toggle preserva la sección cuando el slug difiere entre idiomas (`/es/sobre-mi` → `/en/about`) **no** va acá: esas páginas recién existen en la Task 10, y en modo estático una ruta inexistente sirve un 404 sin cabecera, así que el test daría timeout esperando el toggle. La lógica ya está cubierta por los tests unitarios de `getAlternateUrl` (Task 3); el test E2E equivalente se agrega en la Task 10.
 
 - [ ] **Step 11: Commit**
 
@@ -1108,8 +1121,9 @@ Expected: FAIL — el directorio `src/content/casos-qa/es` no existe.
 `src/content.config.ts`:
 
 ```ts
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const tags = z.enum([
   'manual', 'automation', 'e2e', 'api', 'exploratorio',
@@ -1127,8 +1141,8 @@ const casosQa = defineCollection({
     destacado: z.boolean().default(false),
     estado: z.enum(['completo', 'en-progreso']),
     ejemplo: z.boolean().default(false),
-    repo: z.string().url().optional(),
-    demo: z.string().url().optional(),
+    repo: z.url().optional(),
+    demo: z.url().optional(),
   }),
 });
 
@@ -1141,8 +1155,8 @@ const proyectos = defineCollection({
     fecha: z.coerce.date(),
     destacado: z.boolean().default(false),
     ejemplo: z.boolean().default(false),
-    repo: z.string().url().optional(),
-    demo: z.string().url().optional(),
+    repo: z.url().optional(),
+    demo: z.url().optional(),
   }),
 });
 
@@ -1206,11 +1220,16 @@ Reemplazar al completar la implementación.
 
 - [ ] **Step 6: Crear los otros dos casos y el proyecto**
 
-Con la misma estructura de seis bloques, en ambos idiomas y todos con `ejemplo: true`:
+En ambos idiomas y todos con `ejemplo: true`.
+
+Con la estructura de seis bloques:
 
 - `testing-freelance.md` — `tags: [manual, exploratorio]`, `estado: completo`, `destacado: true`
 - `gestor-operaciones.md` — `tags: [manual, automation, api]`, `estado: en-progreso`, `destacado: true`
-- `proyectos/{es,en}/gestor-operaciones.md` — `stack: [React, TypeScript, Node]`, `destacado: true`
+
+Con estructura propia, más simple (la colección `proyectos` no tiene `tags` ni `estado`, así que bloques como "Estrategia de prueba" o "Hallazgos" no tendrían sentido ahí):
+
+- `proyectos/{es,en}/gestor-operaciones.md` — `stack: [React, TypeScript, Node]`, `destacado: true`. Bloques: descripción, motivación y estado actual.
 
 - [ ] **Step 7: Crear el guardián de publicación**
 
@@ -1247,7 +1266,9 @@ Este script **no corre en CI**: si lo hiciera, el pipeline estaría en rojo desd
 - [ ] **Step 8: Correr los tests**
 
 Run: `npm run test:unit && npm run build`
-Expected: unit PASS (13 tests); build PASS sin errores de esquema.
+Expected: unit PASS (17 tests: 15 de i18n + 2 de contenido); build PASS sin errores de esquema.
+
+El total de i18n subió de 10 a 15 durante la ejecución: la ronda de arreglo de la Task 3 sumó 3 tests de query/fragmento en `getAlternateUrl` y separó el test de `useTranslations` en tres.
 
 - [ ] **Step 9: Commit**
 
@@ -1278,39 +1299,93 @@ Las tres piezas que hacen que un caso se lea como trabajo profesional de QA y no
 
 - [ ] **Step 1: Escribir los tests (fallan)**
 
+`tests/e2e/pages/ComponentesPage.ts`:
+
+```ts
+import type { Page, Locator } from '@playwright/test';
+import { BasePage } from './BasePage';
+
+export class ComponentesPage extends BasePage {
+  readonly bug: Locator;
+  readonly severidad: Locator;
+  readonly matriz: Locator;
+  readonly metricas: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.bug = page.getByTestId('bug-report').first();
+    this.severidad = page.getByTestId('bug-severidad').first();
+    this.matriz = page.getByTestId('test-matrix');
+    this.metricas = page.getByTestId('metricas');
+  }
+
+  async abrir(): Promise<void> {
+    await this.page.goto('/es/demo-componentes');
+  }
+
+  matrizCaption(): Locator {
+    return this.matriz.locator('caption');
+  }
+
+  matrizEncabezados(): Locator {
+    return this.matriz.locator('th');
+  }
+
+  metricaEtiquetas(): Locator {
+    return this.metricas.locator('dt');
+  }
+
+  metricaValores(): Locator {
+    return this.metricas.locator('dd');
+  }
+}
+```
+
 `tests/e2e/componentes.spec.ts`:
 
 ```ts
 import { test, expect } from '@playwright/test';
+import { ComponentesPage } from './pages/ComponentesPage';
 
 test.describe('Componentes de dominio QA', () => {
-  test.beforeEach(async ({ page }) => { await page.goto('/es/demo-componentes'); });
+  let componentes: ComponentesPage;
 
-  test('el reporte de bug muestra todos sus campos', async ({ page }) => {
-    const bug = page.getByTestId('bug-report').first();
-    await expect(bug).toContainText('BUG-001');
-    await expect(bug).toContainText('Pasos para reproducir');
-    await expect(bug).toContainText('Resultado esperado');
-    await expect(bug).toContainText('Resultado obtenido');
+  test.beforeEach(async ({ page }) => {
+    componentes = new ComponentesPage(page);
+    await componentes.abrir();
   });
 
-  test('la severidad se comunica con texto, no solo con color', async ({ page }) => {
-    const severidad = page.getByTestId('bug-severidad').first();
-    await expect(severidad).toHaveText(/Crítica|Alta|Media|Baja/);
+  test('el reporte de bug muestra todos sus campos', async () => {
+    await expect(componentes.bug).toContainText('BUG-001');
+    await expect(componentes.bug).toContainText('Pasos para reproducir');
+    await expect(componentes.bug).toContainText('Resultado esperado');
+    await expect(componentes.bug).toContainText('Resultado obtenido');
   });
 
-  test('la matriz de casos renderiza una tabla accesible', async ({ page }) => {
-    const matriz = page.getByTestId('test-matrix');
-    await expect(matriz.locator('caption')).toBeVisible();
-    await expect(matriz.locator('th')).toHaveCount(4);
+  test('la severidad muestra la etiqueta exacta que corresponde al valor', async () => {
+    // La demo pasa severidad="alto", cuya etiqueta es "Alta".
+    await expect(componentes.severidad).toContainText('Alta');
+    await expect(componentes.severidad).not.toContainText('Crítica');
+    await expect(componentes.severidad).not.toContainText('Media');
+    await expect(componentes.severidad).not.toContainText('Baja');
   });
 
-  test('las métricas muestran etiqueta y valor', async ({ page }) => {
-    await expect(page.getByTestId('metricas').locator('dt').first()).toBeVisible();
-    await expect(page.getByTestId('metricas').locator('dd').first()).toBeVisible();
+  test('la matriz de casos renderiza una tabla accesible', async () => {
+    await expect(componentes.matrizCaption()).toBeVisible();
+    await expect(componentes.matrizEncabezados()).toHaveCount(4);
+  });
+
+  test('las métricas muestran etiqueta y valor', async () => {
+    await expect(componentes.metricaEtiquetas().first()).toBeVisible();
+    await expect(componentes.metricaValores().first()).toBeVisible();
   });
 });
 ```
+
+Dos correcciones respecto de la primera versión de este bloque, ambas detectadas en revisión:
+
+- **La aserción de severidad usaba `toHaveText(/Crítica|Alta|Media|Baja/)`**, que solo verifica que aparezca *alguna* etiqueta válida. Si el mapa de `etiquetas` de `BugReport` estuviera cruzado (`alto: 'Baja'`), el test seguiría en verde. Ahora exige la etiqueta correcta y descarta explícitamente las otras tres.
+- **Los selectores CSS (`caption`, `th`, `dt`, `dd`) vivían en el spec**, violando la restricción de Page Object Model. Se movieron a `ComponentesPage`.
 
 - [ ] **Step 2: Correr para verificar que fallan**
 
@@ -1587,7 +1662,7 @@ test.describe('Home', () => {
 
   test('hay un único h1', async ({ page }) => {
     await page.goto('/es/');
-    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
 });
 ```
@@ -2262,6 +2337,23 @@ test.describe('Contacto y CV', () => {
 });
 ```
 
+Y agregar a `tests/e2e/idioma.spec.ts` el test que la Task 4 no podía correr, porque recién ahora existen las páginas con slug distinto en cada idioma:
+
+```ts
+test('el toggle preserva la sección aunque el slug cambie', async ({ page }) => {
+  await page.goto('/es/sobre-mi');
+  await page.getByTestId('lang-toggle').click();
+  await expect(page).toHaveURL(/\/en\/about$/);
+  await expect(page.getByTestId('sobre-mi')).toBeVisible();
+
+  await page.goto('/es/contacto');
+  await page.getByTestId('lang-toggle').click();
+  await expect(page).toHaveURL(/\/en\/contact$/);
+});
+```
+
+Este es el caso que en producción rompe más seguido: el toggle de idioma funciona en la home, donde el slug es igual en los dos idiomas, y falla justo en las secciones traducidas.
+
 El test del portapapeles solo pasa en Chromium; los otros navegadores no dan permisos de clipboard a Playwright. Agregar al inicio del test: `test.skip(({ browserName }) => browserName !== 'chromium', 'Clipboard solo en Chromium');`
 
 - [ ] **Step 3: Correr para verificar que fallan**
@@ -2577,6 +2669,9 @@ import { test, expect } from '@playwright/test';
 const paginas = ['/es/', '/es/qa', '/es/qa/suite-e2e-portfolio', '/es/contacto'];
 
 test.describe('Regresión visual', () => {
+  test.skip(({ browserName }) => browserName !== 'chromium',
+    'Las capturas de referencia se generan solo en Chromium');
+
   for (const tema of ['light', 'dark'] as const) {
     for (const ruta of paginas) {
       test(`${ruta} en tema ${tema}`, async ({ page }) => {
@@ -2634,6 +2729,8 @@ Para poder usar componentes dentro del contenido, renombrar los archivos de `.md
 ```bash
 npx astro add mdx --yes
 ```
+
+En Astro 7 el procesador Markdown por defecto es Sätteri, no remark/rehype. `@astrojs/mdx` sigue siendo compatible y los componentes importados dentro del propio `.mdx` funcionan sin configuración extra. La única limitación es que Sätteri no soporta plugins Recma; este proyecto no usa ninguno, así que no aplica.
 
 En `src/content.config.ts`, cambiar ambos `pattern: '**/*.md'` por `pattern: '**/*.{md,mdx}'`.
 
@@ -2708,11 +2805,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Verificación de tipos
+        run: npm run check
 
       - name: Tests unitarios
         run: npm run test:unit

@@ -1,0 +1,43 @@
+---
+type Severidad = 'critico' | 'alto' | 'medio' | 'bajo';
+interface Props {
+  id: string; titulo: string; severidad: Severidad; prioridad: string;
+  entorno: string; pasos: string[]; esperado: string; obtenido: string;
+}
+const { id, titulo, severidad, prioridad, entorno, pasos, esperado, obtenido } = Astro.props;
+
+const etiquetas: Record<Severidad, string> = {
+  critico: 'Crítica', alto: 'Alta', medio: 'Media', bajo: 'Baja',
+};
+const iconos: Record<Severidad, string> = {
+  critico: '⬤', alto: '◆', medio: '▲', bajo: '■',
+};
+const colores: Record<Severidad, string> = {
+  critico: 'text-sev-critico', alto: 'text-sev-alto',
+  medio: 'text-sev-medio', bajo: 'text-sev-bajo',
+};
+---
+<article data-testid="bug-report" class="my-6 rounded-lg border border-border bg-surface p-5">
+  <header class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+    <h3 class="text-lg font-semibold"><span class="font-mono text-muted">{id}</span> · {titulo}</h3>
+    <span data-testid="bug-severidad" class={`font-medium ${colores[severidad]}`}>
+      <span aria-hidden="true">{iconos[severidad]}</span> {etiquetas[severidad]}
+    </span>
+  </header>
+
+  <dl class="mb-4 grid grid-cols-2 gap-2 text-sm">
+    <dt class="text-muted">Prioridad</dt><dd>{prioridad}</dd>
+    <dt class="text-muted">Entorno</dt><dd class="font-mono text-xs">{entorno}</dd>
+  </dl>
+
+  <h4 class="mt-4 font-medium">Pasos para reproducir</h4>
+  <ol class="ml-5 list-decimal text-sm text-muted">
+    {pasos.map((p) => <li>{p}</li>)}
+  </ol>
+
+  <h4 class="mt-4 font-medium">Resultado esperado</h4>
+  <p class="text-sm text-muted">{esperado}</p>
+
+  <h4 class="mt-4 font-medium">Resultado obtenido</h4>
+  <p class="text-sm text-muted">{obtenido}</p>
+</article>

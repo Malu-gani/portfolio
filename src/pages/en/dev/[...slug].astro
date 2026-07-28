@@ -1,0 +1,15 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getProyectoStaticPaths } from '../../../i18n/proyectos';
+import ProyectoDetalle from '../../../components/ProyectoDetalle.astro';
+
+export async function getStaticPaths() {
+  return getProyectoStaticPaths('en');
+}
+
+interface Props {
+  proyecto: CollectionEntry<'proyectos'>;
+}
+const { proyecto } = Astro.props;
+---
+<ProyectoDetalle lang="en" proyecto={proyecto} />

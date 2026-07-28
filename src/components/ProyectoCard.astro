@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Tag from './Tag.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang; slug: string;
+  datos: CollectionEntry<'proyectos'>['data'];
+}
+const { lang, slug, datos } = Astro.props;
+---
+<article data-testid="proyecto-card"
+  class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
+  <h3 class="text-lg font-semibold">
+    {/*
+      data-astro-reload: fuerza una navegación de página completa en vez de
+      la transición cliente-a-cliente del <ClientRouter/> de Astro. WebKit
+      crashea el proceso de render con esa transición específicamente entre
+      el listado /dev y su detalle (View Transitions API nativa, bug
+      documentado en Safari — ver withastro/astro#15727). Navegación dura al
+      mismo URL no crashea, así que este atributo evita el crash sin
+      renunciar a la navegación. Detalle completo del diagnóstico en
+      docs/cross-browser-diagnostico.md.
+    */}
+    <a href={`/${lang}/dev/${slug}`} data-astro-reload class="after:absolute after:inset-0">{datos.titulo}</a>
+  </h3>
+  <p class="mt-2 text-sm text-muted">{datos.resumen}</p>
+  <div class="mt-3 flex flex-wrap gap-1">{datos.stack.map((s) => <Tag nombre={s} />)}</div>
+</article>

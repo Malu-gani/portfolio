@@ -1,0 +1,15 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import CaseLayout from '../layouts/CaseLayout.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  caso: CollectionEntry<'casos-qa'>;
+}
+const { lang, caso } = Astro.props;
+const { Content } = await render(caso);
+---
+<CaseLayout lang={lang} datos={caso.data}>
+  <Content />
+</CaseLayout>

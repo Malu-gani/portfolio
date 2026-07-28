@@ -1,0 +1,69 @@
+import { test, expect } from '@playwright/test';
+import { ContactoPage } from './pages/ContactoPage';
+
+const EMAIL = 'maluganijuanmanuel@gmail.com';
+
+test.describe('Contacto y CV', () => {
+  test('muestra email, LinkedIn y GitHub', async ({ page }) => {
+    const contacto = new ContactoPage(page);
+    await contacto.abrir('es');
+    await expect(contacto.emailTexto).toHaveText(EMAIL);
+    await expect(contacto.emailTexto).toHaveAttribute('href', `mailto:${EMAIL}`);
+    await expect(contacto.linkedin).toHaveAttribute('href', /linkedin\.com/);
+    await expect(contacto.github).toHaveAttribute('href', /github\.com/);
+  });
+
+  test('no hay formulario de contacto', async ({ page }) => {
+    const contacto = new ContactoPage(page);
+    await contacto.abrir('es');
+    await expect(page.getByTestId('contacto')).toBeVisible();
+    await expect(contacto.formularios()).toHaveCount(0);
+  });
+
+  test('el botón copia el email al portapapeles', async ({ context, page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Clipboard solo en Chromium');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const contacto = new ContactoPage(page);
+    await contacto.abrir('es');
+    await contacto.botonCopiar.click();
+    const copiado = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copiado).toBe(EMAIL);
+  });
+
+  test('si falla la copia, avisa en vez de quedarse en silencio', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Sobrescribe navigator.clipboard; se verificó estable solo en Chromium');
+    const contacto = new ContactoPage(page);
+    // Sobrescribimos el clipboard ANTES de que cargue la página para forzar
+    // el camino de error sin depender de permisos del navegador: simula un
+    // contexto sin `navigator.clipboard` disponible (no seguro / navegador viejo)
+    // o una escritura rechazada.
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: () => Promise.reject(new Error('permiso denegado')) },
+      });
+    });
+    await contacto.abrir('es');
+    await contacto.botonCopiar.click();
+    await expect(page.getByRole('status')).toHaveText('No se pudo copiar. Copialo a mano.');
+    await expect(contacto.botonCopiar).toHaveText('No se pudo copiar. Copialo a mano.');
+  });
+
+  test('el CV en español se descarga', async ({ page }) => {
+    await page.goto('/es/');
+    const [descarga] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('cv-descargar').click(),
+    ]);
+    expect(descarga.suggestedFilename()).toBe('cv-es.pdf');
+  });
+
+  test('el CV en inglés se descarga', async ({ page }) => {
+    await page.goto('/en/');
+    const [descarga] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('cv-descargar').click(),
+    ]);
+    expect(descarga.suggestedFilename()).toBe('cv-en.pdf');
+  });
+});

@@ -1,0 +1,8 @@
+---
+interface Props { texto: string }
+const { texto } = Astro.props;
+---
+<p data-testid="banner-ejemplo"
+  class="mb-6 rounded-md border border-sev-medio bg-surface px-4 py-2 text-sm text-sev-medio">
+  <span aria-hidden="true">⚠</span> {texto}
+</p>

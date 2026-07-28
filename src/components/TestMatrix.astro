@@ -1,0 +1,37 @@
+---
+type Estado = 'paso' | 'fallo' | 'bloqueado';
+interface Caso { id: string; escenario: string; tipo: string; estado: Estado }
+interface Props { titulo: string; casos: Caso[] }
+const { titulo, casos } = Astro.props;
+
+const etiquetas: Record<Estado, string> = { paso: 'Pasó', fallo: 'Falló', bloqueado: 'Bloqueado' };
+const iconos: Record<Estado, string> = { paso: '✓', fallo: '✕', bloqueado: '⊘' };
+const colores: Record<Estado, string> = {
+  paso: 'text-est-paso', fallo: 'text-est-fallo', bloqueado: 'text-est-bloqueado',
+};
+---
+<div class="my-6 overflow-x-auto">
+  <table data-testid="test-matrix" class="w-full border-collapse text-sm">
+    <caption class="mb-2 text-left font-medium">{titulo}</caption>
+    <thead>
+      <tr class="border-b border-border text-left text-muted">
+        <th scope="col" class="py-2 pr-4">ID</th>
+        <th scope="col" class="py-2 pr-4">Escenario</th>
+        <th scope="col" class="py-2 pr-4">Tipo</th>
+        <th scope="col" class="py-2">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {casos.map((c) => (
+        <tr class="border-b border-border">
+          <td class="py-2 pr-4 font-mono text-xs">{c.id}</td>
+          <td class="py-2 pr-4">{c.escenario}</td>
+          <td class="py-2 pr-4 text-muted">{c.tipo}</td>
+          <td class={`py-2 ${colores[c.estado]}`}>
+            <span aria-hidden="true">{iconos[c.estado]}</span> {etiquetas[c.estado]}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
