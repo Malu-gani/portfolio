@@ -7,16 +7,18 @@ import type { Lang } from '../i18n/ui';
 interface Props {
   lang: Lang; slug: string;
   datos: CollectionEntry<'casos-qa'>['data'];
+  nivelTitulo: 2 | 3;
 }
-const { lang, slug, datos } = Astro.props;
+const { lang, slug, datos, nivelTitulo } = Astro.props;
 const t = useTranslations(lang);
 const href = `/${lang}/qa/${slug}`;
+const TituloTag = nivelTitulo === 2 ? 'h2' : 'h3';
 ---
 <article data-testid="caso-card"
   class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
-  <h3 class="text-lg font-semibold">
+  <TituloTag class="text-lg font-semibold">
     <a href={href} class="after:absolute after:inset-0">{datos.titulo}</a>
-  </h3>
+  </TituloTag>
   {datos.estado === 'en-progreso' && (
     <p class="mt-1 text-xs text-sev-medio"><span aria-hidden="true">◐</span> {t('caso.enProgreso')}</p>
   )}

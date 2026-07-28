@@ -6,12 +6,14 @@ import type { Lang } from '../i18n/ui';
 interface Props {
   lang: Lang; slug: string;
   datos: CollectionEntry<'proyectos'>['data'];
+  nivelTitulo: 2 | 3;
 }
-const { lang, slug, datos } = Astro.props;
+const { lang, slug, datos, nivelTitulo } = Astro.props;
+const TituloTag = nivelTitulo === 2 ? 'h2' : 'h3';
 ---
 <article data-testid="proyecto-card"
   class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
-  <h3 class="text-lg font-semibold">
+  <TituloTag class="text-lg font-semibold">
     {/*
       data-astro-reload: fuerza una navegación de página completa en vez de
       la transición cliente-a-cliente del <ClientRouter/> de Astro. WebKit
@@ -23,7 +25,7 @@ const { lang, slug, datos } = Astro.props;
       docs/cross-browser-diagnostico.md.
     */}
     <a href={`/${lang}/dev/${slug}`} data-astro-reload class="after:absolute after:inset-0">{datos.titulo}</a>
-  </h3>
+  </TituloTag>
   <p class="mt-2 text-sm text-muted">{datos.resumen}</p>
   <div class="mt-3 flex flex-wrap gap-1">{datos.stack.map((s) => <Tag nombre={s} />)}</div>
 </article>
