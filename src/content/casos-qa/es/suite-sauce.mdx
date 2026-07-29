@@ -1,0 +1,76 @@
+---
+titulo: "Suite E2E de un e-commerce con Playwright"
+resumen: "Automatización de los flujos de compra de SauceDemo con Page Object Model, testing data-driven y un hallazgo en mi propio test."
+tags: [automation, e2e, regresion]
+stack: [Playwright, JavaScript, GitHub Actions]
+fecha: 2026-06-15
+destacado: false
+estado: completo
+ejemplo: false
+---
+
+import BugReport from '../../../components/BugReport.astro';
+import Metricas from '../../../components/Metricas.astro';
+
+## Contexto
+
+SauceDemo es una tienda de práctica pensada para automatización: expone los mismos flujos que cualquier e-commerce —login, catálogo, carrito, checkout— y además ofrece usuarios con comportamientos distintos a propósito, incluido uno bloqueado y otro con lentitud inducida.
+
+Lo elegí justamente por eso: permite ejercitar pruebas negativas y condiciones de borde sin tener que romper nada, que es difícil de conseguir en un entorno real cuando recién empezás.
+
+## Estrategia de prueba
+
+Prioricé por cercanía a la venta, que es el criterio que usaría en un e-commerce real:
+
+- **Riesgo alto:** el checkout completo. Si falla, no hay transacción.
+- **Riesgo alto:** el login, porque bloquea todo lo demás. Acá entra el caso negativo del usuario bloqueado: verificar que el sistema **rechace** bien es tan importante como que acepte bien.
+- **Riesgo medio:** la coherencia de precios entre el catálogo y el checkout. Un desfasaje acá no rompe nada visible, pero cobra mal.
+- **Riesgo medio:** la persistencia del carrito al navegar, porque perder el carrito pierde la compra sin ningún mensaje de error.
+- **Riesgo bajo:** el ordenamiento del catálogo. Molesta, pero no impide comprar.
+
+**Decidí no automatizar** la apariencia visual del catálogo ni los textos de la interfaz: es un sitio de terceros que no controlo, y cualquier cambio de su lado produciría fallas que no indican ningún defecto real.
+
+## Ejecución
+
+12 pruebas corriendo en Chromium, Firefox y WebKit, con Page Object Model y herencia: una `BasePage` con lo común, y `LoginPage`, `InventoryPage` y `CheckoutPage` encima.
+
+El login no son cuatro pruebas escritas cuatro veces: es un arreglo de datos recorrido con un bucle, donde cada usuario lleva su resultado esperado. El usuario bloqueado marca una bandera y cambia la verificación —espera el mensaje de error en vez de la redirección al inventario—, así que agregar un usuario nuevo es agregar una línea de datos, no un test.
+
+Está conectado a GitHub Actions: la suite corre en cada push y en cada pull request, y publica el reporte de la corrida.
+
+## Hallazgos
+
+El hallazgo más útil no salió de probar la aplicación, sino de revisar mi propio código.
+
+<BugReport id="TEST-001" titulo="El test del subtotal no validaba la suma que decía validar"
+  severidad="alto" prioridad="P1" entorno="suite-sauce · Playwright · los 3 navegadores"
+  pasos={['Abrir tests/multi-product-price.spec.js', 'Ver que calcula expectedSum sumando los precios del catálogo', 'Ver contra qué valor se compara realmente el subtotal']}
+  esperado="El subtotal del checkout se compara contra la suma calculada de los productos agregados."
+  obtenido="Se comparaba contra 39.98 hardcodeado. La suma calculada se guardaba en una variable que nunca se usaba." />
+
+El test se llamaba "validar que el subtotal es la suma correcta de dos productos", calculaba la suma recorriendo el catálogo… y después afirmaba contra un número fijo. El oráculo era una constante, no el cálculo.
+
+Las dos consecuencias, que apuntan en direcciones opuestas: **pasaba aunque la suma estuviera mal**, porque el resultado del cálculo no participaba de la verificación; y **habría fallado sin que hubiera ningún defecto** el día que SauceDemo cambiara precios o el orden de los productos. Un test que no puede detectar el error que busca, pero sí puede dar una falla falsa.
+
+Lo corregí comparando contra el valor calculado. Para confirmar que la corrección servía no alcanzaba con verlo en verde —antes también estaba en verde—, así que rompí a propósito la suma del Page Object sumando uno por producto: el test detectó la diferencia (41.98 contra 39.98 del sistema). Con el código anterior, ese mismo sabotaje pasaba inadvertido.
+
+Elegí además comparar con tolerancia de dos decimales en vez de igualdad estricta. Para estos dos productos la suma da exacta, pero los precios se suman como números de punto flotante y otras combinaciones arrastran error de representación; comparar dinero por igualdad estricta funciona hasta que deja de funcionar, y falla de una forma que parece un bug de la aplicación.
+
+<Metricas items={[
+  { etiqueta: 'Pruebas', valor: '12' }, { etiqueta: 'Navegadores', valor: '3' },
+  { etiqueta: 'Total', valor: '36' }, { etiqueta: 'Page Objects', valor: '4' },
+]} />
+
+## Automatización
+
+La suite cubre login (cuatro usuarios), compra completa, cierre de sesión, alta y baja de productos, persistencia del carrito al navegar, coherencia de precios entre catálogo y checkout, ordenamiento de menor a mayor, y carga del inventario.
+
+La decisión de diseño que más rindió fue separar los datos del script. Los cuatro escenarios de login son datos; el procedimiento es uno solo. Cuando quise agregar el caso negativo no tuve que escribir un test nuevo, sino una fila con una bandera.
+
+## Resultado y aprendizajes
+
+Lo que me llevo es que una suite en verde no significa una suite que funciona. Nueve archivos pasaban, el reporte estaba impecable, y adentro había un test que no podía detectar el error que decía buscar. No lo encontré corriéndolo —corriéndolo pasaba— sino leyéndolo con la pregunta de qué tendría que romperse para que fallara.
+
+Desde entonces esa pregunta es parte de cómo escribo tests: si no puedo describir el cambio concreto que lo haría fallar, todavía no terminé de escribirlo. Y cuando dudo, lo rompo a propósito para comprobarlo, que es exactamente lo que hice acá.
+
+También me quedó claro por qué conviene comparar valores calculados y no constantes. El número fijo es más rápido de escribir y se lee más claro, pero traslada al test una suposición sobre datos que no controlo.

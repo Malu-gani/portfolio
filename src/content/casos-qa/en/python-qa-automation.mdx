@@ -1,0 +1,69 @@
+---
+titulo: "Python automation over an HR system"
+resumen: "Cases designed before automating, with automatic evidence on failure, over OrangeHRM: employee creation, attachments and report downloads."
+tags: [automation, e2e, manual]
+stack: [Python, pytest, Playwright, assertpy]
+fecha: 2026-07-05
+destacado: false
+estado: en-progreso
+ejemplo: false
+---
+
+import Metricas from '../../../components/Metricas.astro';
+
+## Context
+
+OrangeHRM is a human resources system with a public demo. Unlike a practice store, it has stateful administrative flows: you create an employee, attach documents to them, generate exportable reports. That makes it much closer to a real internal system, and also much more awkward to automate — which was exactly the point.
+
+I built it in Python with pytest so as not to be stuck with a single automation language. My other suite is in JavaScript, and most junior QA openings ask for one or the other without you knowing which in advance.
+
+## Test strategy
+
+What I wanted to exercise here wasn't coverage so much as three things I hadn't practiced:
+
+- **Designing the cases before automating them.** Every test carries its case identifier (`OH-TC-02`, `OH-TC-03`, `OH-TC-05`, `OH-TC-10`) and a docstring with its objective. The case existed first as a design and then as code, not the other way around.
+- **Automating stateful flows**, not read-only queries: create an employee, attach a file, generate and download a report. Those are the ones that leave a trace and the ones that break most.
+- **Capturing evidence without intervention**, because a failure that leaves no proof forces you to reproduce it by hand to understand it.
+
+**High risk:** employee creation and file uploads, because they write data. **Medium risk:** search by ID and report export. **Low risk, not automated:** the administrative configuration modules, which are barely touched.
+
+## Execution
+
+13 tests using pytest and Playwright for Python, spread across three fronts: the HR system, a practice store and a forms site. Locators live in separate page classes, one per module.
+
+Verifications combine Playwright's own — which wait for the element on their own — with `assertpy` for data comparisons, which reads almost like a sentence: `assert_that(result_id).is_equal_to("0312")`.
+
+The piece that served me best is a hook in `conftest.py` that attaches to each test's report: if one fails during execution, it takes a screenshot with a name and timestamp, saves it to disk and embeds it in the HTML report. Nothing to remember, no code to add per test; the evidence shows up on its own and only when needed.
+
+<Metricas items={[
+  { etiqueta: 'Tests', valor: '13' }, { etiqueta: 'Modules', valor: '3' },
+  { etiqueta: 'Case design', valor: 'Zephyr' }, { etiqueta: 'Evidence', valor: 'Auto' },
+]} />
+
+## Findings
+
+The findings from this work are about my own suite, and they're the reason this case is marked **in progress** rather than complete. I'd rather show them than present the repository as if it were finished.
+
+**The tests aren't independent of each other.** The one that uploads an attachment looks for employee `412222`, which a different test creates. Run them in another order, or run only the attachment one, and it fails for a reason unrelated to what it means to verify. It's one of the first rules you learn — every test sets up its own scenario — and I broke it without noticing, because writing them in order it worked.
+
+**Employee creation uses a fixed ID.** Since it's a unique value in the system, the second run collides with the first. A test that only passes the first time isn't a regression test.
+
+**One verification is tied to data from a public demo** that resets periodically: it expects employee `0312` to have a particular name. The day that data changes, the test will fail with no defect present.
+
+**Four modules are scaffolded but empty** (admin, leave, performance and recruitment): the file and its page class exist, with no tests inside. I keep them in the repository because they mark the plan, but they don't count as coverage and I don't want them to look like it.
+
+**Three files in the root directory aren't tests**, despite being named `test_*`: they're scripts recorded with the code generator, with `run_*` functions that pytest doesn't collect. They served to explore the tool and stayed there.
+
+## Automation
+
+What did come out well is the separation between what a test wants to verify and how it gets there. Locators and navigation steps live in the page classes; the tests read as a sequence of intentions. When OrangeHRM changed how you search for a report, the adjustment happened in one place.
+
+Resolving evidence once, in the hook, rather than in each test also worked well. It's the difference between a convention you have to remember and a guarantee that holds on its own.
+
+## Outcome and takeaways
+
+The central lesson is that test independence doesn't show while you're writing them: writing them in order, one after another, the suite passes end to end and everything looks fine. It shows when someone runs a single one, or when the order changes, or when the system keeps state from the previous run. By then the problem is already spread across several files.
+
+Next up in this repository, in order: each test generating its own data — an ID derived from execution time instead of a fixed number — and the attachment test creating its own employee rather than depending on another. Only after that does adding the empty modules make sense: adding coverage on top of a base that isn't independent multiplies the problem rather than reducing it.
+
+Compared with my JavaScript suite, the difference that surprised me most wasn't the language but how much stateful flows change things. In a practice store every test starts from zero effortlessly; in a system that stores data, achieving that is a design decision you have to make deliberately from the start.

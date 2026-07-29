@@ -1,0 +1,76 @@
+---
+titulo: "E2E suite for an e-commerce with Playwright"
+resumen: "Automating SauceDemo's purchase flows with the Page Object Model, data-driven testing, and a finding in my own test."
+tags: [automation, e2e, regresion]
+stack: [Playwright, JavaScript, GitHub Actions]
+fecha: 2026-06-15
+destacado: false
+estado: completo
+ejemplo: false
+---
+
+import BugReport from '../../../components/BugReport.astro';
+import Metricas from '../../../components/Metricas.astro';
+
+## Context
+
+SauceDemo is a practice store built for automation: it exposes the same flows as any e-commerce — login, catalog, cart, checkout — and it also offers users with deliberately different behaviors, including a locked-out one and another with induced slowness.
+
+I picked it for exactly that reason: it lets you exercise negative tests and edge conditions without having to break anything, which is hard to come by in a real environment when you're just starting out.
+
+## Test strategy
+
+I prioritized by proximity to the sale, which is the criterion I'd use on a real e-commerce:
+
+- **High risk:** the full checkout. If it fails, there's no transaction.
+- **High risk:** login, because it blocks everything else. This is where the locked-out user's negative case belongs: verifying the system **rejects** correctly matters as much as verifying it accepts correctly.
+- **Medium risk:** price consistency between catalog and checkout. A mismatch here breaks nothing visible, but charges wrong.
+- **Medium risk:** cart persistence while navigating, because losing the cart loses the sale with no error message at all.
+- **Low risk:** catalog sorting. Annoying, but it doesn't prevent buying.
+
+**I decided not to automate** the catalog's visual appearance or the interface copy: it's a third-party site I don't control, and any change on their side would produce failures that indicate no real defect.
+
+## Execution
+
+12 tests running on Chromium, Firefox and WebKit, using the Page Object Model with inheritance: a `BasePage` holding what's common, and `LoginPage`, `InventoryPage` and `CheckoutPage` on top.
+
+Login isn't four tests written four times: it's a data array walked with a loop, where each user carries its expected outcome. The locked-out user sets a flag that switches the verification — expecting the error message instead of the redirect to inventory — so adding a new user means adding a line of data, not a test.
+
+It's wired to GitHub Actions: the suite runs on every push and every pull request, and publishes the run's report.
+
+## Findings
+
+The most useful finding didn't come from testing the application, but from reviewing my own code.
+
+<BugReport id="TEST-001" titulo="The subtotal test wasn't validating the sum it claimed to validate"
+  severidad="alto" prioridad="P1" entorno="suite-sauce · Playwright · all 3 browsers"
+  pasos={['Open tests/multi-product-price.spec.js', 'See it compute expectedSum by adding up the catalog prices', 'See what value the subtotal is actually compared against']}
+  esperado="The checkout subtotal is compared against the computed sum of the added products."
+  obtenido="It was compared against a hardcoded 39.98. The computed sum was stored in a variable that was never used." />
+
+The test was called "validate that the subtotal is the correct sum of two products", computed the sum by walking the catalog… and then asserted against a fixed number. The oracle was a constant, not the calculation.
+
+Two consequences, pointing in opposite directions: it **passed even if the sum was wrong**, because the computed result took no part in the verification; and it **would have failed with no defect present** the day SauceDemo changed prices or product order. A test that can't detect the error it's looking for, but can raise a false one.
+
+I fixed it by comparing against the computed value. Confirming the fix worked couldn't just mean seeing it green — it was green before too — so I deliberately broke the Page Object's sum by adding one per product: the test caught the difference (41.98 against the system's 39.98). With the previous code, that same sabotage went unnoticed.
+
+I also chose to compare with two-decimal tolerance rather than strict equality. For these two products the sum comes out exact, but prices are added as floating-point numbers and other combinations carry representation error; comparing money by strict equality works right up until it doesn't, and it fails in a way that looks like an application bug.
+
+<Metricas items={[
+  { etiqueta: 'Tests', valor: '12' }, { etiqueta: 'Browsers', valor: '3' },
+  { etiqueta: 'Total', valor: '36' }, { etiqueta: 'Page Objects', valor: '4' },
+]} />
+
+## Automation
+
+The suite covers login (four users), full purchase, logout, adding and removing products, cart persistence while navigating, price consistency between catalog and checkout, low-to-high sorting, and inventory loading.
+
+The design decision that paid off most was separating data from script. The four login scenarios are data; the procedure is one. When I wanted to add the negative case I didn't have to write a new test, just a row with a flag.
+
+## Outcome and takeaways
+
+What I take away is that a green suite doesn't mean a working suite. Nine files were passing, the report looked spotless, and inside there was a test that couldn't detect the error it claimed to look for. I didn't find it by running it — running it, it passed — but by reading it with the question of what would have to break for it to fail.
+
+Since then that question is part of how I write tests: if I can't describe the concrete change that would make it fail, I haven't finished writing it. And when in doubt, I break it on purpose to check, which is exactly what I did here.
+
+It also made clear why comparing computed values beats comparing constants. The fixed number is quicker to write and reads more clearly, but it moves into the test an assumption about data I don't control.
