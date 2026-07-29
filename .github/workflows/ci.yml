@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -53,9 +53,9 @@ jobs:
       matrix:
         project: [chromium, firefox, webkit, mobile]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -91,7 +91,7 @@ jobs:
 
       - name: Publicar reporte de Playwright (${{ matrix.project }})
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.project }}
           path: playwright-report/
@@ -105,7 +105,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Descargar los reportes de los 4 proyectos
         # Sin merge-multiple: cada artefacto (uno por proyecto de Playwright)
@@ -114,14 +114,15 @@ jobs:
         # nombres de archivo (index.html, data/) y se pisan entre sí -- lo
         # publicado terminaba siendo una mezcla de un solo proyecto. Así se
         # publican los 4 reportes completos, cada uno en su propia carpeta.
-        # if-no-artifact-found: warn (el default) para que este paso no falle
-        # cuando `e2e` fue saltado por `needs: verificar` y no subió nada; el
-        # siguiente paso decide si hay algo que publicar.
-        uses: actions/download-artifact@v4
+        # Cuando `e2e` queda saltado (p. ej. si `verificar` falló) no hay
+        # artefactos que bajar. Con `pattern` eso no es un error: la acción
+        # solo lanza si no encuentra un `name` o un `artifact-ids` explícito,
+        # así que acá no baja nada y sigue de largo. El paso siguiente decide
+        # si hay algo que publicar.
+        uses: actions/download-artifact@v8
         with:
           pattern: playwright-report-*
           path: reporte-descargado
-          if-no-artifact-found: warn
 
       - name: Verificar si hay reporte para publicar
         # `e2e` corre con `if: always() && ref == main`, así que este job se
