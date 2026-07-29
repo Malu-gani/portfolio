@@ -33,16 +33,16 @@ jobs:
       - name: Lighthouse
         run: npm run test:lighthouse
 
-      - name: Contenido pendiente de reemplazo (no bloqueante)
-        # El sitio todavía tiene contenido de ejemplo (`ejemplo: true` en varias
-        # colecciones); check:listo está pensado para dar rojo hasta que se
-        # reemplace por casos y proyectos reales antes de publicar. Bloquear el
-        # pipeline con esto haría que el CI nazca rojo, así que se corre en modo
-        # informativo (continue-on-error) para que el estado quede visible en
-        # el resumen del job sin tumbar el badge. Sacar `continue-on-error`
-        # cuando el contenido real reemplace al de ejemplo.
+      - name: Contenido de ejemplo
+        # Gate bloqueante desde que todo el contenido del sitio es real
+        # (PR #5). Antes corría con `continue-on-error` porque el sitio nacía
+        # con casos de ejemplo y el pipeline habría arrancado rojo; esa razón
+        # ya no aplica, y dejarlo informativo significaría que un `ejemplo:
+        # true` reintroducido pase inadvertido hasta que alguien lea el log.
+        # Falla si vuelve a aparecer contenido de ejemplo en cualquier
+        # colección. `tests/e2e/casos.spec.ts` cubre el mismo invariante desde
+        # el lado del sitio renderizado.
         run: npm run check:listo
-        continue-on-error: true
 
   e2e:
     needs: verificar
