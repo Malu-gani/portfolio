@@ -21,8 +21,18 @@ test.describe('Carril Dev', () => {
     await expect(page.getByTestId('proyecto-detalle')).toBeVisible();
   });
 
-  test('el detalle enlaza al repositorio', async ({ page }) => {
+  // El campo `repo` es opcional en el esquema y CaseLayout lo renderiza
+  // condicionalmente. Se cubren las dos ramas, cada una donde hoy aplica de
+  // verdad: gestor-operaciones no lo tiene (repositorio privado hasta que esté
+  // la suite de pruebas), y el caso de QA de este portfolio sí.
+  test('el detalle no muestra enlace al repositorio si el proyecto no lo declara', async ({ page }) => {
     await page.goto('/es/dev/gestor-operaciones');
+    await expect(page.getByTestId('proyecto-detalle')).toBeVisible();
+    await expect(page.getByTestId('caso-repo')).toHaveCount(0);
+  });
+
+  test('el detalle enlaza al repositorio cuando el contenido lo declara', async ({ page }) => {
+    await page.goto('/es/qa/suite-e2e-portfolio');
     await expect(page.getByTestId('caso-repo')).toHaveAttribute('href', /github\.com/);
   });
 });

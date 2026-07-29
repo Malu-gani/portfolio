@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { QaPage } from './pages/QaPage';
 import { CasoPage } from './pages/CasoPage';
+import { rutasDelSitio } from './utils/rutas';
 
 test.describe('Carril QA', () => {
   test('el listado muestra todos los casos', async ({ page }) => {
@@ -32,13 +33,18 @@ test.describe('Carril QA', () => {
     }
   });
 
-  test('el contenido de ejemplo se avisa al visitante', async ({ page }) => {
-    // "suite-e2e-portfolio" pasó a contenido real (ejemplo: false); el caso
-    // que sigue siendo de ejemplo es "gestor-operaciones", así que el
-    // mecanismo del banner se verifica ahí.
-    const caso = new CasoPage(page);
-    await caso.abrir('es', 'gestor-operaciones');
-    await expect(caso.bannerEjemplo).toBeVisible();
+  // Ya no queda contenido con `ejemplo: true`, así que no hay dónde ejercitar
+  // el banner encendido: el test que lo hacía se invirtió en el invariante que
+  // ahora importa, que es que el sitio no muestre ese aviso en ninguna ruta.
+  // Es el equivalente en la suite E2E de `npm run check:listo`, que valida lo
+  // mismo sobre el frontmatter. Falsable: poner `ejemplo: true` en cualquier
+  // caso o proyecto hace fallar este test.
+  test('ninguna ruta muestra el aviso de contenido de ejemplo', async ({ page }) => {
+    for (const ruta of rutasDelSitio()) {
+      await page.goto(ruta);
+      await expect(page.getByTestId('banner-ejemplo'),
+        `${ruta} todavía muestra el aviso de contenido de ejemplo`).toHaveCount(0);
+    }
   });
 
   test('el cambio de idioma preserva el caso abierto', async ({ page }) => {
