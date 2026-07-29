@@ -6,7 +6,9 @@
 
 Portfolio bilingüe (ES/EN) de **Juan Manuel Malugani**, carta de presentación para una búsqueda laboral activa en QA. Sitio estático construido con Astro, con dos carriles: `/qa` es el principal, `/dev` es secundario y deliberadamente más chico — muestra que además de testear puedo escribir el código que se testea, sin competir con el carril principal.
 
-> **Estado del contenido:** todo lo que ves publicado hoy — los tres casos de QA, el proyecto de `/dev` y la sección "Sobre mí" — es contenido de ejemplo, marcado como tal en el frontmatter (`ejemplo: true`) y avisado con un banner visible en cada página. Está ahí para que el layout y las pruebas tengan algo real que renderizar mientras se redacta el contenido definitivo. El script `npm run check:listo` falla a propósito mientras quede alguna pieza de ejemplo sin reemplazar — es la señal de "no publicar todavía", no un bug.
+> **Estado del contenido:** todo el contenido escrito del sitio es real — los dos casos de QA, el proyecto de `/dev` y la sección "Sobre mí". Ya no queda nada marcado con `ejemplo: true`, y `npm run check:listo` da verde; es un gate bloqueante del CI, así que reintroducir contenido de ejemplo pone el pipeline en rojo.
+>
+> **Falta una sola cosa antes de linkearlo desde un CV:** los PDFs de `public/cv/` siguen siendo placeholders (contienen el texto "CV de ejemplo — reemplazar"). `check:listo` no los alcanza, porque solo inspecciona el frontmatter de las colecciones. Ver "Antes de publicar".
 
 ## Stack
 
@@ -95,17 +97,22 @@ Un proyecto del carril `/dev` sigue el mismo patrón (mismo slug en `src/content
 
 ## Antes de publicar
 
-Este sitio no está listo para mostrarse como definitivo todavía. Antes de linkearlo desde un CV real:
+**Pendiente — bloquea publicar:**
 
-1. Correr `npm run check:listo` hasta que dé verde — hoy falla a propósito porque queda contenido de ejemplo.
-2. Reemplazar los tres casos de QA de ejemplo por casos reales.
-3. Reemplazar el proyecto de ejemplo del carril `/dev`.
-4. Escribir el texto real de "Sobre mí" y quitar su banner de ejemplo.
-5. Reemplazar `public/cv/cv-es.pdf` y `public/cv/cv-en.pdf` por el CV real.
-6. Verificar que las URLs de LinkedIn y GitHub en `ContactContent.astro` y `Footer.astro` sean las correctas.
-7. Actualizar `site` en `astro.config.mjs` con el dominio real de despliegue — hoy tiene un placeholder que queda horneado en el sitemap y en las etiquetas `hreflang` de todas las páginas.
-8. Actualizar los conteos fijos en los tests que asumen una cantidad de casos o proyectos (por ejemplo `tests/e2e/casos.spec.ts`, `tests/e2e/home.spec.ts` y `tests/e2e/dev.spec.ts`): con contenido real la cantidad de casos, proyectos y destacados va a cambiar.
-9. Regenerar las capturas de referencia de la regresión visual (`npx playwright test tests/e2e/visual.spec.ts --project=chromium --update-snapshots`): el contenido real va a diferir de las capturas actuales, generadas sobre el contenido de ejemplo.
+1. **Reemplazar `public/cv/cv-es.pdf` y `public/cv/cv-en.pdf` por el CV real.** Los archivos actuales son placeholders generados: el PDF dice "CV de ejemplo — reemplazar". El botón de descarga del sitio ya funciona y entrega ese archivo, así que hoy un visitante se baja el placeholder. Ningún gate automático lo detecta: `check:listo` solo inspecciona el frontmatter de las colecciones, y el test E2E de descarga verifica el nombre del archivo, no su contenido.
+
+**Ya hecho:**
+
+- ✅ `npm run check:listo` da verde, y desde entonces es un gate bloqueante del CI (sin `continue-on-error`).
+- ✅ Casos de QA reales (`suite-e2e-portfolio`, `gestor-operaciones`).
+- ✅ Proyecto real en el carril `/dev`.
+- ✅ Texto real de "Sobre mí", sin banner de ejemplo.
+- ✅ URLs de LinkedIn y GitHub verificadas en `ContactContent.astro` y `Footer.astro`.
+- ✅ `site` en `astro.config.mjs` apunta a la URL real de despliegue.
+- ✅ Conteos de casos y proyectos en los tests actualizados al contenido real.
+- ✅ Capturas de referencia de la regresión visual regeneradas sobre el contenido real.
+
+**A tener en cuenta al seguir editando contenido:** hay tests que fijan la cantidad de casos y proyectos (`casos.spec.ts`, `home.spec.ts`, `dev.spec.ts`) y capturas de referencia que congelan el layout. Agregar o quitar un caso obliga a actualizar ambos — regenerar las capturas con `npx playwright test tests/e2e/visual.spec.ts --project=chromium --update-snapshots`.
 
 ## Método de trabajo
 
