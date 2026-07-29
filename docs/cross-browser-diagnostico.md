@@ -62,8 +62,45 @@ Conclusión: el disparador es la transición de **navegación client-side de Ast
 
 Zona gris, más cerca de "diferencia/bug de plataforma" que de "bug de nuestro código": se descartaron las hipótesis de código más plausibles (wrapper, patrón de link) y ninguna era la causa. Pero no es un caso de "no hay nada para hacer": el sitio puede mitigar el disparo sin renunciar a la navegación.
 
-### Resolución aplicada
+### Resolución aplicada (primera, incompleta — ver la sección siguiente)
 
-Se agregó `data-astro-reload` al enlace de la tarjeta de proyecto (`src/components/ProyectoCard.astro`), que fuerza una navegación de página completa en vez de la transición cliente-a-cliente de Astro para ese enlace puntual. Es exactamente el camino que el diagnóstico confirmó que no crashea (paso 4 arriba). El costo es perder la transición animada al entrar al detalle desde el listado de `/dev` — aceptable dado que `/dev` es el carril secundario del sitio y la alternativa era un crash real de proceso para usuarios de Safari.
+Se agregó `data-astro-reload` al enlace de la tarjeta de proyecto (`src/components/ProyectoCard.astro`), que fuerza una navegación de página completa en vez de la transición cliente-a-cliente de Astro para ese enlace puntual. Es exactamente el camino que el diagnóstico confirmó que no crashea (paso 4 arriba). El costo era perder la transición animada al entrar al detalle desde el listado de `/dev`.
 
-Verificado: `tests/e2e/dev.spec.ts` — el test "se navega al detalle del proyecto" pasa en los 4 proyectos de Playwright, incluido `webkit`, sin necesidad de `test.skip`.
+Funcionó, pero **atacaba el síntoma en un enlace, no la causa**. La conclusión de que el disparador era "el par de rutas `/es/dev` → `/es/dev/gestor-operaciones`" resultó ser una correlación, no la causa: ese par simplemente era el único que en ese momento cumplía la condición real. Ver abajo.
+
+## Causa raíz real: el cambio de estado de scroll del documento
+
+Al borrar el caso `testing-freelance` (commit `383bc7a`), el listado `/es/qa` pasó de 3 tarjetas a 2 y **apareció el mismo crash en el carril QA**, que hasta entonces estaba en verde. Eso invalidó la explicación por par de rutas y permitió aislar la condición verdadera.
+
+### Evidencia
+
+Bisecando, el crash aparece exactamente en `383bc7a`. Restaurar solo el archivo borrado lo hace desaparecer, dejando el resto del commit intacto — así que no era el flag `destacado` ni el contenido de ningún caso. Lo único que cambia entre ambos estados, medido:
+
+| Estado | `/es/qa` scrollHeight | clientHeight | ¿contenedor de scroll? | Resultado |
+|---|---|---|---|---|
+| 3 casos | 804 | 720 | sí | no crashea |
+| 2 casos | 720 | 720 | no | **crashea** |
+
+La página destino siempre scrollea (2413px). Es decir: el crash ocurre cuando la navegación va de una página que **no** es contenedor de scroll a una que **sí** lo es.
+
+Tres predicciones falsables, las tres cumplidas en `webkit`:
+
+1. **Control:** sin tocar nada → crashea.
+2. Forzar scroll en el listado (`min-height: 250vh` inyectado, mismo destino) → **no** crashea.
+3. Navegar de una página sin scroll a otra sin scroll → **no** crashea.
+
+Esto también explica el crash original de `/dev`: ese listado tiene una sola tarjeta y nunca scrolleaba. Los "controles negativos" del diagnóstico anterior (paso 5) no descartaban nada: los pares que no crasheaban eran justamente los que partían de una página que ya scrolleaba.
+
+### Resolución
+
+`overflow-y: scroll` en `html` (`src/styles/global.css`): el documento es siempre contenedor de scroll, así que el cambio de estado que dispara el crash no puede ocurrir en ninguna navegación del sitio.
+
+**`scrollbar-gutter: stable` no alcanza** — probado explícitamente, el crash persiste. Reserva el espacio del scrollbar pero no convierte al documento en contenedor de scroll, que es lo que importa.
+
+Con la causa raíz corregida, el `data-astro-reload` de `ProyectoCard.astro` quedó innecesario y **se quitó**: verificado que `/dev` navega al detalle en `webkit` sin crashear y sin él, recuperando la transición animada que se había resignado.
+
+Verificado: la suite completa pasa en `webkit` (137 tests, 0 fallas), incluidos `dev.spec.ts` y `casos.spec.ts`, sin ningún `test.skip`.
+
+### Guarda de regresión
+
+`tests/e2e/navegacion.spec.ts` — "Estabilidad del scroll entre navegaciones" afirma sobre cada ruta del sitio que el documento es contenedor de scroll. Los tests de navegación listado→detalle solo detectan este crash de casualidad, cuando el contenido deja el listado más corto que el viewport; esta aserción no depende del largo del contenido. Verificada falsable: quitando el `overflow-y: scroll`, 16 de sus casos fallan.

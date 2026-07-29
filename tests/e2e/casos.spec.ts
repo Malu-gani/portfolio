@@ -33,8 +33,11 @@ test.describe('Carril QA', () => {
   });
 
   test('el contenido de ejemplo se avisa al visitante', async ({ page }) => {
+    // "suite-e2e-portfolio" pasó a contenido real (ejemplo: false); el caso
+    // que sigue siendo de ejemplo es "gestor-operaciones", así que el
+    // mecanismo del banner se verifica ahí.
     const caso = new CasoPage(page);
-    await caso.abrir('es', 'suite-e2e-portfolio');
+    await caso.abrir('es', 'gestor-operaciones');
     await expect(caso.bannerEjemplo).toBeVisible();
   });
 

@@ -2,11 +2,11 @@
 titulo: "E2E suite for this portfolio"
 resumen: "Test strategy and automation for the site you are viewing: navigation, i18n, theming and accessibility."
 tags: [automation, e2e, accesibilidad]
-stack: [Playwright, TypeScript, axe-core, GitHub Actions]
+stack: [Playwright, TypeScript, axe-core, Vitest, GitHub Actions]
 fecha: 2026-07-27
 destacado: false
 estado: completo
-ejemplo: true
+ejemplo: false
 repo: "https://github.com/Malu-gani/portfolio"
 ---
 
@@ -16,7 +16,7 @@ import Metricas from '../../../components/Metricas.astro';
 
 ## Context
 
-This portfolio is a bilingual static site with two content tracks. It has no backend, but it still concentrates several points where a silent failure would wreck its one job: a recruiter opens it and it works.
+This portfolio is a bilingual static site with two content tracks. It has no backend, but it still concentrates several points where a silent failure would wreck its one job: a recruiter opens it and it works. This case documents the suite that tests the site itself.
 
 ## Test strategy
 
@@ -25,37 +25,55 @@ I prioritized by impact on that goal:
 - **High risk:** a broken link or a page that fails to load. It ends the evaluation on the spot.
 - **High risk:** the language switch that drops the visitor back on the home page instead of the equivalent page.
 - **Medium risk:** dark mode that doesn't persist, or that flashes white on load.
-- **Medium risk:** contrast failures that leave text unreadable in either theme.
+- **Medium risk:** accessibility violations that leave the site unusable with a keyboard or a screen reader.
 
 **I decided not to automate** wording review or image quality checks: those are human judgment calls, and automating them would only produce false positives without adding value.
 
 ## Execution
 
-Playwright suite using the Page Object Model, running on Chromium, Firefox, WebKit and a mobile viewport.
+Playwright suite using the Page Object Model, running on 4 browser projects: Chromium, Firefox, WebKit, and a mobile profile (Pixel 7). Accessibility and link-integrity routes aren't copied by hand: they're derived from the filesystem (static pages + content collections), so a new case or project gets covered automatically without touching the suite.
 
 ## Findings
 
-<BugReport id="BUG-001" titulo="The language toggle drops the current section"
-  severidad="alto" prioridad="P2" entorno="Chrome 130 · Windows 11"
-  pasos={['Open /en/about', 'Click the ES toggle', 'Observe the resulting URL']}
-  esperado="Redirects to /es/sobre-mi keeping the section."
-  obtenido="Redirects to /es/ dropping the section." />
+Running the full suite outside Chromium surfaced three real problems, two platform-specific and one in production.
 
-<TestMatrix titulo="Navigation cases" casos={[
-  { id: 'TC-01', escenario: 'Language switch on home', tipo: 'E2E', estado: 'paso' },
-  { id: 'TC-02', escenario: 'Theme persistence', tipo: 'E2E', estado: 'paso' },
-  { id: 'TC-03', escenario: 'English CV download', tipo: 'E2E', estado: 'bloqueado' },
-]} />
+<BugReport id="BUG-001" titulo="WebKit crashes navigating from a short list to a detail page"
+  severidad="alto" prioridad="P2" entorno="WebKit (Playwright) · local production build"
+  pasos={['Go to a list that fits in the viewport (/en/dev, or /en/qa with two cases)', 'Click the card', 'Watch the WebKit render process']}
+  esperado="Navigates to the detail without interrupting the process."
+  obtenido="WebKit's render process crashes (Page crashed), 100% deterministic over 10+ runs." />
 
-<Metricas items={[
-  { etiqueta: 'Cases', valor: '24' }, { etiqueta: 'Bugs', valor: '7' },
-  { etiqueta: 'Automated', valor: '82%' }, { etiqueta: 'Duration', valor: '48s' },
+This bug taught me more through how I misdiagnosed it the first time than through the fix. When I found it on `/dev` I ruled out the content, the detail wrapper, and the card's "stretched link" pattern with evidence, and confirmed a hard navigation to the same destination doesn't crash. I concluded the trigger was **the route pair** `/es/dev` → `/es/dev/gestor-operaciones` via Astro's client-side transition, and mitigated it with `data-astro-reload` on that link. It worked, and the suite went green.
+
+It was a correlation, not the cause. Weeks later I deleted a QA case, the `/es/qa` list dropped to two cards, and the same crash appeared in a track that had never had it. Bisecting led me to the exact commit; restoring just the deleted file made it disappear. The only thing that changed, measured: with three cards the list scrolled (804px against a 720px viewport), with two it didn't (720). The destination always scrolls. **The real cause is that WebKit crashes when the transition goes from a page that isn't a scroll container to one that is** — the original route pair was just the only one meeting that condition at the time.
+
+I confirmed it with three falsifiable predictions: untouched it crashes; forcing the list to scroll with the same destination it doesn't; and from a non-scrolling page to another non-scrolling one it doesn't either. The fix is `overflow-y: scroll` on `html`, which makes that state change impossible on any navigation in the site. I also tried `scrollbar-gutter: stable`, which looked like the tidier option, and it **isn't enough**: the crash persists, because it reserves the scrollbar space without making the document a scroll container. With the root cause fixed I could also drop the `data-astro-reload` and get back the `/dev` animated transition I had given up. Full diagnosis in `docs/cross-browser-diagnostico.md`.
+
+The second: in WebKit, the first `Tab` on the page goes straight to the theme toggle, never to the skip-link. That's Safari's default behavior ("Full Keyboard Access" is off out of the box, so plain `<a>` elements without `tabindex` aren't included in the tab cycle). I added `tabindex="0"` only to the skip-link, because one unreachable by keyboard doesn't do its job. I didn't force it on the rest of the navigation: that would override a real accessibility preference of the user, not fix a defect of the site. It's documented as a known, accepted limitation, not hidden.
+
+The third one was caught by Lighthouse in production, not by this suite: `heading-order` on `/es/qa`, an `h1` followed by an `h3` in the cards with no `h2` in between. axe-core classifies that rule as "best practice", not WCAG A/AA, so the accessibility sweep below reported zero violations even though the level jump was real. I fixed the card's heading level and added a dedicated assertion (walks every page, checks no heading skips a level) to close that coverage gap without widening axe's tags for the whole suite.
+
+<TestMatrix titulo="Findings status, after the fix" casos={[
+  { id: 'BUG-001', escenario: 'WebKit crash from short list to detail', tipo: 'E2E', estado: 'paso' },
+  { id: 'A11Y-01', escenario: 'Skip-link tab order in WebKit', tipo: 'Accessibility', estado: 'paso' },
+  { id: 'A11Y-02', escenario: 'Heading order in case cards', tipo: 'Accessibility', estado: 'paso' },
 ]} />
 
 ## Automation
 
-I automated what repeats on every deploy and what a human doesn't catch at a glance: broken links, contrast, and visual regressions. The pipeline runs on GitHub Actions on every push and publishes the run's report.
+Accessibility with `axe-core` (WCAG 2.0/2.1 A and AA) across the site's 16 real routes, in light and dark theme, plus the dedicated heading-order assertion. Internal link integrity (200 on every one) and `rel="noopener"` on links that open a new tab, across the same 16 routes. External links get the same check, but it's skipped in CI: it depends on non-deterministic third-party services (LinkedIn returns 999 to bots even when the link works fine in a real browser). Visual regression compares screenshots per page and theme, but only in the local Chromium project: versioned snapshots are tied to the OS they were generated on (`-win32` suffix), so comparing them against CI's Linux runner would produce a false failure the first time and a false green on retry — not a real signal, which is why it's a local gate, not a CI one.
+
+On GitHub Actions, each of the 4 Playwright projects runs in its own matrix job, with `--workers=1`. That's not the default: running all 4 projects in parallel against a single local `npm run preview` saturated that server and produced intermittent `NS_ERROR_CONNECTION_REFUSED` on a different route each time — diagnosed by isolating with `--workers=1`, where the error stopped showing up. Reports from all 4 runs get published to GitHub Pages on every push to `main`.
+
+<Metricas items={[
+  { etiqueta: 'Unit', valor: '34' }, { etiqueta: 'E2E', valor: '120 × 4' },
+  { etiqueta: 'A11y routes', valor: '16 × 2' }, { etiqueta: 'Real bugs', valor: '3' },
+]} />
 
 ## Outcome and takeaways
 
-To be replaced once the implementation is complete.
+The three real findings from this suite have something in common: none of them came from running Chromium with the default config. The WebKit crash needed isolating the full suite against the other browsers; the heading bug was caught by Lighthouse, not axe, because axe doesn't classify it as a WCAG violation. The lesson I take from it is that "green on Chromium" and "green" aren't the same thing, and that an accessibility tool covers whatever it decides to cover — don't assume "zero violations" means "no accessibility problems" without checking which rules are actually being evaluated.
+
+The more uncomfortable lesson is BUG-001's: I had a tidy diagnosis, with hypotheses ruled out one by one, that still pointed at the wrong cause. The test passed, everything went green, and it convinced me for weeks. What exposed it was an unrelated content change that reproduced the same crash in another track. What I took from it is that a fix that works doesn't prove the diagnosis is right, and that when a root cause is phrased as "this particular combination" it's worth distrusting: it's almost always a more general condition that only one place happens to meet so far. The regression guard now asserts the invariant — that every page is a scroll container — rather than the symptom, because the symptom only showed up when the content happened to be shorter than the viewport.
+
+I also learned to document limits instead of hiding them: WebKit's tab order still doesn't cover the rest of the navigation, on purpose, and that's written down in the diagnosis instead of papered over with a global `tabindex="0"` that would override a real accessibility preference.

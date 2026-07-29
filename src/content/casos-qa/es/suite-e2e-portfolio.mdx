@@ -2,11 +2,11 @@
 titulo: "Suite E2E de este portfolio"
 resumen: "Estrategia de prueba y automatización del sitio que estás viendo: navegación, i18n, tema y accesibilidad."
 tags: [automation, e2e, accesibilidad]
-stack: [Playwright, TypeScript, axe-core, GitHub Actions]
+stack: [Playwright, TypeScript, axe-core, Vitest, GitHub Actions]
 fecha: 2026-07-27
 destacado: false
 estado: completo
-ejemplo: true
+ejemplo: false
 repo: "https://github.com/Malu-gani/portfolio"
 ---
 
@@ -16,7 +16,7 @@ import Metricas from '../../../components/Metricas.astro';
 
 ## Contexto
 
-Este portfolio es un sitio estático bilingüe con dos carriles de contenido. Aunque no tiene backend, concentra varios puntos donde un fallo silencioso arruinaría su único objetivo: que un reclutador lo abra y funcione.
+Este portfolio es un sitio estático bilingüe con dos carriles de contenido. Aunque no tiene backend, concentra varios puntos donde un fallo silencioso arruinaría su único objetivo: que un reclutador lo abra y funcione. Este caso documenta la suite que lo prueba a él mismo.
 
 ## Estrategia de prueba
 
@@ -25,37 +25,55 @@ Prioricé por impacto sobre ese objetivo:
 - **Riesgo alto:** un enlace roto o una página que no carga. Corta la evaluación en seco.
 - **Riesgo alto:** el cambio de idioma que devuelve a la home en vez de a la página equivalente.
 - **Riesgo medio:** el tema oscuro que no persiste, o que arranca con parpadeo blanco.
-- **Riesgo medio:** fallas de contraste que dejan texto ilegible en uno de los dos temas.
+- **Riesgo medio:** violaciones de accesibilidad que dejan el sitio inutilizable con teclado o lector de pantalla.
 
 **Decidí no automatizar** la validación de la redacción ni la calidad de las imágenes: son revisiones humanas y automatizarlas daría falsos positivos sin aportar valor.
 
 ## Ejecución
 
-Suite en Playwright con Page Object Model, corriendo en Chromium, Firefox, WebKit y viewport mobile.
+Suite en Playwright con Page Object Model, corriendo en 4 proyectos de navegador: Chromium, Firefox, WebKit y un perfil mobile (Pixel 7). Las rutas de accesibilidad e integridad de enlaces no están copiadas a mano: se derivan del filesystem (páginas estáticas + colecciones de contenido), así que un caso o proyecto nuevo queda cubierto solo, sin tocar la suite.
 
 ## Hallazgos
 
-<BugReport id="BUG-001" titulo="El toggle de idioma pierde la sección actual"
-  severidad="alto" prioridad="P2" entorno="Chrome 130 · Windows 11"
-  pasos={['Abrir /es/sobre-mi', 'Hacer clic en el toggle EN', 'Observar la URL resultante']}
-  esperado="Redirige a /en/about manteniendo la sección."
-  obtenido="Redirige a /en/ perdiendo la sección." />
+Correr la suite completa fuera de Chromium sacó a la luz tres problemas reales, dos de plataforma y uno de producción.
 
-<TestMatrix titulo="Casos de navegación" casos={[
-  { id: 'TC-01', escenario: 'Cambio de idioma en home', tipo: 'E2E', estado: 'paso' },
-  { id: 'TC-02', escenario: 'Persistencia de tema', tipo: 'E2E', estado: 'paso' },
-  { id: 'TC-03', escenario: 'Descarga de CV en inglés', tipo: 'E2E', estado: 'bloqueado' },
-]} />
+<BugReport id="BUG-001" titulo="WebKit crashea al navegar de un listado corto al detalle"
+  severidad="alto" prioridad="P2" entorno="WebKit (Playwright) · build de producción local"
+  pasos={['Ir a un listado que entre en el viewport (/es/dev, o /es/qa con dos casos)', 'Hacer clic en la tarjeta', 'Observar el proceso de render de WebKit']}
+  esperado="Navega al detalle sin interrumpir el proceso."
+  obtenido="El proceso de render de WebKit crashea (Page crashed), 100% determinista en más de 10 corridas." />
 
-<Metricas items={[
-  { etiqueta: 'Casos', valor: '24' }, { etiqueta: 'Bugs', valor: '7' },
-  { etiqueta: 'Automatizados', valor: '82%' }, { etiqueta: 'Duración', valor: '48s' },
+Este bug me enseñó más por cómo lo diagnostiqué mal la primera vez que por el arreglo. Al detectarlo en `/dev` descarté por evidencia el contenido, el wrapper del detalle y el patrón de "stretched link" de la tarjeta, y comprobé que una navegación dura al mismo destino no crashea. Concluí que el disparador era **el par de rutas** `/es/dev` → `/es/dev/gestor-operaciones` vía la transición cliente-a-cliente de Astro, y lo mitigué con `data-astro-reload` en ese enlace. Funcionó, y la suite quedó verde.
+
+Era una correlación, no la causa. Semanas después borré un caso de QA, el listado `/es/qa` quedó con dos tarjetas y el mismo crash apareció en un carril que nunca lo había tenido. Bisecando llegué al commit exacto; restaurar solo el archivo borrado lo hacía desaparecer. Lo único que cambiaba, medido: con tres tarjetas el listado scrolleaba (804px contra un viewport de 720), con dos no (720). El destino siempre scrollea. **La causa real es que WebKit crashea cuando la transición va de una página que no es contenedor de scroll a una que sí lo es** — el par de rutas original solo era el único que cumplía esa condición en ese momento.
+
+Lo confirmé con tres predicciones falsables: sin tocar nada crashea; forzando scroll en el listado con el mismo destino no crashea; y de una página sin scroll a otra sin scroll tampoco. El arreglo es `overflow-y: scroll` en `html`, que hace que ese cambio de estado no pueda ocurrir en ninguna navegación del sitio. Probé también `scrollbar-gutter: stable`, que parecía la opción más prolija, y **no alcanza**: el crash persiste, porque reserva el espacio del scrollbar pero no vuelve al documento contenedor de scroll. Con la causa raíz corregida pude además quitar el `data-astro-reload` y recuperar la transición animada de `/dev` que había resignado. Diagnóstico completo en `docs/cross-browser-diagnostico.md`.
+
+El segundo: en WebKit, el primer `Tab` de la página va directo al botón de tema, nunca al skip-link. Es el comportamiento de fábrica de Safari ("Full Keyboard Access" apagado por defecto, así que los `<a>` sin `tabindex` no entran al ciclo de tabulación). Le agregué `tabindex="0"` solo al skip-link, porque uno inalcanzable por teclado no cumple su función. No lo forcé en el resto de la navegación: hacerlo pisaría una preferencia de accesibilidad real del usuario, no corregiría un defecto del sitio. Queda documentado como limitación conocida y aceptada, no escondida.
+
+El tercero lo encontró Lighthouse en producción, no esta suite: `heading-order` en `/es/qa`, un `h1` seguido de un `h3` en las tarjetas sin `h2` intermedio. axe-core clasifica esa regla como "best practice", no como WCAG A/AA, así que el barrido de accesibilidad de abajo daba cero violaciones aunque el salto de nivel fuera real. Corregí el nivel de heading de las tarjetas y agregué una aserción propia (recorre cada página y verifica que ningún heading salte de nivel) para cerrar ese agujero de cobertura sin ensanchar los tags de axe para toda la suite.
+
+<TestMatrix titulo="Estado de los hallazgos, tras la corrección" casos={[
+  { id: 'BUG-001', escenario: 'Crash de WebKit de listado corto a detalle', tipo: 'E2E', estado: 'paso' },
+  { id: 'A11Y-01', escenario: 'Tab-order del skip-link en WebKit', tipo: 'Accesibilidad', estado: 'paso' },
+  { id: 'A11Y-02', escenario: 'Orden de headings en tarjetas de caso', tipo: 'Accesibilidad', estado: 'paso' },
 ]} />
 
 ## Automatización
 
-Automaticé lo que se repite en cada deploy y lo que un humano no detecta a simple vista: enlaces rotos, contraste y regresiones visuales. El pipeline corre en GitHub Actions en cada push y publica el reporte de la corrida.
+Accesibilidad con `axe-core` (WCAG 2.0/2.1 A y AA) sobre las 16 rutas reales del sitio, en tema claro y oscuro, más la aserción propia de orden de headings. Integridad de enlaces internos (200 en cada uno) y `rel="noopener"` en los que abren pestaña nueva, sobre las mismas 16 rutas. Los enlaces externos se verifican igual, pero se saltan en CI: dependen de servicios de terceros no deterministas (LinkedIn devuelve 999 a bots aunque el link funcione en un navegador real). La regresión visual compara capturas por página y tema, pero solo en el proyecto Chromium local: las capturas versionadas quedan atadas al sistema operativo donde se generaron (sufijo `-win32`), así que compararlas contra el runner Linux de CI daría un falso fallo la primera vez y un falso verde en el reintento — no es una señal real, por eso es un gate local, no de CI.
+
+En GitHub Actions, cada uno de los 4 proyectos de Playwright corre en su propio job de la matriz, con `--workers=1`. Eso no es la config por defecto: correr los 4 proyectos en paralelo contra un único `npm run preview` local saturaba ese servidor y producía `NS_ERROR_CONNECTION_REFUSED` intermitente en una ruta distinta cada vez — diagnosticado aislando con `--workers=1`, donde el error dejaba de aparecer. Los reportes de las 4 corridas se publican en GitHub Pages en cada push a `main`.
+
+<Metricas items={[
+  { etiqueta: 'Unitarios', valor: '34' }, { etiqueta: 'E2E', valor: '120 × 4' },
+  { etiqueta: 'Rutas a11y', valor: '16 × 2' }, { etiqueta: 'Bugs reales', valor: '3' },
+]} />
 
 ## Resultado y aprendizajes
 
-Reemplazar al completar la implementación.
+Los tres hallazgos reales de esta suite tienen algo en común: ninguno salió de correr Chromium con la config por defecto. El crash de WebKit necesitó aislar la suite completa contra los otros navegadores; el bug de headings lo agarró Lighthouse, no axe, porque axe no lo clasifica como violación WCAG. La lección que me llevo es que "verde en Chromium" y "verde" no son lo mismo, y que una herramienta de accesibilidad cubre lo que decide cubrir — no asumir que "cero violaciones" significa "sin problemas de accesibilidad" sin mirar qué reglas están efectivamente evaluando.
+
+La lección más incómoda es la del BUG-001: tuve un diagnóstico prolijo, con hipótesis descartadas una por una, que igual señalaba la causa equivocada. Pasó el test, quedó verde y me convenció durante semanas. Lo que lo delató fue un cambio de contenido no relacionado que reprodujo el mismo crash en otro carril. Me quedó que un arreglo que funciona no prueba que el diagnóstico sea correcto, y que cuando la causa se enuncia como "esta combinación puntual" conviene desconfiar: casi siempre es una condición más general que por ahora solo se cumple en un lugar. Ahora la guarda de regresión afirma sobre el invariante —que toda página sea contenedor de scroll— y no sobre el síntoma, porque el síntoma solo aparecía cuando el contenido quedaba más corto que el viewport.
+
+También aprendí a documentar límites en vez de esconderlos: el tab-order de WebKit sigue sin cubrir el resto de la navegación, a propósito, y eso queda escrito en el diagnóstico en vez de disimulado con un `tabindex="0"` global que pisaría una preferencia real de accesibilidad.
