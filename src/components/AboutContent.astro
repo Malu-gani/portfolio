@@ -1,14 +1,8 @@
 ---
-// @ejemplo-pendiente: la biografía de abajo es texto de relleno.
-// `npm run check:listo` falla mientras este marcador exista en el archivo.
-// Quitar esta línea recién cuando `textos` tenga el contenido real.
-import EjemploBanner from './EjemploBanner.astro';
-import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 const textos: Record<Lang, {
   titulo: string;
@@ -21,36 +15,41 @@ const textos: Record<Lang, {
   es: {
     titulo: 'Sobre mí',
     recorrido:
-      'Vengo de [ejemplo: reemplazar con el recorrido real — carrera previa, cómo llegué a QA, hitos relevantes].',
+      'Hace tres años trabajo como operador de monitoreo de alarmas: opero eventos que aparecen en pantalla, algunos generados manualmente, otros disparados por el sistema al detectar una anomalía real (luz, vibración, movimiento). Ahí reconocí el mismo patrón que después encontré en QA — leer una señal, decidir si es un problema real, y actuar con criterio. Hice el camino formal — un bootcamp de testing de 43 horas y la preparación para ISTQB Foundation Level — y lo sostuve con práctica real: armé suites de automatización con Playwright en TypeScript y Python, testing de API con Postman diseñando casos en Zephyr Scale/Jira, y hoy pruebo una aplicación financiera real que estoy construyendo en paralelo.',
     motivacion:
-      '[Ejemplo: por qué QA — qué me atrae de encontrar el caso que rompe el sistema antes que el usuario, y de dejar esa evidencia documentada de forma clara].',
+      'Lo que me atrae de QA es encontrar el caso que rompe el sistema antes de que lo encuentre un usuario, y dejar esa evidencia documentada de forma que cualquiera pueda entender qué pasó y por qué. Lo que me vuelve bueno en esto es criterio, rigurosidad, y la capacidad de abstraerme de un flujo puntual para tener panorama completo de una situación — no quedarme en lo obvio, sino entender qué más puede estar afectando un cambio antes de darlo por probado.',
     formaTrabajo:
-      '[Ejemplo: forma de trabajo — cómo priorizo qué testear, cómo documento una estrategia de prueba, cuándo automatizo y cuándo no].',
+      'Prioridad por riesgo, no por cobertura total — si el tiempo es corto, primero lo que puede costar una venta o un dato mal cargado, después el resto. Documento con evidencia (capturas, logs, casos con ID trazable) porque un bug sin evidencia es una opinión. Automatizo cuando el flujo se repite y vale la pena mantenerlo; cuando no, testing exploratorio es más rápido y no deja código muerto. Y sigo estudiando de forma constante — la mayoría de lo que sé lo aprendí armando proyectos propios, no solo viendo cursos.',
     formacionTitulo: 'Formación y certificaciones',
     formacion: [
-      '[Ejemplo: título o curso — institución, año]',
-      '[Ejemplo: certificación — entidad emisora, año]',
+      'The Complete 2026 Software Testing Bootcamp — Tarek Roshdy / Nezam Academy (43.5 hs)',
+      'ISTQB Foundation Level V4.0 — curso completo, examen pendiente',
+      'Curso de Postman y testing de API (YouTube)',
+      'Curso guiado de Playwright',
+      'Roadmap-Logica — estudio autodidacta de lógica de programación (JavaScript y Python)',
     ],
   },
   en: {
     titulo: 'About me',
     recorrido:
-      '[Example: replace with the real background — previous career, how I got into QA, relevant milestones].',
+      "For three years I've worked as an alarm monitoring operator: I handle events that show up on screen, some triggered manually, others raised by the system when it detects a real anomaly (light, vibration, movement). That's where I recognized the same pattern I later found in QA — reading a signal, deciding whether it's a real problem, and acting with judgment. I did the formal path too — a 43-hour testing bootcamp and ISTQB Foundation Level prep — and backed it with real practice: I built automation suites with Playwright in TypeScript and Python, API testing with Postman designing cases in Zephyr Scale/Jira, and today I'm testing a real financial application I'm building in parallel.",
     motivacion:
-      '[Example: why QA — what draws me to finding the bug that breaks the system before the user does, and documenting that evidence clearly].',
+      "What draws me to QA is finding the case that breaks the system before a user does, and documenting that evidence clearly enough for anyone to understand what happened and why. What makes me good at it is judgment, rigor, and the ability to step back from a single flow to see the full picture of a situation — not stopping at the obvious, but understanding what else a change might be affecting before calling it tested.",
     formaTrabajo:
-      '[Example: way of working — how I prioritize what to test, how I document a test strategy, when I automate and when I don\'t].',
+      "I prioritize by risk, not total coverage — if time is short, I start with whatever could cost a sale or corrupt data, then the rest. I document with evidence (screenshots, logs, traceable case IDs) because a bug without evidence is just an opinion. I automate when a flow repeats and is worth maintaining; when it's not, exploratory testing is faster and doesn't leave dead code behind. And I keep studying constantly — most of what I know I learned building my own projects, not just watching courses.",
     formacionTitulo: 'Education and certifications',
     formacion: [
-      '[Example: degree or course — institution, year]',
-      '[Example: certification — issuing body, year]',
+      'The Complete 2026 Software Testing Bootcamp — Tarek Roshdy / Nezam Academy (43.5 hrs)',
+      'ISTQB Foundation Level V4.0 — course completed, exam pending',
+      'Postman and API testing course (YouTube)',
+      'Guided Playwright course',
+      'Roadmap-Logica — self-taught study of programming logic (JavaScript and Python)',
     ],
   },
 };
 const c = textos[lang];
 ---
 <div data-testid="sobre-mi">
-  <EjemploBanner texto={t('ejemplo.aviso')} />
   <h1 class="text-3xl font-bold sm:text-4xl">{c.titulo}</h1>
   <div class="mt-6 max-w-prose space-y-4 text-muted">
     <p>{c.recorrido}</p>
