@@ -17,12 +17,12 @@ test.describe('Home', () => {
   test('lista solo los casos destacados', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
-    // De los 3 casos de ejemplo, "testing-freelance" tiene `destacado: false`
-    // a propósito: si este test diera 3 (con o sin el filtro de
+    // De los 2 casos de ejemplo, "suite-e2e-portfolio" tiene `destacado: false`
+    // a propósito: si este test diera 2 (con o sin el filtro de
     // HomeContent.astro), no estaría verificando el filtro en absoluto. El
     // listado completo (sin filtrar) se cubre en casos.spec.ts, que sigue
-    // esperando 3 en /qa.
-    await expect(home.casos).toHaveCount(2);
+    // esperando 2 en /qa.
+    await expect(home.casos).toHaveCount(1);
   });
 
   test('el bloque QA precede al bloque Dev en el DOM', async ({ page }) => {
