@@ -17,11 +17,11 @@ test.describe('Home', () => {
   test('lista solo los casos destacados', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
-    // De los 2 casos de ejemplo, "suite-e2e-portfolio" tiene `destacado: false`
-    // a propósito: si este test diera 2 (con o sin el filtro de
-    // HomeContent.astro), no estaría verificando el filtro en absoluto. El
-    // listado completo (sin filtrar) se cubre en casos.spec.ts, que sigue
-    // esperando 2 en /qa.
+    // De los 4 casos publicados, solo "gestor-operaciones" tiene
+    // `destacado: true`. La brecha entre 4 y 1 es lo que hace que este test
+    // verifique el filtro de HomeContent.astro: si diera 4, estaría pasando
+    // con o sin filtro y no probaría nada. El listado completo sin filtrar se
+    // cubre en casos.spec.ts, que espera 4 en /qa.
     await expect(home.casos).toHaveCount(1);
   });
 

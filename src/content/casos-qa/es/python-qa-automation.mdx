@@ -1,0 +1,69 @@
+---
+titulo: "Automatización en Python sobre un sistema de RRHH"
+resumen: "Casos diseñados antes de automatizar, con evidencia automática al fallar, sobre OrangeHRM: alta de empleado, adjuntos y descarga de reportes."
+tags: [automation, e2e, manual]
+stack: [Python, pytest, Playwright, assertpy]
+fecha: 2026-07-05
+destacado: false
+estado: en-progreso
+ejemplo: false
+---
+
+import Metricas from '../../../components/Metricas.astro';
+
+## Contexto
+
+OrangeHRM es un sistema de recursos humanos con una demo pública. A diferencia de una tienda de práctica, tiene flujos administrativos con estado: se da de alta un empleado, se le adjuntan documentos, se generan reportes exportables. Eso lo hace mucho más parecido a un sistema interno real, y también mucho más incómodo de automatizar, que era justamente lo que buscaba.
+
+Lo armé en Python con pytest para no quedarme con un solo lenguaje de automatización. La otra suite que tengo es en JavaScript, y la mayoría de las búsquedas de QA junior piden uno u otro sin que se sepa cuál de antemano.
+
+## Estrategia de prueba
+
+Lo que quise ejercitar acá no fue tanto la cobertura como tres cosas que no había practicado:
+
+- **Diseñar los casos antes de automatizarlos.** Cada test lleva su identificador de caso (`OH-TC-02`, `OH-TC-03`, `OH-TC-05`, `OH-TC-10`) y su docstring con el objetivo. El caso existió primero como diseño y después como código, no al revés.
+- **Automatizar flujos con estado**, no consultas de solo lectura: crear un empleado, adjuntarle un archivo, generar y descargar un reporte. Son los que dejan rastro y los que más se rompen.
+- **Capturar evidencia sin intervención**, porque una falla que no deja prueba obliga a reproducirla a mano para entenderla.
+
+**Riesgo alto:** el alta de empleado y la subida de adjuntos, porque escriben datos. **Riesgo medio:** la búsqueda por ID y la exportación de reportes. **Riesgo bajo, no automatizado:** los módulos de configuración administrativa, que casi no se tocan.
+
+## Ejecución
+
+13 pruebas con pytest y Playwright para Python, repartidas en tres frentes: el sistema de RRHH, una tienda de práctica y un sitio de formularios. Los localizadores viven en clases de página separadas, una por módulo.
+
+Las verificaciones combinan las de Playwright, que esperan solas a que el elemento aparezca, con `assertpy` para las comparaciones de datos, que se lee casi como una oración: `assert_that(result_id).is_equal_to("0312")`.
+
+La pieza que más me sirvió es un hook en `conftest.py` que se engancha al reporte de cada prueba: si una falla durante la ejecución, saca una captura de pantalla con nombre y marca de tiempo, la guarda en disco y la incrusta en el reporte HTML. No hay que acordarse de nada ni agregar código en cada test; la evidencia aparece sola y solo cuando hace falta.
+
+<Metricas items={[
+  { etiqueta: 'Pruebas', valor: '13' }, { etiqueta: 'Módulos', valor: '3' },
+  { etiqueta: 'Casos diseñados', valor: 'Zephyr' }, { etiqueta: 'Evidencia', valor: 'Auto' },
+]} />
+
+## Hallazgos
+
+Los hallazgos de este trabajo son sobre mi propia suite, y son la razón por la que este caso figura **en progreso** y no completo. Prefiero mostrarlos a presentar el repositorio como si estuviera terminado.
+
+**Las pruebas no son independientes entre sí.** La que sube un archivo adjunto busca al empleado `412222`, que crea otra prueba distinta. Si se ejecutan en otro orden, o si alguien corre solo la de adjuntos, falla por una razón que no tiene nada que ver con lo que quiere verificar. Es de las primeras reglas que se aprenden —cada prueba se prepara su propio escenario— y la rompí sin darme cuenta, porque escribiéndolas en orden funcionaba.
+
+**El alta de empleado usa un ID fijo.** Al ser un dato único en el sistema, la segunda ejecución choca con la primera. Una prueba que solo pasa la primera vez no es una prueba de regresión.
+
+**Hay una verificación atada a datos de una demo pública** que se reinicia periódicamente: espera que el empleado `0312` se llame de determinada forma. El día que ese dato cambie, la prueba va a fallar sin que haya ningún defecto.
+
+**Cuatro módulos están esbozados pero vacíos** (administración, licencias, evaluación de desempeño y reclutamiento): existen el archivo y su clase de página, sin ninguna prueba adentro. Los dejo en el repositorio porque marcan el plan, pero no cuentan como cobertura y no quiero que lo parezcan.
+
+**Tres archivos del directorio raíz no son pruebas**, aunque se llamen `test_*`: son scripts grabados con el generador de código, con funciones `run_*` que pytest no recoge. Sirvieron para explorar la herramienta y quedaron ahí.
+
+## Automatización
+
+Lo que sí quedó bien resuelto es la separación entre lo que la prueba quiere verificar y cómo se llega hasta ahí. Los localizadores y los pasos de navegación están en las clases de página; los tests leen como una secuencia de intenciones. Cuando OrangeHRM cambió la forma de buscar un reporte, el ajuste fue en un solo lugar.
+
+También funcionó bien resolver la evidencia una sola vez, en el hook, en vez de en cada prueba. Es la diferencia entre una convención que hay que recordar y una garantía que se cumple sola.
+
+## Resultado y aprendizajes
+
+El aprendizaje central es que la independencia entre pruebas no se nota cuando las escribís: escribiéndolas en orden, una atrás de la otra, la suite pasa entera y todo parece bien. Se nota cuando alguien corre una sola, o cuando el orden cambia, o cuando el sistema conserva estado de la corrida anterior. Para entonces el problema ya está repartido en varios archivos.
+
+Lo próximo en este repositorio, en orden: que cada prueba genere sus propios datos —un ID derivado del momento de ejecución en vez de un número fijo— y que la de adjuntos cree su propio empleado en lugar de depender de otra. Recién después tiene sentido sumar los módulos vacíos: agregar cobertura sobre una base que no es independiente es multiplicar el problema, no reducirlo.
+
+Comparado con mi suite en JavaScript, la diferencia que más me sorprendió no fue el lenguaje sino cuánto cambia tener flujos con estado. En una tienda de práctica cada prueba arranca de cero sin esfuerzo; en un sistema que guarda datos, conseguir eso es una decisión de diseño que hay que tomar a propósito desde el principio.

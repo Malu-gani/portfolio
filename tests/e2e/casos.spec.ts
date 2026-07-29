@@ -7,13 +7,13 @@ test.describe('Carril QA', () => {
   test('el listado muestra todos los casos', async ({ page }) => {
     const qa = new QaPage(page);
     await qa.abrir('es');
-    await expect(qa.casos).toHaveCount(2);
+    await expect(qa.casos).toHaveCount(4);
   });
 
   test('el listado en inglés muestra la misma cantidad', async ({ page }) => {
     const qa = new QaPage(page);
     await qa.abrir('en');
-    await expect(qa.casos).toHaveCount(2);
+    await expect(qa.casos).toHaveCount(4);
   });
 
   test('se navega del listado al detalle', async ({ page }) => {
