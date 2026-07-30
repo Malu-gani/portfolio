@@ -23,6 +23,7 @@ export type ClaveUI =
   | 'caso.enProgreso'
   | 'caso.completo'
   | 'caso.verRepo'
+  | 'caso.verDemo'
   | 'cv.descargar'
   | 'contacto.copiar'
   | 'contacto.copiado'
@@ -52,6 +53,7 @@ const es = {
   'caso.enProgreso': 'En progreso',
   'caso.completo': 'Completo',
   'caso.verRepo': 'Ver repositorio',
+  'caso.verDemo': 'Ver la app',
   'cv.descargar': 'Descargar CV',
   'contacto.copiar': 'Copiar email',
   'contacto.copiado': 'Copiado',
@@ -80,6 +82,7 @@ const en = {
   'caso.enProgreso': 'In progress',
   'caso.completo': 'Complete',
   'caso.verRepo': 'View repository',
+  'caso.verDemo': 'View the app',
   'cv.descargar': 'Download CV',
   'contacto.copiar': 'Copy email',
   'contacto.copiado': 'Copied',

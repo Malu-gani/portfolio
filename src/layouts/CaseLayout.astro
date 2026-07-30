@@ -11,6 +11,7 @@ interface Props {
     titulo: string; resumen: string; tags: string[]; stack: string[];
     fecha: Date; estado?: 'completo' | 'en-progreso'; ejemplo: boolean;
     repo?: string;
+    demo?: string;
   };
 }
 const { lang, datos } = Astro.props;
@@ -33,9 +34,17 @@ const t = useTranslations(lang);
         {datos.tags.map((tag) => <Tag nombre={tag} />)}
         {datos.stack.map((s) => <Tag nombre={s} />)}
       </div>
-      {datos.repo && (
-        <a href={datos.repo} data-testid="caso-repo"
-          class="mt-4 inline-block text-accent hover:underline">{t('caso.verRepo')} →</a>
+      {(datos.repo || datos.demo) && (
+        <div class="mt-4 flex flex-wrap gap-4">
+          {datos.repo && (
+            <a href={datos.repo} data-testid="caso-repo"
+              class="inline-block text-accent hover:underline">{t('caso.verRepo')} →</a>
+          )}
+          {datos.demo && (
+            <a href={datos.demo} data-testid="caso-demo"
+              class="inline-block text-accent hover:underline">{t('caso.verDemo')} →</a>
+          )}
+        </div>
       )}
     </header>
 
