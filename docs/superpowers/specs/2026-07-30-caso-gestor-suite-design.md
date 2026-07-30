@@ -155,10 +155,18 @@ plantilla.** Existe en las dos colecciones desde que se creó el esquema y nunca
 se usó. Enlazar la app no es una edición de contenido: hay que construir el
 enlace.
 
-Se agrega junto al de `repo`, que ya se dibuja con `data-testid="caso-repo"`:
-mismo tratamiento, `target="_blank"` y `rel="noopener"`, con
-`data-testid="caso-demo"`. Sirve para los dos carriles porque el campo está en
-ambas colecciones.
+Se agrega junto al de `repo`, en `src/layouts/CaseLayout.astro:36-39`, con
+`data-testid="caso-demo"` y **el mismo tratamiento que el enlace al repositorio,
+que no lleva `target="_blank"`**: abre en la misma pestaña. Se sigue el patrón
+existente en vez de introducir uno nuevo para un solo enlace.
+
+Un único cambio cubre los dos carriles: `CasoDetalle.astro` y
+`ProyectoDetalle.astro` renderizan ambos a través de `CaseLayout`, y los dos le
+pasan el `data` de la colección entero.
+
+Requiere además declarar `demo?: string` en el `Props` de `CaseLayout` y una
+clave de traducción `caso.verDemo` en los dos idiomas (`src/i18n/ui.ts`), igual
+que `caso.verRepo`.
 
 ## 6. Tests
 
@@ -175,8 +183,9 @@ Se actualizan en el mismo paso que el contenido, no después.
    que lo declara y una que no. Agregar la funcionalidad sin cobertura no es
    aceptable en un portfolio de QA.
 3. **`tests/e2e/enlaces.spec.ts`** no se toca. El barrido de `rel="noopener"`
-   recorre todos los `target="_blank"` del sitio y cubre el enlace nuevo solo;
-   si se olvida el `rel`, ese test lo detecta.
+   solo recorre los `target="_blank"`, y el enlace nuevo no lo lleva —igual que
+   el del repositorio—, así que queda fuera de ese barrido por diseño. El de
+   enlaces externos sí lo cubre, pero se saltea en CI.
 
 Verificación antes de dar el trabajo por cerrado: `npm run check`,
 `npm run check:listo`, `npm run test:unit` y los E2E relevantes en chromium.
