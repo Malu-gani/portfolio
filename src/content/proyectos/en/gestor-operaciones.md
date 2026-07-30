@@ -2,9 +2,11 @@
 titulo: "Trading journal and risk manager"
 resumen: "Web app for logging crypto and stock trades, with per-account balances and risk control before entering a position."
 stack: [Next.js, TypeScript, Supabase, PostgreSQL, Tailwind]
-fecha: 2026-07-29
+fecha: 2026-07-30
 destacado: true
 ejemplo: false
+repo: "https://github.com/Malu-gani/Registro-de-Operaciones"
+demo: "https://registro-de-operaciones-chi.vercel.app"
 ---
 
 ## Description
@@ -29,4 +31,10 @@ Isolation between users lives in the database, with Row Level Security on every 
 
 Under active development. The trades, per-account balances, multi-portfolio and fixed-term deposit flows are implemented; the alerts module is in the data model but not built yet.
 
-**It has no automated test suite yet** — the test plan is written and published in this portfolio's QA track, but execution is pending. The repository is private for now; I'll link it here once I finish the suite and make it public.
+It has an automated test suite and runs in continuous integration. The design of that suite, the defects it found, and what was deliberately left untested are covered in the case on this portfolio's QA track.
+
+## Deployment and operation
+
+It's deployed and in use, at a total cost of zero. Hosting is Vercel on the free plan: the production environment follows the main branch, so every integrated change ships on its own, and each pull request gets its own preview URL. The database and authentication run on Supabase's free tier, and confirmation emails go out over Gmail SMTP.
+
+The architectural decision that took the most work was email confirmation. The standard flow stores a verifier in a cookie on the browser where sign-up started, so registering on a computer and opening the email on a phone failed — which is exactly what everyone does. Switching to a flow based on a token carried in the link itself removed that dependency, at the cost of writing the email templates and a dedicated route handler for confirmation.
