@@ -1,0 +1,31 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+/**
+ * Los tres botones son enlaces a rutas reales, no estado en cliente. Sin
+ * JavaScript, cada uno navega y el filtro funciona igual; con JavaScript, el
+ * script de `ProyectoListadoFiltrable` los intercepta y evita la recarga.
+ */
+interface Props { lang: Lang; activo: 'qa' | 'dev' | 'todos' }
+const { lang, activo } = Astro.props;
+const t = useTranslations(lang);
+
+const base = lang === 'es' ? '/es/proyectos' : '/en/projects';
+const opciones = [
+  { clave: 'qa' as const, href: base, texto: t('filtro.qa') },
+  { clave: 'dev' as const, href: `${base}/dev`, texto: t('filtro.dev') },
+  { clave: 'todos' as const, href: `${base}/${lang === 'es' ? 'todos' : 'all'}`, texto: t('filtro.todos') },
+];
+---
+<div role="group" aria-label={t('filtro.etiqueta')} data-testid="filtro-proyectos"
+  class="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-surface p-1">
+  {opciones.map((o) => (
+    <a href={o.href} data-testid={`filtro-${o.clave}`} data-filtro={o.clave}
+      aria-current={activo === o.clave ? 'true' : undefined}
+      class:list={[
+        'rounded-md px-3 py-1.5 text-sm transition-colors',
+        activo === o.clave ? 'bg-bg text-text' : 'text-muted hover:text-text',
+      ]}>{o.texto}</a>
+  ))}
+</div>

@@ -1,21 +1,86 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import Tag from './Tag.astro';
+import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
+/**
+ * Card única para los dos carriles. `CasoCard` y `ProyectoCard` eran casi
+ * idénticos —mismo borde, mismo hover, misma estructura— y mantenerlos
+ * separados significaba aplicar cada cambio de diseño dos veces.
+ *
+ * El `tipo` lo pasa quien renderiza, derivado de la colección de la que sale
+ * la entrada. No vive en el frontmatter a propósito: un dato que se puede
+ * calcular no debería poder contradecirse.
+ */
 interface Props {
-  lang: Lang; slug: string;
-  datos: CollectionEntry<'proyectos'>['data'];
+  lang: Lang;
+  slug: string;
+  tipo: 'qa' | 'dev';
+  datos: {
+    titulo: string;
+    resumen: string;
+    tags?: string[];
+    stack: string[];
+    estado?: 'completo' | 'en-progreso';
+    metricas?: { etiqueta: string; valor: string }[];
+    repo?: string;
+    demo?: string;
+  };
   nivelTitulo: 2 | 3;
 }
-const { lang, slug, datos, nivelTitulo } = Astro.props;
+
+const { lang, slug, tipo, datos, nivelTitulo } = Astro.props;
+const t = useTranslations(lang);
 const TituloTag = nivelTitulo === 2 ? 'h2' : 'h3';
+const href = `/${lang}/${tipo === 'qa' ? 'qa' : 'dev'}/${slug}`;
+// Los chips salen de `tags` en QA (manual, e2e, api...) y de `stack` en dev.
+const chips = tipo === 'qa' ? (datos.tags ?? []) : datos.stack;
 ---
-<article data-testid="proyecto-card"
-  class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
-  <TituloTag class="text-lg font-semibold">
-    <a href={`/${lang}/dev/${slug}`} class="after:absolute after:inset-0">{datos.titulo}</a>
+<article data-testid="proyecto-card" data-tipo={tipo}
+  class="relative flex flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
+  <div class="flex items-center gap-2">
+    <span data-testid="card-distintivo"
+      class="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted">
+      {tipo === 'qa' ? t('card.qa') : t('card.dev')}
+    </span>
+    {datos.estado === 'en-progreso' && (
+      <span data-testid="card-estado" class="text-xs text-sev-medio">
+        <span aria-hidden="true">◐</span> {t('caso.enProgreso')}
+      </span>
+    )}
+  </div>
+
+  <TituloTag class="mt-3 text-lg font-semibold">
+    <a href={href} class="after:absolute after:inset-0">{datos.titulo}</a>
   </TituloTag>
+
   <p class="mt-2 text-sm text-muted">{datos.resumen}</p>
-  <div class="mt-3 flex flex-wrap gap-1">{datos.stack.map((s) => <Tag nombre={s} />)}</div>
+
+  {datos.metricas && datos.metricas.length > 0 && (
+    <dl data-testid="card-metricas" class="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+      {datos.metricas.map((m) => (
+        <div class="flex items-baseline gap-1">
+          <dd class="font-mono text-sm text-accent">{m.valor}</dd>
+          <dt class="text-xs text-muted">{m.etiqueta}</dt>
+        </div>
+      ))}
+    </dl>
+  )}
+
+  <div class="mt-3 flex flex-wrap gap-1">
+    {chips.map((c) => <Tag nombre={c} />)}
+  </div>
+
+  {(datos.repo || datos.demo) && (
+    <div class="relative z-10 mt-4 flex gap-4 text-sm">
+      {datos.repo && (
+        <a href={datos.repo} data-testid="card-repo" target="_blank" rel="noopener noreferrer"
+          class="text-accent hover:underline">{t('caso.verRepo')}</a>
+      )}
+      {datos.demo && (
+        <a href={datos.demo} data-testid="card-demo" target="_blank" rel="noopener noreferrer"
+          class="text-accent hover:underline">{t('caso.verDemo')}</a>
+      )}
+    </div>
+  )}
 </article>

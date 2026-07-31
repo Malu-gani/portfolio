@@ -1,25 +1,53 @@
 ---
-import Tag from './Tag.astro';
+import { stack, ordenCategorias, type Categoria, type Nivel } from '../data/stack';
 import { useTranslations } from '../i18n/utils';
-import type { Lang } from '../i18n/ui';
+import type { Lang, ClaveUI } from '../i18n/ui';
+
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const grupos = [
-  { es: 'Automatización', en: 'Automation', items: ['Playwright', 'Cypress', 'Selenium'] },
-  { es: 'API', en: 'API', items: ['Postman', 'REST Assured'] },
-  { es: 'Gestión', en: 'Management', items: ['Jira', 'TestRail', 'Xray'] },
-  { es: 'Desarrollo', en: 'Development', items: ['TypeScript', 'React', 'Git'] },
-];
+const claveCategoria: Record<Categoria, ClaveUI> = {
+  lenguajes: 'stack.lenguajes',
+  testing: 'stack.testing',
+  frameworks: 'stack.frameworks',
+  datos: 'stack.datos',
+  herramientas: 'stack.herramientas',
+};
+
+const claveNivel: Record<Nivel, ClaveUI> = {
+  avanzado: 'stack.nivel.avanzado',
+  intermedio: 'stack.nivel.intermedio',
+  aprendiendo: 'stack.nivel.aprendiendo',
+};
+
+// El nivel se comunica con texto, no solo con color: es la misma restricción
+// que rige para severidad y estado en el resto del sitio.
+const colorNivel: Record<Nivel, string> = {
+  avanzado: 'text-accent',
+  intermedio: 'text-muted',
+  aprendiendo: 'text-sev-medio',
+};
 ---
-<section data-testid="stack" class="py-10">
+<section data-testid="stack" id="stack" class="scroll-mt-24 py-10">
   <h2 class="text-2xl font-semibold">{t('home.stack')}</h2>
-  <div class="mt-4 grid gap-4 sm:grid-cols-2">
-    {grupos.map((g) => (
-      <div>
-        <h3 class="text-sm uppercase tracking-wide text-muted">{lang === 'es' ? g.es : g.en}</h3>
-        <div class="mt-2 flex flex-wrap gap-1">{g.items.map((i) => <Tag nombre={i} />)}</div>
+  <div class="mt-6 space-y-8">
+    {ordenCategorias.map((categoria) => (
+      <div data-testid={`stack-grupo-${categoria}`}>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-muted">
+          {t(claveCategoria[categoria])}
+        </h3>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {stack.filter((tec) => tec.categoria === categoria).map((tec) => (
+            <li data-testid="stack-item"
+              class="rounded-lg border border-border bg-surface px-3 py-2">
+              <span class="block text-sm font-medium text-text">{tec.nombre}</span>
+              <span class={`block text-xs ${colorNivel[tec.nivel]}`}>
+                {t(claveNivel[tec.nivel])}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     ))}
   </div>

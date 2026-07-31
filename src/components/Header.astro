@@ -1,33 +1,143 @@
 ---
 import ThemeToggle from './ThemeToggle.tsx';
 import LangToggle from './LangToggle.astro';
+import NavMobile from './NavMobile.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
-import { rutas } from '../i18n/routes';
+import type { Lang } from '../i18n/ui';
 
-const lang = getLangFromUrl(Astro.url);
+const lang: Lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
-const enlaces = [
-  { testid: 'nav-inicio', href: `/${lang}/`, texto: t('nav.inicio') },
-  { testid: 'nav-qa', href: rutas.qa[lang], texto: t('nav.qa') },
-  { testid: 'nav-dev', href: rutas.dev[lang], texto: t('nav.dev') },
-  { testid: 'nav-sobre', href: rutas.about[lang], texto: t('nav.sobre') },
-  { testid: 'nav-contacto', href: rutas.contact[lang], texto: t('nav.contacto') },
+
+// El navbar es contextual: en la home los items son anclas y el scroll-spy
+// marca la sección visible; en cualquier otra página son enlaces a la home
+// posicionada en esa sección.
+const home = `/${lang}/`;
+const enHome = Astro.url.pathname === home || Astro.url.pathname === `/${lang}`;
+
+const secciones = [
+  { id: 'inicio', testid: 'nav-inicio', texto: t('nav.inicio') },
+  { id: 'sobre-mi', testid: 'nav-sobre', texto: t('nav.sobre') },
+  { id: 'qa', testid: 'nav-qa', texto: t('nav.qa') },
+  { id: 'dev', testid: 'nav-dev', texto: t('nav.dev') },
+  { id: 'stack', testid: 'nav-stack', texto: t('nav.stack') },
+  { id: 'contacto', testid: 'nav-contacto', texto: t('nav.contacto') },
 ];
 ---
-<header class="border-b border-border">
+<header class="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur">
   <nav data-testid="nav-principal" aria-label={t('nav.principal')}
     class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-    <ul class="flex flex-wrap gap-4">
-      {enlaces.map((e) => (
+    <NavMobile lang={lang} enHome={enHome} secciones={secciones} />
+    <ul data-testid="nav-secciones" class="hidden flex-wrap gap-4 sm:flex">
+      {secciones.map((s) => (
         <li>
-          <a href={e.href} data-testid={e.testid}
-            class="text-muted hover:text-accent focus-visible:text-accent">{e.texto}</a>
+          <a href={enHome ? `#${s.id}` : `${home}#${s.id}`}
+            data-testid={s.testid} data-seccion={s.id}
+            class="text-muted transition-colors hover:text-accent focus-visible:text-accent aria-[current=true]:text-accent">
+            {s.texto}
+          </a>
         </li>
       ))}
     </ul>
     <div class="flex gap-2">
       <LangToggle />
-      <ThemeToggle etiqueta={t('tema.cambiar')} client:load />
+      <ThemeToggle
+        etiqueta={t('tema.cambiar')}
+        etiquetaClaro={t('tema.claro')}
+        etiquetaOscuro={t('tema.oscuro')}
+        client:load
+      />
     </div>
   </nav>
 </header>
+
+<script>
+  // Scroll-spy en vanilla: marcar el enlace de la sección visible. No se hace
+  // con un island de React porque el proyecto sostiene que React se usa en
+  // exactamente dos, y pagar hidratación para resaltar un enlace no lo
+  // justifica.
+  let observador: IntersectionObserver | null = null;
+  let controlador: AbortController | null = null;
+
+  function activarScrollSpy() {
+    // Cada swap del ClientRouter vuelve a llamar acá con un DOM nuevo: sin
+    // esto quedarían observadores y listeners del documento anterior.
+    observador?.disconnect();
+    controlador?.abort();
+
+    const enlaces = document.querySelectorAll<HTMLAnchorElement>('a[data-seccion]');
+    if (enlaces.length === 0) return;
+
+    const porId = new Map<string, HTMLAnchorElement>();
+    for (const a of enlaces) {
+      if (a.dataset.seccion) porId.set(a.dataset.seccion, a);
+    }
+
+    const secciones = [...porId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    // Fuera de la home no hay secciones que observar y los enlaces apuntan a
+    // otra página: no hay nada que marcar.
+    if (secciones.length === 0) return;
+
+    function marcar(id: string) {
+      for (const a of porId.values()) a.removeAttribute('aria-current');
+      porId.get(id)?.setAttribute('aria-current', 'true');
+    }
+
+    // La última sección nunca alcanza la banda del observador: la página toca
+    // el fondo antes. Medido en 1280x800, contacto se queda en 264px con la
+    // banda terminando en 240, y el nav marcaba "Stack" estando en contacto.
+    const ultima = secciones[secciones.length - 1].id;
+    const enElFondo = () =>
+      Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 1;
+
+    observador = new IntersectionObserver(
+      (entradas) => {
+        if (enElFondo()) {
+          marcar(ultima);
+          return;
+        }
+        for (const entrada of entradas) {
+          if (!entrada.isIntersecting) continue;
+          marcar(entrada.target.id);
+        }
+      },
+      // El margen superior descuenta el header sticky; el inferior hace que la
+      // sección se considere activa recién cuando ocupa la parte de arriba del
+      // viewport, y no apenas asoma desde abajo.
+      { rootMargin: '-20% 0px -70% 0px' }
+    );
+
+    for (const s of secciones) observador.observe(s);
+
+    // Llegar al fondo scrolleando no siempre mueve una sección a través de la
+    // banda, así que el observador puede no volver a disparar. Este listener
+    // cubre ese caso.
+    controlador = new AbortController();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (enElFondo()) marcar(ultima);
+      },
+      { passive: true, signal: controlador.signal }
+    );
+
+    // Sin esto, al tocar una sección el panel queda abierto tapando el
+    // contenido al que acaba de saltar.
+    const menu = document.querySelector<HTMLDetailsElement>('[data-testid="nav-mobile"]');
+    menu?.addEventListener(
+      'click',
+      (evento) => {
+        if ((evento.target as HTMLElement).closest('a')) menu.open = false;
+      },
+      { signal: controlador.signal }
+    );
+  }
+
+  activarScrollSpy();
+  // Las view transitions no recargan la página: sin esto, el scroll-spy deja
+  // de funcionar tras la primera navegación con el ClientRouter. Es el mismo
+  // problema que ya resuelve el script de tema en BaseLayout.astro.
+  document.addEventListener('astro:after-swap', activarScrollSpy);
+</script>

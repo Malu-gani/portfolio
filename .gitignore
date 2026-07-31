@@ -16,3 +16,6 @@ Thumbs.db
 
 # Contexto de trabajo local, fuera del control de versiones
 CLAUDE.md
+
+# configuracion local de herramientas
+.claude/

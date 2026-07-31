@@ -54,4 +54,13 @@ describe('getAlternateUrl', () => {
   it('preserva query string y fragmento juntos', () => {
     expect(getAlternateUrl('/es/qa?tag=e2e#resultados', 'en')).toBe('/en/qa?tag=e2e#resultados');
   });
+  it('traduce el slug del filtro "todos" al cambiar de idioma', () => {
+    expect(getAlternateUrl('/es/proyectos/todos', 'en')).toBe('/en/projects/all');
+    expect(getAlternateUrl('/en/projects/all', 'es')).toBe('/es/proyectos/todos');
+  });
+
+  it('deja intacto el resto de los slugs de proyectos', () => {
+    expect(getAlternateUrl('/es/proyectos/dev', 'en')).toBe('/en/projects/dev');
+    expect(getAlternateUrl('/es/proyectos', 'en')).toBe('/en/projects');
+  });
 });

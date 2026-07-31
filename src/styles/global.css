@@ -69,7 +69,7 @@
    alcanza (reserva el espacio pero el documento sigue pasando de no
    scrolleable a scrolleable, y el crash persiste). Ver
    docs/cross-browser-diagnostico.md. */
-html { color-scheme: light dark; overflow-y: scroll; }
+html { color-scheme: light dark; overflow-y: scroll; scroll-behavior: smooth; }
 [data-theme='dark'] { color-scheme: dark; }
 
 body {

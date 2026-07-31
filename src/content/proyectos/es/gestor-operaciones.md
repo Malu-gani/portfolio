@@ -2,9 +2,11 @@
 titulo: "Diario de trading y gestor de riesgo"
 resumen: "Aplicación web para registrar operaciones de cripto y acciones, con saldos por cuenta y control de riesgo antes de entrar."
 stack: [Next.js, TypeScript, Supabase, PostgreSQL, Tailwind]
-fecha: 2026-07-29
+fecha: 2026-07-30
 destacado: true
 ejemplo: false
+repo: "https://github.com/Malu-gani/Registro-de-Operaciones"
+demo: "https://registro-de-operaciones-chi.vercel.app"
 ---
 
 ## Descripción
@@ -29,4 +31,10 @@ El aislamiento entre usuarios está en la base de datos, con Row Level Security 
 
 En desarrollo activo. Los flujos de operaciones, saldos por cuenta, multi-portafolio y plazos fijos están implementados; el módulo de alertas está en el modelo de datos pero todavía no construido.
 
-**Todavía no tiene suite de pruebas automatizada** — el plan de pruebas está escrito y publicado en el carril de QA de este portfolio, pero la ejecución está pendiente. El repositorio es privado por ahora; lo voy a enlazar acá cuando termine la suite y lo haga público.
+Tiene suite de pruebas automatizada y corre en integración continua. El diseño de esa suite, los defectos que encontró y qué se decidió no probar están en el caso del carril de QA de este portfolio.
+
+## Despliegue y operación
+
+Está desplegada y en uso, con un costo total de cero. El hosting es Vercel en su plan gratuito: el entorno de producción sigue la rama principal, así que cada cambio integrado se publica solo, y cada pull request recibe su propia URL de vista previa. La base de datos y la autenticación corren en la capa gratuita de Supabase, y los mails de confirmación salen por SMTP de Gmail.
+
+La decisión de arquitectura que más trabajo dio fue la confirmación por email. El flujo estándar guarda un verificador en una cookie del navegador donde arrancó el registro, así que registrarse en la computadora y abrir el mail en el celular fallaba — que es exactamente lo que hace cualquiera. Cambiarlo por un flujo basado en un token que viaja en el propio enlace eliminó esa dependencia, a cambio de tener que escribir las plantillas de mail y un manejador de ruta propio para la confirmación.
