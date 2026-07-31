@@ -162,9 +162,12 @@ export const stack: Tecnologia[] = [
   { nombre: 'Testing Library', categoria: 'testing', nivel: 'avanzado' },
   { nombre: 'pytest', categoria: 'testing', nivel: 'intermedio' },
   { nombre: 'Postman', categoria: 'testing', nivel: 'intermedio' },
-  { nombre: 'Newman', categoria: 'testing', nivel: 'intermedio' },
   { nombre: 'axe-core', categoria: 'testing', nivel: 'intermedio' },
   { nombre: 'Lighthouse CI', categoria: 'testing', nivel: 'intermedio' },
+  // Newman está en 'aprendiendo' y no en 'intermedio' a propósito: hay un
+  // video visto y una colección lista para correr (TRELLOW), pero nunca se
+  // ejecutó en un pipeline. Cuando eso pase, sube de nivel.
+  { nombre: 'Newman', categoria: 'testing', nivel: 'aprendiendo' },
   { nombre: 'REST Assured', categoria: 'testing', nivel: 'aprendiendo' },
 
   { nombre: 'React', categoria: 'frameworks', nivel: 'avanzado' },
@@ -182,7 +185,11 @@ export const stack: Tecnologia[] = [
   { nombre: 'Vercel', categoria: 'herramientas', nivel: 'avanzado' },
   { nombre: 'Docker', categoria: 'herramientas', nivel: 'intermedio' },
   { nombre: 'ESLint', categoria: 'herramientas', nivel: 'intermedio' },
-  { nombre: 'Jira', categoria: 'herramientas', nivel: 'intermedio' },
+  // Jira y Zephyr Scale van juntos y en avanzado: los casos de
+  // `python-qa-automation` se diseñaron dentro de Zephyr Scale antes de
+  // automatizarse, no es solo la convención de nombres copiada.
+  { nombre: 'Jira', categoria: 'herramientas', nivel: 'avanzado' },
+  { nombre: 'Zephyr Scale', categoria: 'herramientas', nivel: 'avanzado' },
   { nombre: 'Trello', categoria: 'herramientas', nivel: 'intermedio' },
   { nombre: 'Notion', categoria: 'herramientas', nivel: 'intermedio' },
 ];
