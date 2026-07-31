@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Hero from './Hero.astro';
 import StackGrid from './StackGrid.astro';
-import CasoCard from './CasoCard.astro';
+import ProyectoCard from './ProyectoCard.astro';
 import CvButton from './CvButton.astro';
 import { useTranslations } from '../i18n/utils';
 import { rutas } from '../i18n/routes';
@@ -22,9 +22,7 @@ const casos = (await getCollection('casos-qa'))
   <h2 class="text-2xl font-semibold">{t('home.qa.titulo')}</h2>
   <div class="mt-6 grid gap-4 sm:grid-cols-2">
     {casos.map((c) => (
-      <div class="relative">
-        <CasoCard lang={lang} slug={c.id.replace(prefijo, '')} datos={c.data} nivelTitulo={3} />
-      </div>
+      <ProyectoCard lang={lang} slug={c.id.replace(prefijo, '')} tipo="qa" datos={c.data} nivelTitulo={3} />
     ))}
   </div>
   <a href={rutas.qa[lang]} class="mt-4 inline-block text-accent hover:underline">{t('qa.titulo')} →</a>

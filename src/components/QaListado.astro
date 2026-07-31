@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import CasoCard from './CasoCard.astro';
+import ProyectoCard from './ProyectoCard.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -20,8 +20,6 @@ const bajada = lang === 'es'
 <p class="mt-3 max-w-prose text-muted">{bajada}</p>
 <div data-testid="lista-casos" class="mt-8 grid gap-4 sm:grid-cols-2">
   {casos.map((c) => (
-    <div class="relative">
-      <CasoCard lang={lang} slug={c.id.replace(prefijo, '')} datos={c.data} nivelTitulo={2} />
-    </div>
+    <ProyectoCard lang={lang} slug={c.id.replace(prefijo, '')} tipo="qa" datos={c.data} nivelTitulo={2} />
   ))}
 </div>

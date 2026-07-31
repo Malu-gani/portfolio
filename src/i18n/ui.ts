@@ -30,6 +30,8 @@ export type ClaveUI =
   | 'stack.nivel.aprendiendo'
   | 'qa.titulo'
   | 'dev.titulo'
+  | 'card.qa'
+  | 'card.dev'
   | 'caso.enProgreso'
   | 'caso.completo'
   | 'caso.verRepo'
@@ -70,6 +72,8 @@ const es = {
   'stack.nivel.aprendiendo': 'Aprendiendo',
   'qa.titulo': 'Casos de QA',
   'dev.titulo': 'Proyectos de desarrollo',
+  'card.qa': 'QA',
+  'card.dev': 'Desarrollo',
   'caso.enProgreso': 'En progreso',
   'caso.completo': 'Completo',
   'caso.verRepo': 'Ver repositorio',
@@ -109,6 +113,8 @@ const en = {
   'stack.nivel.aprendiendo': 'Learning',
   'qa.titulo': 'QA case studies',
   'dev.titulo': 'Development projects',
+  'card.qa': 'QA',
+  'card.dev': 'Development',
   'caso.enProgreso': 'In progress',
   'caso.completo': 'Complete',
   'caso.verRepo': 'View repository',

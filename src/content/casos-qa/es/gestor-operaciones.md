@@ -7,6 +7,11 @@ fecha: 2026-07-30
 destacado: true
 estado: completo
 ejemplo: false
+metricas:
+  - etiqueta: pruebas
+    valor: "275"
+  - etiqueta: defectos
+    valor: "10"
 repo: "https://github.com/Malu-gani/Registro-de-Operaciones"
 demo: "https://registro-de-operaciones-chi.vercel.app"
 ---

@@ -18,6 +18,10 @@ const casosQa = defineCollection({
     destacado: z.boolean().default(false),
     estado: z.enum(['completo', 'en-progreso']),
     ejemplo: z.boolean().default(false),
+    metricas: z.array(z.object({
+      etiqueta: z.string().min(1),
+      valor: z.string().min(1),
+    })).max(3).optional(),
     repo: z.url().optional(),
     demo: z.url().optional(),
   }),
@@ -32,6 +36,10 @@ const proyectos = defineCollection({
     fecha: z.coerce.date(),
     destacado: z.boolean().default(false),
     ejemplo: z.boolean().default(false),
+    metricas: z.array(z.object({
+      etiqueta: z.string().min(1),
+      valor: z.string().min(1),
+    })).max(3).optional(),
     repo: z.url().optional(),
     demo: z.url().optional(),
   }),
