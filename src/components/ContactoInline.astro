@@ -1,0 +1,36 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+/**
+ * Contacto abreviado para el hero. La sección completa sigue al cierre de la
+ * home y en `/contacto`: son los dos momentos en que alguien quiere
+ * contactarte, apenas llega y cuando terminó de leer.
+ *
+ * El email es un `mailto:` y no el botón de copiar del island: acá alcanza con
+ * el atajo, y sumar un tercer punto de montaje de React por esto no se
+ * justifica.
+ */
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const email = 'maluganijuanmanuel@gmail.com';
+
+const enlaces = [
+  { testid: 'hero-github', href: 'https://github.com/Malu-gani', texto: 'GitHub', externo: true },
+  { testid: 'hero-linkedin', href: 'https://www.linkedin.com/in/maluganijuanmanuel', texto: 'LinkedIn', externo: true },
+  { testid: 'hero-email', href: `mailto:${email}`, texto: 'Email', externo: false },
+];
+---
+<ul data-testid="contacto-inline" aria-label={t('contacto.enlaces')} class="mt-6 flex flex-wrap gap-3">
+  {enlaces.map((e) => (
+    <li>
+      <a href={e.href} data-testid={e.testid}
+        target={e.externo ? '_blank' : undefined}
+        rel={e.externo ? 'noopener noreferrer' : undefined}
+        class="inline-block rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent">
+        {e.texto}
+      </a>
+    </li>
+  ))}
+</ul>

@@ -43,6 +43,7 @@ export type ClaveUI =
   | 'caso.verRepo'
   | 'caso.verDemo'
   | 'cv.descargar'
+  | 'contacto.enlaces'
   | 'contacto.copiar'
   | 'contacto.copiado'
   | 'contacto.errorCopiar'
@@ -91,6 +92,7 @@ const es = {
   'caso.verRepo': 'Ver repositorio',
   'caso.verDemo': 'Ver la app',
   'cv.descargar': 'Descargar CV',
+  'contacto.enlaces': 'Enlaces de contacto',
   'contacto.copiar': 'Copiar email',
   'contacto.copiado': 'Copiado',
   'contacto.errorCopiar': 'No se pudo copiar. Copialo a mano.',
@@ -138,6 +140,7 @@ const en = {
   'caso.verRepo': 'View repository',
   'caso.verDemo': 'View the app',
   'cv.descargar': 'Download CV',
+  'contacto.enlaces': 'Contact links',
   'contacto.copiar': 'Copy email',
   'contacto.copiado': 'Copied',
   'contacto.errorCopiar': "Couldn't copy. Copy it manually.",

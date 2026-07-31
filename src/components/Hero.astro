@@ -1,11 +1,12 @@
 ---
+import ContactoInline from './ContactoInline.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<section data-testid="hero" class="py-10">
+<section data-testid="hero" id="inicio" class="scroll-mt-24 py-10">
   <p data-testid="badge-disponible"
     class="inline-flex items-center gap-2 rounded-full border border-est-paso px-3 py-1 text-sm text-est-paso">
     <span aria-hidden="true">●</span> {t('home.disponible')}
@@ -13,4 +14,5 @@ const t = useTranslations(lang);
   <h1 class="mt-4 text-4xl font-bold sm:text-5xl">Juan Manuel Malugani</h1>
   <p class="mt-2 font-mono text-accent">{t('home.rol')}</p>
   <p class="mt-4 max-w-prose text-lg text-muted">{t('home.posicionamiento')}</p>
+  <ContactoInline lang={lang} />
 </section>
