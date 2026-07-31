@@ -20,6 +20,14 @@ export type ClaveUI =
   | 'home.dev.titulo'
   | 'home.dev.bajada'
   | 'home.stack'
+  | 'stack.lenguajes'
+  | 'stack.testing'
+  | 'stack.frameworks'
+  | 'stack.datos'
+  | 'stack.herramientas'
+  | 'stack.nivel.avanzado'
+  | 'stack.nivel.intermedio'
+  | 'stack.nivel.aprendiendo'
   | 'qa.titulo'
   | 'dev.titulo'
   | 'caso.enProgreso'
@@ -52,6 +60,14 @@ const es = {
   'home.dev.titulo': 'También escribo código',
   'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
   'home.stack': 'Stack',
+  'stack.lenguajes': 'Lenguajes',
+  'stack.testing': 'Testing y automatización',
+  'stack.frameworks': 'Frameworks y librerías',
+  'stack.datos': 'Bases de datos',
+  'stack.herramientas': 'Herramientas y plataformas',
+  'stack.nivel.avanzado': 'Avanzado',
+  'stack.nivel.intermedio': 'Intermedio',
+  'stack.nivel.aprendiendo': 'Aprendiendo',
   'qa.titulo': 'Casos de QA',
   'dev.titulo': 'Proyectos de desarrollo',
   'caso.enProgreso': 'En progreso',
@@ -83,6 +99,14 @@ const en = {
   'home.dev.titulo': 'I also write code',
   'home.dev.bajada': 'I write code, and that makes me a better tester.',
   'home.stack': 'Stack',
+  'stack.lenguajes': 'Languages',
+  'stack.testing': 'Testing & automation',
+  'stack.frameworks': 'Frameworks & libraries',
+  'stack.datos': 'Databases',
+  'stack.herramientas': 'Tools & platforms',
+  'stack.nivel.avanzado': 'Advanced',
+  'stack.nivel.intermedio': 'Intermediate',
+  'stack.nivel.aprendiendo': 'Learning',
   'qa.titulo': 'QA case studies',
   'dev.titulo': 'Development projects',
   'caso.enProgreso': 'In progress',
