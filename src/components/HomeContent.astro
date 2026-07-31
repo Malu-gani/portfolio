@@ -1,43 +1,63 @@
 ---
 import { getCollection } from 'astro:content';
 import Hero from './Hero.astro';
+import SobreMiResumen from './SobreMiResumen.astro';
 import StackGrid from './StackGrid.astro';
 import ProyectoCard from './ProyectoCard.astro';
-import CvButton from './CvButton.astro';
+import ContactContent from './ContactContent.astro';
 import { useTranslations } from '../i18n/utils';
-import { rutas } from '../i18n/routes';
 import type { Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const prefijo = `${lang}/`;
+const base = lang === 'es' ? '/es/proyectos' : '/en/projects';
+
 const casos = (await getCollection('casos-qa'))
   .filter((c) => c.id.startsWith(prefijo) && c.data.destacado)
+  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
+
+const proyectos = (await getCollection('proyectos'))
+  .filter((p) => p.id.startsWith(prefijo) && p.data.destacado)
   .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
 ---
 <Hero lang={lang} />
 
-<section data-testid="bloque-qa" class="py-10">
+<SobreMiResumen lang={lang} />
+
+<section data-testid="bloque-qa" id="qa" class="scroll-mt-24 border-t border-border py-10">
   <h2 class="text-2xl font-semibold">{t('home.qa.titulo')}</h2>
   <div class="mt-6 grid gap-4 sm:grid-cols-2">
     {casos.map((c) => (
-      <ProyectoCard lang={lang} slug={c.id.replace(prefijo, '')} tipo="qa" datos={c.data} nivelTitulo={3} />
+      <ProyectoCard lang={lang} slug={c.id.replace(prefijo, '')} tipo="qa"
+        datos={c.data} nivelTitulo={3} />
     ))}
   </div>
-  <a href={rutas.qa[lang]} class="mt-4 inline-block text-accent hover:underline">{t('qa.titulo')} →</a>
+  <a href={base} data-testid="ver-todos-qa"
+    class="mt-6 inline-block text-accent hover:underline">{t('home.qa.ver')} →</a>
 </section>
 
-<section data-testid="bloque-dev" class="border-t border-border py-8">
-  <h2 class="text-lg font-semibold text-muted">{t('home.dev.titulo')}</h2>
-  <p class="mt-1 max-w-prose text-sm text-muted">{t('home.dev.bajada')}</p>
-  <a href={rutas.dev[lang]} class="mt-2 inline-block text-accent hover:underline">{t('dev.titulo')} →</a>
+<!--
+  Dev usa el mismo tamaño de encabezado y el mismo tipo de card que QA. La
+  asimetría entre carriles la sostiene el orden de las secciones y el rol
+  declarado en el hero, no achicar el bloque secundario.
+-->
+<section data-testid="bloque-dev" id="dev" class="scroll-mt-24 border-t border-border py-10">
+  <h2 class="text-2xl font-semibold">{t('home.dev.titulo')}</h2>
+  <p class="mt-2 max-w-prose text-muted">{t('home.dev.bajada')}</p>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    {proyectos.map((p) => (
+      <ProyectoCard lang={lang} slug={p.id.replace(prefijo, '')} tipo="dev"
+        datos={p.data} nivelTitulo={3} />
+    ))}
+  </div>
+  <a href={`${base}/dev`} data-testid="ver-todos-dev"
+    class="mt-6 inline-block text-accent hover:underline">{t('home.dev.ver')} →</a>
 </section>
 
 <StackGrid lang={lang} />
 
-<section class="flex flex-wrap gap-3 py-10">
-  <a href={rutas.contact[lang]} data-testid="cta-contacto"
-    class="inline-block rounded-md bg-accent px-5 py-3 font-medium text-bg">{t('nav.contacto')}</a>
-  <CvButton lang={lang} />
+<section data-testid="bloque-contacto" id="contacto" class="scroll-mt-24 border-t border-border py-10">
+  <ContactContent lang={lang} nivelTitulo={2} />
 </section>

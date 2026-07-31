@@ -4,8 +4,9 @@ import CvButton from './CvButton.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
+interface Props { lang: Lang; nivelTitulo?: 1 | 2 }
+const { lang, nivelTitulo = 1 } = Astro.props;
+const TituloTag = nivelTitulo === 1 ? 'h1' : 'h2';
 const t = useTranslations(lang);
 const email = 'maluganijuanmanuel@gmail.com';
 
@@ -22,7 +23,7 @@ const textos: Record<Lang, { titulo: string; bajada: string }> = {
 const c = textos[lang];
 ---
 <div data-testid="contacto">
-  <h1 class="text-3xl font-bold sm:text-4xl">{c.titulo}</h1>
+  <TituloTag class:list={[nivelTitulo === 1 ? 'text-3xl sm:text-4xl' : 'text-2xl', 'font-bold']}>{c.titulo}</TituloTag>
   <p class="mt-3 max-w-prose text-muted">{c.bajada}</p>
 
   <div class="mt-8">

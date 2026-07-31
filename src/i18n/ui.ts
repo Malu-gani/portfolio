@@ -19,6 +19,8 @@ export type ClaveUI =
   | 'home.qa.titulo'
   | 'home.dev.titulo'
   | 'home.dev.bajada'
+  | 'home.qa.ver'
+  | 'home.dev.ver'
   | 'home.stack'
   | 'stack.lenguajes'
   | 'stack.testing'
@@ -71,6 +73,8 @@ const es = {
   'home.qa.titulo': 'Trabajo en QA',
   'home.dev.titulo': 'También escribo código',
   'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
+  'home.qa.ver': 'Ver todos los casos de QA',
+  'home.dev.ver': 'Ver todos los proyectos de desarrollo',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Lenguajes',
   'stack.testing': 'Testing y automatización',
@@ -122,6 +126,8 @@ const en = {
   'home.qa.titulo': 'QA work',
   'home.dev.titulo': 'I also write code',
   'home.dev.bajada': 'I write code, and that makes me a better tester.',
+  'home.qa.ver': 'See all QA cases',
+  'home.dev.ver': 'See all development projects',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Languages',
   'stack.testing': 'Testing & automation',
