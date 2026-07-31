@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-const paginas = ['/es/', '/es/qa', '/es/qa/suite-e2e-portfolio', '/es/contacto'];
+// `/es/qa` dejó de ser una página: hoy es un redirect al listado unificado, y
+// capturarla comparaba contra un `meta refresh`, no contra un listado. La
+// captura del listado tiene que tomarse en su ruta real.
+const paginas = ['/es/', '/es/proyectos', '/es/qa/suite-e2e-portfolio', '/es/contacto'];
 
 test.describe('Regresión visual', () => {
   // Las capturas de referencia se generan y comparan solo en el proyecto
@@ -46,7 +49,15 @@ test.describe('Regresión visual', () => {
         // corridas y la referencia queda inestable.
         await page.evaluate(() => document.fonts.ready);
         const nombre = `${ruta.replace(/\//g, '_')}-${tema}.png`;
-        await expect(page).toHaveScreenshot(nombre, { fullPage: true, maxDiffPixelRatio: 0.01 });
+        // 0.002 y no el 0.01 anterior. Medido durante el rediseño de la home:
+        // con 0.01, `/es/contacto` pasó con 7.606 píxeles distintos (light) y
+        // 7.725 (dark) pese a que su cabecera había cambiado de verdad —
+        // rozando el techo desde abajo sin marcar nada. 0.002 deja ~1.100
+        // píxeles de tolerancia, suficiente para el antialiasing y el
+        // renderizado de fuentes entre corridas, y habría puesto en rojo ese
+        // cambio de cabecera, que es exactamente lo que estas capturas existen
+        // para avisar.
+        await expect(page).toHaveScreenshot(nombre, { fullPage: true, maxDiffPixelRatio: 0.002 });
       });
     }
   }

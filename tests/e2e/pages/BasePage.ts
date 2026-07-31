@@ -9,6 +9,10 @@ export class BasePage {
   readonly temaOscuro: Locator;
   readonly langToggle: Locator;
   readonly nav: Locator;
+  /** El menú de secciones de escritorio; oculto por debajo del breakpoint sm. */
+  readonly navSecciones: Locator;
+  /** El `<details>` del menú de pantallas chicas. */
+  readonly navMobile: Locator;
 
   constructor(protected readonly page: Page) {
     this.themeToggle = page.getByTestId('theme-toggle');
@@ -16,6 +20,22 @@ export class BasePage {
     this.temaOscuro = page.getByTestId('theme-oscuro');
     this.langToggle = page.getByTestId('lang-toggle');
     this.nav = page.getByTestId('nav-principal');
+    this.navSecciones = page.getByTestId('nav-secciones');
+    this.navMobile = page.getByTestId('nav-mobile');
+  }
+
+  /** Enlace del menú de escritorio a una sección de la home. */
+  enlaceSeccion(id: string): Locator {
+    return this.page.getByTestId(`nav-${id === 'sobre-mi' ? 'sobre' : id}`);
+  }
+
+  /** El mismo enlace, en el desplegable de pantallas chicas. */
+  enlaceSeccionMobile(id: string): Locator {
+    return this.page.getByTestId(`m-nav-${id === 'sobre-mi' ? 'sobre' : id}`);
+  }
+
+  async abrirMenuMobile(): Promise<void> {
+    await this.navMobile.locator('summary').click();
   }
 
   async temaActual(): Promise<string | null> {

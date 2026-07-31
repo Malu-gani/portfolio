@@ -12,10 +12,74 @@ test.describe('Navegación', () => {
     });
   }
 
-  test('los enlaces del menú apuntan al idioma correcto', async ({ page }) => {
+  // El navbar es contextual: en la home los items son anclas (`#qa`) y fuera
+  // de ella apuntan a la home posicionada en esa sección (`/en/#qa`). El
+  // idioma solo se puede verificar en la segunda forma, que es la única que
+  // lleva prefijo.
+  test('fuera de la home los enlaces del menú apuntan al idioma correcto', async ({ page }) => {
+    await page.goto('/en/contact');
+    await expect(page.getByTestId('nav-qa')).toHaveAttribute('href', '/en/#qa');
+    await expect(page.getByTestId('nav-sobre')).toHaveAttribute('href', '/en/#sobre-mi');
+
+    await page.goto('/es/contacto');
+    await expect(page.getByTestId('nav-qa')).toHaveAttribute('href', '/es/#qa');
+    await expect(page.getByTestId('nav-sobre')).toHaveAttribute('href', '/es/#sobre-mi');
+  });
+
+  // La página completa de Sobre mí ya no está en el menú: se llega desde el
+  // resumen de la home. Este test es lo que quedó cubriendo que esa ruta
+  // respete el idioma.
+  test('el resumen de Sobre mí enlaza a la página completa en el idioma correcto', async ({ page }) => {
     await page.goto('/en/');
-    await expect(page.getByTestId('nav-qa')).toHaveAttribute('href', '/en/qa');
-    await expect(page.getByTestId('nav-sobre')).toHaveAttribute('href', '/en/about');
+    await expect(page.getByTestId('link-sobre-completo')).toHaveAttribute('href', '/en/about');
+
+    await page.goto('/es/');
+    await expect(page.getByTestId('link-sobre-completo')).toHaveAttribute('href', '/es/sobre-mi');
+  });
+});
+
+test.describe('Scroll-spy del navbar', () => {
+  // El menú de secciones existe recién a partir del breakpoint sm; fijar un
+  // viewport de escritorio hace que este bloque diga lo mismo en los cuatro
+  // proyectos, incluido `mobile`, donde si no el enlace estaría oculto y no se
+  // podría clickear. La pantalla angosta se cubre en el bloque de abajo.
+  test.use({ viewport: { width: 1280, height: 720 } });
+
+  // Se navega por el ancla en vez de scrollear con `scrollIntoViewIfNeeded`:
+  // ese método scrollea lo mínimo indispensable y deja la sección más abajo de
+  // la banda del IntersectionObserver (medido: `#qa` quedaba en y=252 con la
+  // banda en 144–216, y el marcado correcto era `sobre-mi`). El ancla, además,
+  // es cómo llega el usuario de verdad.
+  test('la sección a la que se salta queda marcada en el menú', async ({ page }) => {
+    await page.goto('/es/');
+    await expect(page.getByTestId('nav-inicio')).toHaveAttribute('aria-current', 'true');
+
+    await page.getByTestId('nav-qa').click();
+
+    await expect(page.getByTestId('nav-qa')).toHaveAttribute('aria-current', 'true', { timeout: 5000 });
+    await expect(page.getByTestId('nav-inicio')).not.toHaveAttribute('aria-current', 'true');
+  });
+
+  test('fuera de la home el menú apunta a la home con ancla', async ({ page }) => {
+    await page.goto('/es/contacto');
+    await expect(page.getByTestId('nav-qa')).toHaveAttribute('href', '/es/#qa');
+  });
+});
+
+test.describe('Menú en pantallas chicas', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  test('el menú de escritorio se oculta y el desplegable navega', async ({ page }) => {
+    await page.goto('/es/');
+    await expect(page.getByTestId('nav-secciones')).toBeHidden();
+
+    const menu = page.getByTestId('nav-mobile');
+    await menu.locator('summary').click();
+    await expect(page.getByTestId('m-nav-qa')).toBeVisible();
+
+    await page.getByTestId('m-nav-qa').click();
+    // El panel se cierra solo: si quedara abierto, taparía la sección.
+    await expect(page.getByTestId('m-nav-qa')).toBeHidden();
   });
 });
 
