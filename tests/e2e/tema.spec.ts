@@ -24,6 +24,26 @@ test.describe('Toggle de tema', () => {
     expect(await base.temaActual()).toBe('dark');
   });
 
+  test('la píldora activa es la del tema vigente', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/es/');
+    const base = new BasePage(page);
+    await expect(base.temaClaro).toHaveAttribute('aria-pressed', 'true');
+    await expect(base.temaOscuro).toHaveAttribute('aria-pressed', 'false');
+
+    await base.elegirTema('dark');
+    await expect(base.temaOscuro).toHaveAttribute('aria-pressed', 'true');
+    await expect(base.temaClaro).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('elegir el tema ya activo no lo cambia', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/es/');
+    const base = new BasePage(page);
+    await base.elegirTema('light');
+    expect(await base.temaActual()).toBe('light');
+  });
+
   test('el toggle sigue funcionando después de navegar', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/es/');

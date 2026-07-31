@@ -60,10 +60,14 @@ test.describe('Navegación por teclado', () => {
   test('se llega al toggle de tema solo con el teclado', async ({ page }) => {
     const base = new BasePage(page);
     await page.goto('/es/');
+    // El control es un grupo de dos píldoras: lo focusable son los botones, no
+    // el contenedor `theme-toggle`. Alcanzar cualquiera de los dos prueba que
+    // el control es operable con teclado.
+    const pildoras = ['theme-claro', 'theme-oscuro'];
     for (let i = 0; i < 20; i++) {
       await page.keyboard.press('Tab');
       const testid = await base.elementoEnfocado().getAttribute('data-testid');
-      if (testid === 'theme-toggle') return;
+      if (testid !== null && pildoras.includes(testid)) return;
     }
     throw new Error('No se alcanzó el toggle de tema con el teclado en 20 tabulaciones');
   });

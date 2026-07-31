@@ -10,6 +10,8 @@ export type ClaveUI =
   | 'nav.contacto'
   | 'nav.principal'
   | 'tema.cambiar'
+  | 'tema.claro'
+  | 'tema.oscuro'
   | 'idioma.cambiar'
   | 'home.rol'
   | 'home.disponible'
@@ -40,6 +42,8 @@ const es = {
   'nav.contacto': 'Contacto',
   'nav.principal': 'Navegación principal',
   'tema.cambiar': 'Cambiar tema',
+  'tema.claro': 'Claro',
+  'tema.oscuro': 'Oscuro',
   'idioma.cambiar': 'Ver en inglés',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
@@ -69,6 +73,8 @@ const en = {
   'nav.contacto': 'Contact',
   'nav.principal': 'Main navigation',
   'tema.cambiar': 'Toggle theme',
+  'tema.claro': 'Light',
+  'tema.oscuro': 'Dark',
   'idioma.cambiar': 'View in Spanish',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',

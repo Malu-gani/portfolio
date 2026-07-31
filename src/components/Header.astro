@@ -27,7 +27,12 @@ const enlaces = [
     </ul>
     <div class="flex gap-2">
       <LangToggle />
-      <ThemeToggle etiqueta={t('tema.cambiar')} client:load />
+      <ThemeToggle
+        etiqueta={t('tema.cambiar')}
+        etiquetaClaro={t('tema.claro')}
+        etiquetaOscuro={t('tema.oscuro')}
+        client:load
+      />
     </div>
   </nav>
 </header>
