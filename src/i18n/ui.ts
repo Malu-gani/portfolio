@@ -10,6 +10,7 @@ export type ClaveUI =
   | 'nav.stack'
   | 'nav.contacto'
   | 'nav.principal'
+  | 'nav.abrir'
   | 'tema.cambiar'
   | 'tema.claro'
   | 'tema.oscuro'
@@ -65,6 +66,7 @@ const es = {
   'nav.stack': 'Stack',
   'nav.contacto': 'Contacto',
   'nav.principal': 'Navegación principal',
+  'nav.abrir': 'Abrir menú',
   'tema.cambiar': 'Cambiar tema',
   'tema.claro': 'Claro',
   'tema.oscuro': 'Oscuro',
@@ -119,6 +121,7 @@ const en = {
   'nav.stack': 'Stack',
   'nav.contacto': 'Contact',
   'nav.principal': 'Main navigation',
+  'nav.abrir': 'Open menu',
   'tema.cambiar': 'Toggle theme',
   'tema.claro': 'Light',
   'tema.oscuro': 'Dark',
