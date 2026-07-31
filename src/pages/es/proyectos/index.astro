@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProyectoListadoFiltrable from '../../../components/ProyectoListadoFiltrable.astro';
+
+const lang = 'es' as const;
+---
+<BaseLayout lang={lang} title="Proyectos · Juan Manuel Malugani"
+  description="Casos de QA y proyectos de desarrollo, documentados de punta a punta.">
+  <ProyectoListadoFiltrable lang={lang} activo="qa" />
+</BaseLayout>

@@ -3,5 +3,11 @@
   "outputDirectory": "dist",
   "framework": "astro",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/es/qa", "destination": "/es/proyectos", "permanent": true },
+    { "source": "/es/dev", "destination": "/es/proyectos/dev", "permanent": true },
+    { "source": "/en/qa", "destination": "/en/projects", "permanent": true },
+    { "source": "/en/dev", "destination": "/en/projects/dev", "permanent": true }
+  ]
 }

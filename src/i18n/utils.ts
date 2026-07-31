@@ -33,5 +33,13 @@ export function getAlternateUrl(pathname: string, destino: Lang): string {
   const clave = claves.find((k) => seccionSlugs[k][actual] === seccion);
   if (!clave) return `/${destino}/${queryString}${fragment}`;
 
-  return `${['', destino, seccionSlugs[clave][destino], ...resto].join('/')}${queryString}${fragment}`;
+  // El tercer filtro de proyectos es el único slug de segundo nivel que
+  // cambia entre idiomas ('todos' / 'all'); el resto ('dev', y los slugs de
+  // los casos) es igual en ambos y pasa sin tocar.
+  const slugsFiltro: Record<Lang, string> = { es: 'todos', en: 'all' };
+  const restoTraducido = resto.map((segmento) =>
+    segmento === slugsFiltro[actual] && clave === 'proyectos' ? slugsFiltro[destino] : segmento
+  );
+
+  return `${['', destino, seccionSlugs[clave][destino], ...restoTraducido].join('/')}${queryString}${fragment}`;
 }

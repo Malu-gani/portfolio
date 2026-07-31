@@ -30,6 +30,12 @@ export type ClaveUI =
   | 'stack.nivel.aprendiendo'
   | 'qa.titulo'
   | 'dev.titulo'
+  | 'proyectos.titulo'
+  | 'proyectos.bajada'
+  | 'filtro.qa'
+  | 'filtro.dev'
+  | 'filtro.todos'
+  | 'filtro.etiqueta'
   | 'card.qa'
   | 'card.dev'
   | 'caso.enProgreso'
@@ -72,6 +78,12 @@ const es = {
   'stack.nivel.aprendiendo': 'Aprendiendo',
   'qa.titulo': 'Casos de QA',
   'dev.titulo': 'Proyectos de desarrollo',
+  'proyectos.titulo': 'Proyectos',
+  'proyectos.bajada': 'Casos de QA y proyectos de desarrollo. Cada uno documenta el contexto, lo que hice y qué aprendí.',
+  'filtro.qa': 'QA · Automation',
+  'filtro.dev': 'Desarrollo',
+  'filtro.todos': 'Todos',
+  'filtro.etiqueta': 'Filtrar proyectos',
   'card.qa': 'QA',
   'card.dev': 'Desarrollo',
   'caso.enProgreso': 'En progreso',
@@ -113,6 +125,12 @@ const en = {
   'stack.nivel.aprendiendo': 'Learning',
   'qa.titulo': 'QA case studies',
   'dev.titulo': 'Development projects',
+  'proyectos.titulo': 'Projects',
+  'proyectos.bajada': 'QA cases and development projects. Each one documents the context, what I did, and what I learned.',
+  'filtro.qa': 'QA · Automation',
+  'filtro.dev': 'Development',
+  'filtro.todos': 'All',
+  'filtro.etiqueta': 'Filter projects',
   'card.qa': 'QA',
   'card.dev': 'Development',
   'caso.enProgreso': 'In progress',
