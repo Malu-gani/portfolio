@@ -7,6 +7,7 @@ export type ClaveUI =
   | 'nav.qa'
   | 'nav.dev'
   | 'nav.sobre'
+  | 'nav.stack'
   | 'nav.contacto'
   | 'nav.principal'
   | 'tema.cambiar'
@@ -61,6 +62,7 @@ const es = {
   'nav.qa': 'QA',
   'nav.dev': 'Desarrollo',
   'nav.sobre': 'Sobre mí',
+  'nav.stack': 'Stack',
   'nav.contacto': 'Contacto',
   'nav.principal': 'Navegación principal',
   'tema.cambiar': 'Cambiar tema',
@@ -114,6 +116,7 @@ const en = {
   'nav.qa': 'QA',
   'nav.dev': 'Development',
   'nav.sobre': 'About',
+  'nav.stack': 'Stack',
   'nav.contacto': 'Contact',
   'nav.principal': 'Main navigation',
   'tema.cambiar': 'Toggle theme',
