@@ -43,6 +43,9 @@ export type ClaveUI =
   | 'caso.verRepo'
   | 'caso.verDemo'
   | 'cv.descargar'
+  | 'sobre.titulo'
+  | 'sobre.resumen'
+  | 'sobre.ver'
   | 'contacto.enlaces'
   | 'contacto.copiar'
   | 'contacto.copiado'
@@ -92,6 +95,9 @@ const es = {
   'caso.verRepo': 'Ver repositorio',
   'caso.verDemo': 'Ver la app',
   'cv.descargar': 'Descargar CV',
+  'sobre.titulo': 'Sobre mí',
+  'sobre.resumen': 'Vengo del monitoreo de alarmas: tres años leyendo señales y decidiendo cuáles eran un problema real. Aprendo construyendo: cada proyecto que hago termina documentado, con lo que salió bien y lo que no.',
+  'sobre.ver': 'Leer el recorrido completo',
   'contacto.enlaces': 'Enlaces de contacto',
   'contacto.copiar': 'Copiar email',
   'contacto.copiado': 'Copiado',
@@ -140,6 +146,9 @@ const en = {
   'caso.verRepo': 'View repository',
   'caso.verDemo': 'View the app',
   'cv.descargar': 'Download CV',
+  'sobre.titulo': 'About me',
+  'sobre.resumen': 'I come from alarm monitoring: three years reading signals and deciding which ones were a real problem. I learn by building: every project I take on ends up documented, including what worked and what did not.',
+  'sobre.ver': 'Read the full story',
   'contacto.enlaces': 'Contact links',
   'contacto.copiar': 'Copy email',
   'contacto.copiado': 'Copied',
