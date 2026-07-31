@@ -85,9 +85,17 @@ export default function ThemeToggle({ etiqueta, etiquetaClaro, etiquetaOscuro }:
       data-testid="theme-toggle"
       className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1"
     >
+      {/*
+        El `aria-label` no es redundante con el texto: por debajo del breakpoint
+        sm el `<span>` es `display: none` y los iconos son `aria-hidden`, así que
+        sin él los botones se quedan sin nombre accesible en pantallas chicas
+        (axe: `button-name`, WCAG 4.1.2). Coincide palabra por palabra con la
+        etiqueta visible cuando esta se muestra, que es lo que pide 2.5.3.
+      */}
       <button
         type="button"
         data-testid="theme-claro"
+        aria-label={etiquetaClaro}
         aria-pressed={tema === 'light'}
         onClick={() => elegir('light')}
         className={`${pildora} ${tema === 'light' ? activa : inactiva}`}
@@ -98,6 +106,7 @@ export default function ThemeToggle({ etiqueta, etiquetaClaro, etiquetaOscuro }:
       <button
         type="button"
         data-testid="theme-oscuro"
+        aria-label={etiquetaOscuro}
         aria-pressed={tema === 'dark'}
         onClick={() => elegir('dark')}
         className={`${pildora} ${tema === 'dark' ? activa : inactiva}`}
