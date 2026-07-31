@@ -101,29 +101,42 @@ a repositorio y demo cuando el frontmatter los tenga.
 la que viene la entrada. Un dato que se puede calcular no debería poder
 contradecirse.
 
-### 3.6 El stack se agrupa por nivel de dominio, no por categoría técnica
+### 3.6 El stack se agrupa por categoría técnica y cada chip declara su nivel
 
-Tres grupos, con el mismo tratamiento visual y distinto encabezado:
+La grilla se organiza en cinco categorías con encabezado fijo —todas visibles al
+scrollear, sin nada que tocar para descubrirlas— y **cada chip lleva el nivel
+debajo del nombre de la tecnología**.
 
-**Trabajo con esto** — proyecto real, defendible en una entrevista técnica:
-Playwright, TypeScript, JavaScript, React, Next.js, Astro, Tailwind CSS,
-Supabase, PostgreSQL, SQL, Vitest, Testing Library, Git, GitHub Actions, Vercel,
-HTML, CSS.
+| Categoría | Tecnologías |
+|---|---|
+| Lenguajes | JavaScript, TypeScript, SQL, HTML, CSS · Python, PHP |
+| Testing y automatización | Playwright, Vitest, Testing Library · pytest, Postman, Newman, axe-core, Lighthouse CI · REST Assured |
+| Frameworks y librerías | React, Next.js, Astro, Tailwind CSS · Bootstrap, jQuery |
+| Bases de datos | PostgreSQL, Supabase |
+| Herramientas y plataformas | Git, GitHub Actions, Vercel · Docker, ESLint, Jira, Trello, Notion |
 
-**Base sólida** — uso puntual o proyectos más chicos: Python, pytest, Postman,
-Newman, PHP, Bootstrap, jQuery, Docker, axe-core, Lighthouse CI, ESLint, Jira,
-Trello, Notion.
-
-**En formación** — en estudio: REST Assured.
+Los niveles son **Avanzado** (proyecto real, defendible en una entrevista
+técnica), **Intermedio** (uso puntual o proyectos más chicos) y **Aprendiendo**
+(en estudio). En la tabla de arriba el `·` separa los tramos en ese orden.
 
 Cypress, Selenium, TestRail y Xray **salen**: no aparecen en ningún proyecto del
 disco y no hay cómo defenderlas.
 
-Una grilla plana de chips iguala visualmente Playwright —275 pruebas y un caso
-escrito— con una herramienta vista en videos. En una entrevista, el chip que no
-se puede defender es el primero que se pica. Agrupar por nivel deja entrar todo
-sin que nada prometa de más, y da un lugar honesto donde poner lo próximo que se
-estudie sin tener que elegir entre inflar el stack o esconderlo.
+Por qué el nivel viaja en el chip y no como criterio de agrupación: una grilla
+plana iguala visualmente Playwright —275 pruebas y un caso escrito— con una
+herramienta vista en videos, y en una entrevista el chip que no se puede
+defender es el primero que se pica. Pero agrupar *por* nivel deja la lectura al
+revés de como alguien busca: se entra al stack preguntando "¿sabe testear?", no
+"¿qué domina mucho?". La categoría ordena, el nivel matiza.
+
+El nivel se declara en texto, no solo por color o posición, en coherencia con la
+restricción que ya rige para severidad y estado en el resto del sitio.
+
+**El stack deja de estar hardcodeado en el componente.** Pasa a
+`src/data/stack.ts` como una lista de `{ nombre, categoria, nivel }`, con las
+categorías y los niveles tipados. Así se puede verificar desde un test unitario
+que ninguna tecnología quede sin categoría o con un nivel inválido, cosa que hoy
+—con los grupos escritos a mano dentro del `.astro`— no se puede afirmar.
 
 ### 3.7 El contacto aparece dos veces, abreviado y completo
 
@@ -227,8 +240,9 @@ escrito. Nunca `--update-snapshots` global.
 | `contenido.test.ts` | validar el campo `metricas` |
 
 **Cobertura nueva:** el filtro en sus tres rutas y con JavaScript deshabilitado,
-el scroll-spy, el menú mobile, las métricas en card, y los redirects de `/qa` y
-`/dev`.
+el scroll-spy, el menú mobile, las métricas en card, los redirects de `/qa` y
+`/dev`, y un test unitario sobre `src/data/stack.ts` que verifique que toda
+tecnología tenga categoría y nivel válidos.
 
 **Decisión abierta:** `maxDiffPixelRatio` está en 0.01 en `visual.spec.ts`. Se
 midió que absorbe cambios de hasta unos 5.700 píxeles sin marcar diferencia. Un
