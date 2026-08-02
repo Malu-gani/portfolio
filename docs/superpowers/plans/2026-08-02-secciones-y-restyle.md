@@ -1640,14 +1640,22 @@ de antemano.
 
 En `tests/e2e/navegacion.spec.ts`, agregar al final:
 
+> **Corregido el 02/08/2026, durante la ejecución.** La versión original de este test afirmaba
+> `expect(tipo).toContain('proximity')`, y **era imposible de cumplir**. `proximity` es el valor
+> inicial de la componente de rigidez de `scroll-snap-type`, así que todos los motores lo eliden
+> al serializar el valor computado: `y proximity` computa a `y`, mientras que `y mandatory`
+> computa a `y mandatory`. Verificado empíricamente en los cuatro navegadores. La aserción pasa a
+> afirmar el eje y la **ausencia** de `mandatory`, que es el invariante que de verdad importa.
+
 ```ts
 test.describe('Scroll-snap', () => {
-  test('la home declara snap por proximidad', async ({ page }) => {
+  test('la home declara snap por proximidad en el eje vertical', async ({ page }) => {
     await page.goto('/es/');
     const tipo = await page.evaluate(
       () => getComputedStyle(document.documentElement).scrollSnapType
     );
-    expect(tipo).toContain('proximity');
+    expect(tipo).toContain('y');
+    expect(tipo, 'el snap quedó en mandatory: recortaría contenido o dejaría huecos').not.toContain('mandatory');
   });
 
   // El bloque global de reduced-motion anula animaciones, transiciones y

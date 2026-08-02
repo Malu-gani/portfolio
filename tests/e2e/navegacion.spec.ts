@@ -109,3 +109,66 @@ test.describe('Estabilidad del scroll entre navegaciones', () => {
     });
   }
 });
+
+test.describe('Scroll-snap', () => {
+  // El valor computado NO incluye "proximity": es el valor inicial de la
+  // componente de rigidez, así que todos los motores lo eliden al serializar
+  // (`y proximity` computa a `y`; `y mandatory` computa a `y mandatory`).
+  // Por eso se afirma el eje y la ausencia de `mandatory`, que es el invariante
+  // que importa: `mandatory` obligaría a que cada sección midiera 100vh, y las
+  // de esta home tienen alturas muy distintas.
+  test('la home declara snap por proximidad en el eje vertical', async ({ page }) => {
+    await page.goto('/es/');
+    const tipo = await page.evaluate(
+      () => getComputedStyle(document.documentElement).scrollSnapType
+    );
+    expect(tipo).toContain('y');
+    expect(tipo, 'el snap quedó en mandatory: recortaría contenido o dejaría huecos').not.toContain('mandatory');
+  });
+
+  // Si el selector de `scroll-snap-align` no matcheara las secciones, el snap no
+  // se aplicaría a nada y los tests de anclas pasarían igual: falso verde. Esta
+  // aserción es la que hace que el snap sea observable y no solo declarado.
+  test('las seis secciones de la home declaran punto de anclaje', async ({ page }) => {
+    await page.goto('/es/');
+    const alineadas = await page.evaluate(() =>
+      ['inicio', 'sobre-mi', 'proyectos', 'stack', 'formacion', 'contacto'].filter((id) => {
+        const el = document.getElementById(id);
+        return el !== null && getComputedStyle(el).scrollSnapAlign.startsWith('start');
+      })
+    );
+    expect(alineadas).toHaveLength(6);
+  });
+
+  // El bloque global de reduced-motion anula animaciones, transiciones y
+  // scroll-behavior, pero `scroll-snap-type` es una propiedad aparte: sin esta
+  // regla, alguien con la preferencia activada seguiría teniendo el scroll
+  // agarrándose solo, que es exactamente el movimiento que pidió no tener.
+  test('con reduced-motion el snap se desactiva', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/es/');
+    const tipo = await page.evaluate(
+      () => getComputedStyle(document.documentElement).scrollSnapType
+    );
+    expect(tipo).toBe('none');
+  });
+
+  // El invariante que evita el crash de WebKit no se puede perder por sumar
+  // snap: `overflow-y: scroll` tiene que seguir ahí.
+  test('el snap no se come el overflow que evita el crash de WebKit', async ({ page }) => {
+    await page.goto('/es/');
+    const overflowY = await page.evaluate(
+      () => getComputedStyle(document.documentElement).overflowY
+    );
+    expect(overflowY).toBe('scroll');
+  });
+
+  // El navbar ancla contra los ids: si el snap rompiera el salto, el sitio
+  // perdería su navegación principal sin que nada más lo notara.
+  test('la navegación por ancla sigue llegando a la sección', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/es/');
+    await page.getByTestId('nav-formacion').click();
+    await expect(page.getByTestId('bloque-formacion')).toBeInViewport({ timeout: 5000 });
+  });
+});

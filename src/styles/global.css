@@ -69,8 +69,25 @@
    alcanza (reserva el espacio pero el documento sigue pasando de no
    scrolleable a scrolleable, y el crash persiste). Ver
    docs/cross-browser-diagnostico.md. */
-html { color-scheme: light dark; overflow-y: scroll; scroll-behavior: smooth; }
+/* `proximity` y no `mandatory`: las secciones tienen alturas muy distintas —el
+   hero es corto, el stack es una grilla de 33 chips— y `mandatory` obligaría a
+   que cada una midiera 100vh, lo que significa recortar contenido o dejar
+   huecos. Con `proximity` el scroll se acomoda solo cuando ya está cerca. */
+html {
+  color-scheme: light dark;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
 [data-theme='dark'] { color-scheme: dark; }
+
+/* Solo las secciones de la home: son las que el navbar ancla. Aplicarlo a
+   cualquier <section> agarraría también las de los detalles de caso, que son
+   texto largo y ahí el snap estorba en vez de ayudar. */
+main > section[id],
+main > * > section[id] {
+  scroll-snap-align: start;
+}
 
 body {
   background-color: var(--bg);
@@ -87,5 +104,11 @@ body {
   }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
     animation: none !important;
+  }
+  /* `scroll-snap-type` no lo cubre ninguna de las reglas de arriba: no es una
+     animación ni una transición ni `scroll-behavior`. Sin esto, el scroll
+     seguiría agarrándose solo para quien pidió no tener movimiento. */
+  html {
+    scroll-snap-type: none !important;
   }
 }
