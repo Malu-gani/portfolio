@@ -37,11 +37,30 @@ const { lang } = Astro.props;
   // del header. No es un island de React: pagar hidratación para un fade no se
   // justifica.
   let observador: IntersectionObserver | null = null;
+  let controlador: AbortController | null = null;
+
+  // Idempotente: una sección ya revelada (`visible`) se salta. Devuelve si
+  // quedan secciones pendientes, para que quien la llama sepa si todavía hace
+  // falta seguir escuchando.
+  function revelarPendientes(secciones: HTMLElement[]) {
+    let quedan = false;
+    for (const s of secciones) {
+      if (s.classList.contains('visible')) continue;
+      if (s.getBoundingClientRect().top < window.innerHeight) {
+        s.classList.add('visible');
+        observador?.unobserve(s);
+      } else {
+        quedan = true;
+      }
+    }
+    return quedan;
+  }
 
   function activarRevelado() {
     observador?.disconnect();
+    controlador?.abort();
 
-    const secciones = document.querySelectorAll<HTMLElement>('.revelar');
+    const secciones = [...document.querySelectorAll<HTMLElement>('.revelar')];
     if (secciones.length === 0) return;
 
     // La clase va primero y desde acá: es lo que habilita el CSS que esconde.
@@ -51,7 +70,12 @@ const { lang } = Astro.props;
     observador = new IntersectionObserver(
       (entradas) => {
         for (const entrada of entradas) {
-          if (!entrada.isIntersecting) continue;
+          // `isIntersecting` solo cubre lo que entra por abajo. Una sección
+          // que ya quedó por encima del viewport en la primera observación
+          // —se llegó con `#ancla`— nunca va a intersectar la banda, y sin
+          // esto se quedaría desplazada para siempre.
+          const yaPaso = entrada.boundingClientRect.top < 0;
+          if (!entrada.isIntersecting && !yaPaso) continue;
           entrada.target.classList.add('visible');
           // Una vez revelada no se vuelve a esconder: el efecto es de entrada,
           // no un parpadeo cada vez que la sección cruza el borde.
@@ -62,6 +86,23 @@ const { lang } = Astro.props;
     );
 
     for (const s of secciones) observador.observe(s);
+
+    // El observador solo emite una entrada cuando la intersección *cruza* un
+    // umbral. Un salto instantáneo —clickear el navbar apenas cargó la
+    // home— puede llevar una sección de completamente abajo a completamente
+    // arriba sin que el navegador vea ningún cruce en el medio, y esa sección
+    // se quedaría desplazada para siempre. Firefox y WebKit lo exponen;
+    // Chromium lo tapaba porque alcanza a disparar durante el recorrido. Este
+    // listener es la red que cubre lo que el observador no puede ver por
+    // construcción, y se desengancha solo cuando ya no queda nada pendiente.
+    controlador = new AbortController();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!revelarPendientes(secciones)) controlador?.abort();
+      },
+      { passive: true, signal: controlador.signal }
+    );
   }
 
   activarRevelado();

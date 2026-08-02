@@ -152,33 +152,45 @@ test.describe('El filtro de la home funciona sin JavaScript', () => {
 });
 
 test.describe('Aparición al scrollear', () => {
-  test('las secciones terminan visibles al recorrer la página', async ({ page }) => {
+  test('las secciones terminan en su posición al recorrer la página', async ({ page }) => {
     await page.goto('/es/');
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    // El observador dispara con el scroll; esperar a la última sección alcanza
-    // porque es la que llega al final del recorrido.
-    await expect(page.getByTestId('bloque-contacto')).toBeVisible();
-    const opacidades = await page.evaluate(() =>
-      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).opacity)
+    // El observador es asíncrono y el desplazamiento se retira con una
+    // transición de 500ms: `toBeVisible` no sirve de gate porque ni la clase
+    // ni el desplazamiento cambian `display` o `visibility`, y leer el
+    // transform apenas se agrega la clase captura un fotograma a mitad de
+    // camino. Se espera a que la transición termine de verdad en las cinco
+    // secciones antes de leer.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          [...document.querySelectorAll<HTMLElement>('.revelar')].every(
+            (el) => getComputedStyle(el).transform === 'none'
+          )
+        )
+      )
+      .toBe(true);
+    const transforms = await page.evaluate(() =>
+      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).transform)
     );
-    expect(opacidades.length, 'ninguna sección declara la clase revelar').toBeGreaterThan(0);
-    expect(opacidades.every((o) => Number(o) === 1), `quedaron secciones invisibles: ${opacidades}`).toBe(true);
+    expect(transforms.length, 'ninguna sección declara la clase revelar').toBeGreaterThan(0);
+    expect(transforms.every((t) => t === 'none'), `quedaron secciones desplazadas: ${transforms}`).toBe(true);
   });
 });
 
 // La restricción más importante del tratamiento visual: si el CSS escondiera
-// los elementos y el JS los revelara, un visitante sin JavaScript vería una
-// página en blanco. El JS opta por el efecto, no lo habilita.
+// o desplazara los elementos y el JS los revelara, un visitante sin
+// JavaScript vería una página rota. El JS opta por el efecto, no lo habilita.
 test.describe('Sin JavaScript no queda nada invisible', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('todas las secciones de la home son visibles', async ({ page }) => {
+  test('todas las secciones de la home están en su posición', async ({ page }) => {
     await page.goto('/es/');
-    const opacidades = await page.evaluate(() =>
-      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).opacity)
+    const transforms = await page.evaluate(() =>
+      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).transform)
     );
-    expect(opacidades.length).toBeGreaterThan(0);
-    expect(opacidades.every((o) => Number(o) === 1), `sin JS quedaron secciones invisibles: ${opacidades}`).toBe(true);
+    expect(transforms.length).toBeGreaterThan(0);
+    expect(transforms.every((t) => t === 'none'), `sin JS quedaron secciones desplazadas: ${transforms}`).toBe(true);
   });
 
   test('el documento no declara la clase que habilita el efecto', async ({ page }) => {
