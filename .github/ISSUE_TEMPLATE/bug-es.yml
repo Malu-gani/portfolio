@@ -1,0 +1,51 @@
+name: Reportar un problema
+description: Contame un defecto que encontraste en el sitio
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el trabajo. Cuanto más concreto el reporte, más
+        rápido se puede reproducir y arreglar.
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: Qué pasó
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperaba que pasara
+    validations:
+      required: true
+  - type: textarea
+    id: obtenido
+    attributes:
+      label: Qué pasó en cambio
+    validations:
+      required: true
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y sistema operativo
+      placeholder: Firefox 141 en Windows 11
+    validations:
+      required: false
+  - type: input
+    id: pantalla
+    attributes:
+      label: Tamaño de pantalla
+      placeholder: Escritorio 1920x1080, o "celular"
+    validations:
+      required: false
