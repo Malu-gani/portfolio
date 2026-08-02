@@ -20,7 +20,7 @@ const { lang } = Astro.props;
   URL al filtrar. /es/proyectos se mantiene porque da una URL propia,
   compartible e indexable, y es el destino de los redirects de /es/qa y /es/dev.
 -->
-<section data-testid="bloque-proyectos" id="proyectos" class="scroll-mt-24 py-16 sm:py-20">
+<section data-testid="bloque-proyectos" id="proyectos" class="revelar scroll-mt-24 py-16 sm:py-20">
   <ProyectoListadoFiltrable lang={lang} activo="qa" nivelTitulo={2} contexto="home" />
 </section>
 
@@ -28,6 +28,44 @@ const { lang } = Astro.props;
 
 <Formacion lang={lang} />
 
-<section data-testid="bloque-contacto" id="contacto" class="scroll-mt-24 py-16 sm:py-20">
+<section data-testid="bloque-contacto" id="contacto" class="revelar scroll-mt-24 py-16 sm:py-20">
   <ContactContent lang={lang} nivelTitulo={2} />
 </section>
+
+<script>
+  // Un solo observador para todas las secciones, mismo patrón que el scroll-spy
+  // del header. No es un island de React: pagar hidratación para un fade no se
+  // justifica.
+  let observador: IntersectionObserver | null = null;
+
+  function activarRevelado() {
+    observador?.disconnect();
+
+    const secciones = document.querySelectorAll<HTMLElement>('.revelar');
+    if (secciones.length === 0) return;
+
+    // La clase va primero y desde acá: es lo que habilita el CSS que esconde.
+    // Sin JavaScript nunca se agrega y las secciones se ven de entrada.
+    document.documentElement.classList.add('js-revelar');
+
+    observador = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) {
+          if (!entrada.isIntersecting) continue;
+          entrada.target.classList.add('visible');
+          // Una vez revelada no se vuelve a esconder: el efecto es de entrada,
+          // no un parpadeo cada vez que la sección cruza el borde.
+          observador?.unobserve(entrada.target);
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' }
+    );
+
+    for (const s of secciones) observador.observe(s);
+  }
+
+  activarRevelado();
+  // Las view transitions no recargan la página: sin esto, volver a la home tras
+  // navegar dejaría las secciones escondidas y sin nadie que las revele.
+  document.addEventListener('astro:after-swap', activarRevelado);
+</script>

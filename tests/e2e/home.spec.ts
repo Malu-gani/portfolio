@@ -150,3 +150,40 @@ test.describe('El filtro de la home funciona sin JavaScript', () => {
     await expect(page).toHaveURL(/\/es\/proyectos\/dev$/);
   });
 });
+
+test.describe('Aparición al scrollear', () => {
+  test('las secciones terminan visibles al recorrer la página', async ({ page }) => {
+    await page.goto('/es/');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // El observador dispara con el scroll; esperar a la última sección alcanza
+    // porque es la que llega al final del recorrido.
+    await expect(page.getByTestId('bloque-contacto')).toBeVisible();
+    const opacidades = await page.evaluate(() =>
+      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).opacity)
+    );
+    expect(opacidades.length, 'ninguna sección declara la clase revelar').toBeGreaterThan(0);
+    expect(opacidades.every((o) => Number(o) === 1), `quedaron secciones invisibles: ${opacidades}`).toBe(true);
+  });
+});
+
+// La restricción más importante del tratamiento visual: si el CSS escondiera
+// los elementos y el JS los revelara, un visitante sin JavaScript vería una
+// página en blanco. El JS opta por el efecto, no lo habilita.
+test.describe('Sin JavaScript no queda nada invisible', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('todas las secciones de la home son visibles', async ({ page }) => {
+    await page.goto('/es/');
+    const opacidades = await page.evaluate(() =>
+      [...document.querySelectorAll('.revelar')].map((el) => getComputedStyle(el).opacity)
+    );
+    expect(opacidades.length).toBeGreaterThan(0);
+    expect(opacidades.every((o) => Number(o) === 1), `sin JS quedaron secciones invisibles: ${opacidades}`).toBe(true);
+  });
+
+  test('el documento no declara la clase que habilita el efecto', async ({ page }) => {
+    await page.goto('/es/');
+    const tiene = await page.evaluate(() => document.documentElement.classList.contains('js-revelar'));
+    expect(tiene, 'la clase js-revelar apareció sin JavaScript').toBe(false);
+  });
+});
