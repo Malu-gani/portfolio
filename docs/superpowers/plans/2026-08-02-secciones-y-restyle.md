@@ -30,8 +30,14 @@ Valen para **todas** las tareas. Cada tarea las hereda sin repetirlas.
   es CSS y vanilla JS.
 - **Sin islands nuevos.** React se queda en `ThemeToggle.tsx` y `CopyEmail.tsx`. Nada de este
   tramo justifica hidratación.
-- **Todo estado de `hover` lleva su equivalente en `:focus-visible`.** Sin excepción: en mobile
-  el hover no existe y con teclado tampoco se dispara.
+- **Todo estado de `hover` lleva su equivalente alcanzable por teclado.** En mobile el hover no
+  existe y con teclado tampoco se dispara.
+  - **Excepción resuelta el 02/08/2026, antes de ejecutar:** en `ProyectoCard.astro` el selector
+    es `:focus-within`, **no** `:focus-visible`. El `<article>` no es focusable —el foco lo recibe
+    el enlace del título, que cubre la card entera con `after:absolute`— así que `:focus-visible`
+    sobre la card no se dispararía nunca: sería cumplir la letra y perder el efecto. Costo
+    asumido: `:focus-within` también se activa al clickear con mouse, y la elevación queda puesta
+    hasta que el foco se va. **Esto no es un hallazgo de revisión.**
 - **El estado por defecto es visible.** Ninguna animación de entrada puede depender de JS para
   que el contenido se vea. Sin JavaScript, nada queda invisible.
 - **El estado se declara en texto**, no solo por color o posición. Rige para severidad, estado de
@@ -253,6 +259,10 @@ npx playwright test proyectos.spec.ts --project=chromium -g "embebible" > /tmp/t
 Esperado: **PASS los dos.** Son tests de caracterización: fijan el comportamiento actual de
 `/es/proyectos` para que el refactor de esta tarea no lo cambie sin que nadie se entere. El test
 que sí falla primero es el del paso siguiente.
+
+> **Decidido el 02/08/2026, antes de ejecutar:** que estos dos tests pasen en la primera corrida
+> es deliberado y no una violación del ciclo TDD. Son la red de un refactor, no el motor de una
+> feature. **Esto no es un hallazgo de revisión.** El ciclo estricto rige para el resto del plan.
 
 - [ ] **Paso 3: Escribir el test que falla de verdad**
 
