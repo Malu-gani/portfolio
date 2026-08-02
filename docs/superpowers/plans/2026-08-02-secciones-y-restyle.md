@@ -1619,7 +1619,28 @@ git commit -m "style: las cards se elevan en hover y en foco de teclado"
 
 ---
 
-## Tarea 9: `scroll-snap` y `prefers-reduced-motion`
+## Tarea 9: `scroll-snap` y `prefers-reduced-motion` — REVERTIDA
+
+> **Revertida el 02/08/2026, en la Tarea 12, aplicando el criterio de reversión que esta misma
+> tarea dejó escrito antes de implementarla.**
+>
+> **Motivo medido, no impresión:** el snap tira del viewport *después* de que el scroll llega a
+> destino, así que un click sobre un elemento que no está cerca de un punto de anclaje no
+> aterriza. Playwright lo reporta como `element is not stable` y después
+> `element is outside of the viewport`. El test del filtro sin JavaScript **fallaba 6 de 6
+> corridas con el snap puesto y pasaba 6 de 6 sin él**, en `chromium` y en `mobile`. Atribución
+> del 100%: se midió desactivando solo esa declaración.
+>
+> El sitio de referencia del que salió el diseño tampoco usa snap — medido, su `scrollSnapType`
+> es `none`.
+>
+> **Qué quedó en su lugar:** una guarda que falla si el snap vuelve sin que alguien lo decida y
+> vuelva a medir, y un test de navegación por ancla que **mide dónde aterriza la sección** en vez
+> de conformarse con `toBeInViewport`. Ese método acepta una intersección parcial: habría dado
+> verde con la sección tapada por el header sticky, que es justamente el modo de falla que
+> importa.
+>
+> Lo que sigue es el texto original de la tarea, conservado como registro.
 
 **La tarea con más riesgo del plan.** `scroll-snap` convive con el `overflow-y: scroll` de `html`,
 que está ahí para evitar un crash real de WebKit, y puede interferir con la navegación por anclas
