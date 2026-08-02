@@ -9,7 +9,15 @@ const t = useTranslations(lang);
 ---
 <section data-testid="bloque-sobre" id="sobre-mi" class="revelar scroll-mt-24 py-16 sm:py-20">
   <h2 class="text-center text-2xl font-semibold">{t('sobre.titulo')}</h2>
-  <p class="mt-3 max-w-prose text-muted">{t('sobre.resumen')}</p>
-  <a href={rutas.about[lang]} data-testid="link-sobre-completo"
-    class="mt-4 inline-block text-accent hover:underline">{t('sobre.ver')} →</a>
+  <!--
+    `mx-auto text-center` es la misma pareja que usan las bajadas de Proyectos,
+    Formación y Contacto embebido. El margen automático centra la caja y el
+    `text-align` los renglones dentro: sin los dos, el párrafo queda colgado del
+    borde izquierdo bajo un título centrado.
+  -->
+  <p data-testid="sobre-resumen" class="mx-auto mt-3 max-w-prose text-center text-muted">{t('sobre.resumen')}</p>
+  <div class="mt-4 text-center">
+    <a href={rutas.about[lang]} data-testid="link-sobre-completo"
+      class="inline-block text-accent hover:underline">{t('sobre.ver')} →</a>
+  </div>
 </section>
