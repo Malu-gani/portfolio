@@ -123,79 +123,80 @@ controlar nada. Pasa a definir el orden dentro de cada filtro. Se hace **primero
 porque es la única parte que se puede verificar contra el listado actual sin haber tocado la home
 todavía.
 
+> **Corregida el 02/08/2026, durante la ejecución.** La versión original de esta tarea pedía un
+> test e2e que afirmara que el destacado aparece primero en `/es/proyectos/todos`. **Ese test no
+> podía fallar.** `gestor-operaciones` existe en las dos colecciones, las dos entradas tienen
+> `destacado: true` y las dos tienen `fecha: 2026-07-30`, que es la máxima del contenido: el orden
+> por fecha sola ya las deja primeras, así que una implementación que ignorara `destacado` daría
+> exactamente la misma salida. Además el título esperado ("Registro de Operaciones") es el nombre
+> del repositorio y no el `titulo` de ninguna entrada. La verificación se mueve a un test unitario
+> sobre el comparador, con datos construidos que sí discriminan.
+
 **Archivos:**
+- Crear: `src/data/orden.ts`
+- Crear: `tests/unit/orden.test.ts`
 - Modificar: `src/components/ProyectoListadoFiltrable.astro:24`
-- Test: `tests/e2e/proyectos.spec.ts` (agregar al describe `Listado unificado`)
 
 **Interfaces:**
 - Consume: nada.
-- Produce: el orden `destacados primero, después por fecha descendente` en
-  `[data-testid="lista-proyectos"]`. La Tarea 3 lo hereda al embeber el componente en la home.
+- Produce: `ordenarPorDestacadoYFecha` en `src/data/orden.ts`. La Tarea 3 hereda el orden al
+  embeber el componente en la home.
 
 - [ ] **Paso 1: Escribir el test que falla**
 
-En `tests/e2e/proyectos.spec.ts`, dentro del `describe('Listado unificado')`, agregar:
-
-```ts
-  // `destacado` dejó de filtrar (la home muestra todo) y pasó a ordenar. Sin
-  // esta aserción el campo quedaría declarado en el esquema sin ningún
-  // consumidor, que es el mismo problema que ya tuvo `demo`.
-  test('los destacados aparecen primero dentro del filtro', async ({ page }) => {
-    const p = new ProyectosPage(page);
-    await page.goto('/es/proyectos/todos');
-    const titulos = await p.cardsVisibles().locator('h2').allTextContents();
-    // gestor-operaciones es el único con `destacado: true` y NO es el más
-    // reciente por fecha: si el orden fuera solo por fecha, no quedaría primero.
-    expect(titulos[0]).toContain('Registro de Operaciones');
-  });
-```
+Crear `tests/unit/orden.test.ts`, cubriendo los casos que discriminan de verdad: un destacado
+**viejo** tiene que quedar antes que un no destacado **nuevo** —es el caso que separa la
+implementación correcta de una que ordene solo por fecha, y el que no existe en el contenido
+real—, el desempate por fecha dentro de cada grupo, y que la función no mute su entrada.
 
 - [ ] **Paso 2: Correr el test y verificar que falla**
 
 ```bash
-npx playwright test proyectos.spec.ts --project=chromium -g "destacados aparecen primero" > /tmp/t1.txt 2>&1; cat /tmp/t1.txt
+npm run test:unit > /tmp/t1.txt 2>&1; grep -E "orden|Cannot find" /tmp/t1.txt
 ```
 
-Esperado: FAIL. El primer título será el del caso más reciente por fecha, no el destacado.
+Esperado: FAIL — no existe `src/data/orden.ts`.
 
-> Si ya pasara sin tocar nada, el test no prueba nada: significa que el destacado además es el
-> más reciente. En ese caso, verificar con `grep -l "destacado: true" src/content/**/*.mdx` cuál
-> es el destacado real y ajustar la aserción para que el orden por fecha y el orden por destacado
-> difieran. Un test que no puede fallar es peor que no tenerlo.
+- [ ] **Paso 3: Crear el comparador**
 
-- [ ] **Paso 3: Implementar el orden**
+`src/data/orden.ts`, con la función pura exportada. Vive en `src/data/` y no dentro del
+componente por la misma razón que `src/data/stack.ts`: desde un `.astro` no se puede afirmar nada
+en un test unitario.
 
-En `src/components/ProyectoListadoFiltrable.astro`, reemplazar la línea 24:
+```ts
+export interface Ordenable {
+  fecha: Date;
+  datos: { destacado: boolean };
+}
 
-```astro
-const todos = [...casos, ...proyectos].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+export function ordenarPorDestacadoYFecha<T extends Ordenable>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    if (a.datos.destacado !== b.datos.destacado) return a.datos.destacado ? -1 : 1;
+    return b.fecha.getTime() - a.fecha.getTime();
+  });
+}
 ```
 
-por:
+- [ ] **Paso 4: Usarlo en el componente**
 
-```astro
-// `destacado` ya no decide quién entra —la home muestra todo— así que decide el
-// orden: los destacados primero dentro de cada filtro, el resto por fecha
-// descendente. Un campo declarado en el esquema sin consumidor es el problema
-// que ya tuvo `demo`, así que o se le da uso o se saca.
-const todos = [...casos, ...proyectos].sort((a, b) => {
-  if (a.datos.destacado !== b.datos.destacado) return a.datos.destacado ? -1 : 1;
-  return b.fecha.getTime() - a.fecha.getTime();
-});
-```
+En `src/components/ProyectoListadoFiltrable.astro`, reemplazar el `.sort(...)` de la línea 24 por
+una llamada a `ordenarPorDestacadoYFecha`, importada desde `../data/orden`.
 
-- [ ] **Paso 4: Correr el test y verificar que pasa**
+- [ ] **Paso 5: Verificar**
 
 ```bash
-npx playwright test proyectos.spec.ts --project=chromium > /tmp/t1.txt 2>&1; grep -E "passed|failed" /tmp/t1.txt
+npm run test:unit > /tmp/t1u.txt 2>&1; grep -E "Tests|failed" /tmp/t1u.txt
+npm run check > /tmp/t1c.txt 2>&1; tail -5 /tmp/t1c.txt
+npx playwright test proyectos.spec.ts --project=chromium > /tmp/t1e.txt 2>&1; grep -E "passed|failed" /tmp/t1e.txt
 ```
 
-Esperado: todos los tests de `proyectos.spec.ts` en verde.
+Esperado: los tres en verde. El e2e no verifica el orden —no puede— pero confirma que el listado
+sigue funcionando.
 
-- [ ] **Paso 5: Commit**
+- [ ] **Paso 6: Commit**
 
 ```bash
-git add src/components/ProyectoListadoFiltrable.astro tests/e2e/proyectos.spec.ts
+git add src/data/orden.ts tests/unit/orden.test.ts src/components/ProyectoListadoFiltrable.astro
 git commit -m "feat: destacado pasa de filtrar a ordenar el listado"
 ```
 
