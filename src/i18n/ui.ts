@@ -66,7 +66,17 @@ export type ClaveUI =
   | 'formacion.estado.completado'
   | 'formacion.estado.examenPendiente'
   | 'formacion.estado.sinCompletar'
-  | 'formacion.estado.intermedio';
+  | 'formacion.estado.intermedio'
+  | 'nav.reportar'
+  | 'reportar.abrir'
+  | 'reportar.titulo'
+  | 'reportar.bajada'
+  | 'reportar.plantillaTitulo'
+  | 'reportar.enGithub'
+  | 'reportar.copiar'
+  | 'reportar.copiado'
+  | 'reportar.errorCopiar'
+  | 'reportar.despues';
 
 type Diccionario = Record<ClaveUI, string>;
 
@@ -135,6 +145,16 @@ const es = {
   'formacion.estado.examenPendiente': 'Curso completo · examen pendiente',
   'formacion.estado.sinCompletar': 'Cursado sin completar',
   'formacion.estado.intermedio': 'Intermedio',
+  'nav.reportar': 'Reportar',
+  'reportar.abrir': 'Reportar un problema del sitio',
+  'reportar.titulo': 'Reportar un problema',
+  'reportar.bajada': 'Este sitio es mi propio objeto de prueba. Si encontraste algo que no funciona como debería, contámelo: es la clase de ayuda que más agradezco.',
+  'reportar.plantillaTitulo': 'Así pido un reporte',
+  'reportar.enGithub': 'Reportar en GitHub',
+  'reportar.copiar': 'Copiar la plantilla',
+  'reportar.copiado': 'Plantilla copiada',
+  'reportar.errorCopiar': 'No se pudo copiar. Seleccionala a mano.',
+  'reportar.despues': 'Leo todo lo que llega. Lo que sea un defecto real se arregla; lo que no, te explico por qué.',
 } as const satisfies Diccionario;
 
 const en = {
@@ -202,6 +222,16 @@ const en = {
   'formacion.estado.examenPendiente': 'Course complete · exam pending',
   'formacion.estado.sinCompletar': 'Attended, not completed',
   'formacion.estado.intermedio': 'Intermediate',
+  'nav.reportar': 'Report',
+  'reportar.abrir': 'Report a problem with the site',
+  'reportar.titulo': 'Report a problem',
+  'reportar.bajada': "This site is my own test object. If you found something that doesn't work the way it should, tell me: it's the kind of help I appreciate most.",
+  'reportar.plantillaTitulo': 'How I ask for a report',
+  'reportar.enGithub': 'Report on GitHub',
+  'reportar.copiar': 'Copy the template',
+  'reportar.copiado': 'Template copied',
+  'reportar.errorCopiar': "Couldn't copy. Select it manually.",
+  'reportar.despues': "I read everything that comes in. Anything that's a real defect gets fixed; anything that isn't, I'll explain why.",
 } as const satisfies Diccionario;
 
 export const ui = { es, en };
