@@ -4,8 +4,7 @@ export const defaultLang: Lang = 'es';
 
 export type ClaveUI =
   | 'nav.inicio'
-  | 'nav.qa'
-  | 'nav.dev'
+  | 'nav.proyectos'
   | 'nav.sobre'
   | 'nav.stack'
   | 'nav.contacto'
@@ -18,11 +17,6 @@ export type ClaveUI =
   | 'home.rol'
   | 'home.disponible'
   | 'home.posicionamiento'
-  | 'home.qa.titulo'
-  | 'home.dev.titulo'
-  | 'home.dev.bajada'
-  | 'home.qa.ver'
-  | 'home.dev.ver'
   | 'home.stack'
   | 'stack.lenguajes'
   | 'stack.testing'
@@ -32,8 +26,6 @@ export type ClaveUI =
   | 'stack.nivel.avanzado'
   | 'stack.nivel.intermedio'
   | 'stack.nivel.aprendiendo'
-  | 'qa.titulo'
-  | 'dev.titulo'
   | 'proyectos.titulo'
   | 'proyectos.bajada'
   | 'filtro.qa'
@@ -60,8 +52,7 @@ type Diccionario = Record<ClaveUI, string>;
 
 const es = {
   'nav.inicio': 'Inicio',
-  'nav.qa': 'QA',
-  'nav.dev': 'Desarrollo',
+  'nav.proyectos': 'Projects',
   'nav.sobre': 'Sobre mí',
   'nav.stack': 'Stack',
   'nav.contacto': 'Contacto',
@@ -74,11 +65,6 @@ const es = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
   'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
-  'home.qa.titulo': 'Trabajo en QA',
-  'home.dev.titulo': 'También escribo código',
-  'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
-  'home.qa.ver': 'Ver todos los casos de QA',
-  'home.dev.ver': 'Ver todos los proyectos de desarrollo',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Lenguajes',
   'stack.testing': 'Testing y automatización',
@@ -88,8 +74,6 @@ const es = {
   'stack.nivel.avanzado': 'Avanzado',
   'stack.nivel.intermedio': 'Intermedio',
   'stack.nivel.aprendiendo': 'Aprendiendo',
-  'qa.titulo': 'Casos de QA',
-  'dev.titulo': 'Proyectos de desarrollo',
   'proyectos.titulo': 'Proyectos',
   'proyectos.bajada': 'Casos de QA y proyectos de desarrollo. Cada uno documenta el contexto, lo que hice y qué aprendí.',
   'filtro.qa': 'QA · Automation',
@@ -115,8 +99,7 @@ const es = {
 
 const en = {
   'nav.inicio': 'Home',
-  'nav.qa': 'QA',
-  'nav.dev': 'Development',
+  'nav.proyectos': 'Projects',
   'nav.sobre': 'About',
   'nav.stack': 'Stack',
   'nav.contacto': 'Contact',
@@ -129,11 +112,6 @@ const en = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',
   'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
-  'home.qa.titulo': 'QA work',
-  'home.dev.titulo': 'I also write code',
-  'home.dev.bajada': 'I write code, and that makes me a better tester.',
-  'home.qa.ver': 'See all QA cases',
-  'home.dev.ver': 'See all development projects',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Languages',
   'stack.testing': 'Testing & automation',
@@ -143,8 +121,6 @@ const en = {
   'stack.nivel.avanzado': 'Advanced',
   'stack.nivel.intermedio': 'Intermediate',
   'stack.nivel.aprendiendo': 'Learning',
-  'qa.titulo': 'QA case studies',
-  'dev.titulo': 'Development projects',
   'proyectos.titulo': 'Projects',
   'proyectos.bajada': 'QA cases and development projects. Each one documents the context, what I did, and what I learned.',
   'filtro.qa': 'QA · Automation',
