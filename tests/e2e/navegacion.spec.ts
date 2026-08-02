@@ -36,6 +36,16 @@ test.describe('Navegación', () => {
     await page.goto('/es/');
     await expect(page.getByTestId('link-sobre-completo')).toHaveAttribute('href', '/es/sobre-mi');
   });
+
+  // El pie pasa a tener los enlaces de las secciones además de las redes. Sin
+  // esta aserción, que quede solo el copyright no rompería nada.
+  test('el pie enlaza secciones y redes', async ({ page }) => {
+    await page.goto('/es/');
+    const pie = page.getByTestId('pie');
+    await expect(pie.getByTestId('pie-github')).toHaveAttribute('href', /github\.com/);
+    await expect(pie.getByTestId('pie-linkedin')).toHaveAttribute('href', /linkedin\.com/);
+    await expect(pie.getByTestId('pie-secciones').getByRole('link')).toHaveCount(3);
+  });
 });
 
 test.describe('Scroll-spy del navbar', () => {
