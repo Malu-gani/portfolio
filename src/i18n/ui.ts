@@ -47,7 +47,26 @@ export type ClaveUI =
   | 'contacto.copiar'
   | 'contacto.copiado'
   | 'contacto.errorCopiar'
-  | 'ejemplo.aviso';
+  | 'ejemplo.aviso'
+  | 'nav.formacion'
+  | 'formacion.titulo'
+  | 'formacion.bajada'
+  | 'formacion.bootcamp.titulo'
+  | 'formacion.bootcamp.institucion'
+  | 'formacion.bootcamp.detalle'
+  | 'formacion.istqb.titulo'
+  | 'formacion.istqb.institucion'
+  | 'formacion.istqb.detalle'
+  | 'formacion.utn.titulo'
+  | 'formacion.utn.institucion'
+  | 'formacion.utn.detalle'
+  | 'formacion.ingles.titulo'
+  | 'formacion.ingles.institucion'
+  | 'formacion.ingles.detalle'
+  | 'formacion.estado.completado'
+  | 'formacion.estado.examenPendiente'
+  | 'formacion.estado.sinCompletar'
+  | 'formacion.estado.intermedio';
 
 type Diccionario = Record<ClaveUI, string>;
 
@@ -97,6 +116,25 @@ const es = {
   'contacto.copiado': 'Copiado',
   'contacto.errorCopiar': 'No se pudo copiar. Copialo a mano.',
   'ejemplo.aviso': 'Contenido de ejemplo — pendiente de reemplazo.',
+  'nav.formacion': 'Formación',
+  'formacion.titulo': 'Formación',
+  'formacion.bajada': 'Dónde aprendí lo que aplico, y qué terminé de cada cosa.',
+  'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
+  'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.bootcamp.detalle': '43,5 horas · 372 lecciones',
+  'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
+  'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.istqb.detalle': '35 h 50 min · 340 lecciones',
+  'formacion.utn.titulo': 'Operador de Mercados Financieros',
+  'formacion.utn.institucion': 'UTN FRBA',
+  'formacion.utn.detalle': '94 horas · 12 unidades · 2022',
+  'formacion.ingles.titulo': 'Inglés',
+  'formacion.ingles.institucion': 'Autodidacta',
+  'formacion.ingles.detalle': 'Lectura técnica y documentación',
+  'formacion.estado.completado': 'Completado',
+  'formacion.estado.examenPendiente': 'Curso completo · examen pendiente',
+  'formacion.estado.sinCompletar': 'Cursado sin completar',
+  'formacion.estado.intermedio': 'Intermedio',
 } as const satisfies Diccionario;
 
 const en = {
@@ -145,6 +183,25 @@ const en = {
   'contacto.copiado': 'Copied',
   'contacto.errorCopiar': "Couldn't copy. Copy it manually.",
   'ejemplo.aviso': 'Sample content — pending replacement.',
+  'nav.formacion': 'Training',
+  'formacion.titulo': 'Training',
+  'formacion.bajada': 'Where I learned what I apply, and what I actually finished.',
+  'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
+  'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.bootcamp.detalle': '43.5 hours · 372 lessons',
+  'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
+  'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.istqb.detalle': '35 h 50 min · 340 lessons',
+  'formacion.utn.titulo': 'Financial Markets Operator',
+  'formacion.utn.institucion': 'UTN FRBA',
+  'formacion.utn.detalle': '94 hours · 12 units · 2022',
+  'formacion.ingles.titulo': 'English',
+  'formacion.ingles.institucion': 'Self-taught',
+  'formacion.ingles.detalle': 'Technical reading and documentation',
+  'formacion.estado.completado': 'Completed',
+  'formacion.estado.examenPendiente': 'Course complete · exam pending',
+  'formacion.estado.sinCompletar': 'Attended, not completed',
+  'formacion.estado.intermedio': 'Intermediate',
 } as const satisfies Diccionario;
 
 export const ui = { es, en };
