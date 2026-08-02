@@ -113,6 +113,7 @@ académica formal que declarar, y ese título prometería un título que no exis
 | The Complete 2026 Software Testing Bootcamp | Tarek Roshdy / Nezam Academy · 43.5 hs · 372 lecciones | Completado |
 | ISTQB Foundation Level V4.0 | Tarek Roshdy / Nezam Academy · 35h50m · 340 lecciones | Curso completo · examen pendiente |
 | Operador de Mercados Financieros | UTN FRBA · 94 hs · 12 unidades · 2022 | Cursado sin completar |
+| Inglés | Autodidacta | Intermedio |
 
 **El estado se declara en texto**, no solo por color o posición, en coherencia con
 la restricción que ya rige para severidad, estado de caso y nivel de stack.
@@ -135,9 +136,22 @@ no aporta a un puesto de QA.
 - **Curso de Postman de YouTube, curso guiado de Playwright, Roadmap-Logica.** Al
   lado de un bootcamp de 43.5 horas restan más de lo que suman. Se quedan donde
   están hoy: la lista de `/es/sobre-mi`.
-- **Inglés.** No se declara nivel hasta rendir el EF SET (gratis, 50 minutos,
-  certificado con nivel CEFR y URL verificable). Una estimación sin respaldo es
-  exactamente el tipo de afirmación blanda que el resto del portfolio evita.
+**Sobre el ítem de inglés.** Se declara **"Intermedio"**, sin rango y sin nivel
+CEFR. Es lo que sostiene la evidencia disponible: en una evaluación informal del
+02/08/2026 resolvió 6 de 6 ítems de gramática —dos de ellos de nivel C1— pero no
+pudo desarmar un párrafo de registro abstracto (`less X than Y`, *in hindsight*,
+*slipped past*) y la producción escrita quedó en 35 palabras sobre 100 pedidas.
+Recepción sólida, producción sin determinar.
+
+Se descartó "intermedio/avanzado": un rango no es un nivel, y leído por un
+reclutador comunica duda sobre el propio nivel. Se descartó "avanzado" porque la
+evidencia lo contradice, y el costo es concreto e inmediato —una entrevista en
+inglés agendada sobre una expectativa que no se sostiene.
+
+Queda pendiente rendir el **EF SET** (gratis, ~50 minutos, nivel CEFR y URL
+verificable) para reemplazar la autoevaluación por un dato respaldado. Su límite
+conocido: mide solo lectura y comprensión auditiva, no producción, y no es
+supervisado.
 
 ### 3.6 Sistema visual
 
@@ -232,7 +246,8 @@ visible con JavaScript deshabilitado.
   runtime.
 - **Work Experience y Certificaciones.** No hay contenido para ninguna de las dos
   todavía.
-- **El ítem de inglés**, hasta que haya certificado con URL verificable.
+- **El nivel CEFR de inglés**, hasta que haya certificado con URL verificable. El
+  ítem entra ahora como "Intermedio" (ver 3.5).
 - **Testimonials, Blog y el bloque "Want to know more?"** de las referencias:
   descartados explícitamente.
 
@@ -252,5 +267,13 @@ visible con JavaScript deshabilitado.
 
 ## 8. Dependencias antes de implementar
 
-- **La foto**, en la mejor calidad disponible. Bloquea el hero.
+- **La foto, en un original de al menos 800×800 px.** Bloquea el hero. El archivo
+  entregado el 02/08/2026 (`juan-manuel-malugani.jpg`) mide **317×317 px y 17 KB**
+  —tamaño de avatar— y se vería borroso en la columna del hero, que ronda los
+  400-500 px de ancho y se duplica en pantallas de alta densidad. Agrandarlo por
+  software solo agrega desenfoque. Una foto de celular sirve.
 - Nada más: el resto del contenido ya existe o está definido en esta spec.
+
+Cuando llegue la foto definitiva se maneja con `astro:assets`, que genera WebP y
+los tamaños responsivos en build y deduce `width`/`height` — así el requisito de
+CLS de 3.4 se cumple sin escribirlo a mano.
