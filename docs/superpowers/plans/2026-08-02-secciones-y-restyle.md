@@ -1799,6 +1799,27 @@ git commit -m "style: scroll-snap por proximidad, desactivado con reduced-motion
 `<html>` tiene la clase `js-revelar`, que la pone el propio script. Sin JavaScript no hay clase,
 no hay ocultamiento, y todo se ve.
 
+> **Corregido el 02/08/2026, durante la ejecución. Es desplazamiento sin fade.**
+> La versión original de esta tarea usaba `opacity: 0` en el estado oculto, siguiendo la letra de
+> la sección 3.6 de la spec. **Eso rompía el gate de accesibilidad:** las secciones bajo el
+> pliegue quedan atenuadas mientras axe evalúa la página, y axe mide el texto atenuado
+> (`#abb1b7` sobre blanco en vez del `#5a6672` real) como contraste insuficiente — 434
+> violaciones de `color-contrast` en `/es/` y `/en/`, en los dos temas. El gate del proyecto es
+> cero violaciones y accesibilidad `= 1`.
+>
+> Se sacó el fade y quedó el desplazamiento, que elimina el problema de raíz. Se descartó
+> `visibility: hidden` —cambiaría una falla que axe detecta por una que no detecta pero afecta a
+> lectores de pantalla— y se descartó excluir las secciones del barrido de axe, que sería apagar
+> el gate justo para el caso que detectó.
+>
+> **Por qué se escapó:** la verificación de esta tarea, tal como yo la había escrito, solo pedía
+> `home.spec.ts` y `navegacion.spec.ts`. Lo detectó la Tarea 11, cuyo Paso 5 sí exige correr
+> `a11y.spec.ts`. Toda tarea que toque estilos visibles debería correrlo.
+>
+> **Consecuencia sobre los tests:** las aserciones de esta tarea afirmaban sobre `opacity`. Sin
+> fade pasarían siempre, y serían tests que no pueden fallar. Se reescribieron para afirmar sobre
+> `transform`.
+
 - [ ] **Paso 1: Escribir el test que falla**
 
 En `tests/e2e/home.spec.ts`, agregar:
