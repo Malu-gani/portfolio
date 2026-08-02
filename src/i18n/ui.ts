@@ -17,6 +17,7 @@ export type ClaveUI =
   | 'home.rol'
   | 'home.disponible'
   | 'home.posicionamiento'
+  | 'home.fotoAlt'
   | 'home.stack'
   | 'stack.lenguajes'
   | 'stack.testing'
@@ -65,6 +66,7 @@ const es = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
   'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
+  'home.fotoAlt': 'Retrato de Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Lenguajes',
   'stack.testing': 'Testing y automatización',
@@ -112,6 +114,7 @@ const en = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',
   'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
+  'home.fotoAlt': 'Portrait of Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Languages',
   'stack.testing': 'Testing & automation',

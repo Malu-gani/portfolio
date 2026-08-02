@@ -1,18 +1,43 @@
 ---
+import { Image } from 'astro:assets';
 import ContactoInline from './ContactoInline.astro';
+import retrato from '../assets/juan-manuel-malugani.jpg';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<section data-testid="hero" id="inicio" class="scroll-mt-24 py-10">
+<!--
+  Una columna y no dos: el original del retrato mide 317x317 y no hay otro. A
+  200px de exhibición da 1,59x de densidad, que se sostiene en retina; a los
+  400-500px de una columna propia daría 0,79x y se vería blando. La restricción
+  se absorbe en el diseño, no escalando por software.
+
+  `widths` no pasa de 317 a propósito: pedirle más a astro:assets genera
+  variantes upscaleadas que pesan más sin verse mejor.
+-->
+<section data-testid="hero" id="inicio" class="scroll-mt-24 py-10 text-center">
+  <Image
+    src={retrato}
+    alt={t('home.fotoAlt')}
+    data-testid="hero-retrato"
+    width={200}
+    height={200}
+    widths={[200, 317]}
+    sizes="200px"
+    format="webp"
+    loading="eager"
+    fetchpriority="high"
+    class="mx-auto h-[200px] w-[200px] rounded-full object-cover ring-2 ring-border"
+  />
+
   <p data-testid="badge-disponible"
-    class="inline-flex items-center gap-2 rounded-full border border-est-paso px-3 py-1 text-sm text-est-paso">
+    class="mt-6 inline-flex items-center gap-2 rounded-full border border-est-paso px-3 py-1 text-sm text-est-paso">
     <span aria-hidden="true">●</span> {t('home.disponible')}
   </p>
   <h1 class="mt-4 text-4xl font-bold sm:text-5xl">Juan Manuel Malugani</h1>
   <p class="mt-2 font-mono text-accent">{t('home.rol')}</p>
-  <p class="mt-4 max-w-prose text-lg text-muted">{t('home.posicionamiento')}</p>
-  <ContactoInline lang={lang} />
+  <p class="mx-auto mt-4 max-w-prose text-lg text-muted">{t('home.posicionamiento')}</p>
+  <div class="flex justify-center"><ContactoInline lang={lang} /></div>
 </section>

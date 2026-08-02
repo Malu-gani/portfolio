@@ -56,6 +56,27 @@ test.describe('Home', () => {
     await page.goto('/es/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
+
+  // `width` y `height` explícitos son lo que evita el CLS del elemento más
+  // grande del primer viewport. El gate de Lighthouse está en performance ≥0.9.
+  test('el retrato del hero declara dimensiones y texto alternativo', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const retrato = home.retrato;
+    await expect(retrato).toBeVisible();
+    await expect(retrato).toHaveAttribute('width', '200');
+    await expect(retrato).toHaveAttribute('height', '200');
+    const alt = await retrato.getAttribute('alt');
+    expect(alt, 'el alt no puede estar vacío ni ser el nombre del archivo').toBeTruthy();
+    expect(alt!.length).toBeGreaterThan(10);
+  });
+
+  // No se sirve el JPG original: astro:assets emite WebP en build.
+  test('el retrato se sirve en WebP', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    await expect(home.retrato).toHaveAttribute('src', /\.webp/);
+  });
 });
 
 test.describe('El filtro de la home funciona sin JavaScript', () => {

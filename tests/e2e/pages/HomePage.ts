@@ -16,6 +16,7 @@ export class HomePage extends BasePage {
   readonly lista: Locator;
   /** Todas las cards renderizadas, visibles u ocultas por el filtro. */
   readonly cards: Locator;
+  readonly retrato: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -27,6 +28,7 @@ export class HomePage extends BasePage {
     this.stack = page.getByTestId('stack');
     this.lista = page.getByTestId('lista-proyectos');
     this.cards = this.lista.getByTestId('proyecto-card');
+    this.retrato = page.getByTestId('hero-retrato');
   }
 
   /** Cards de un carril que además están visibles: es lo que filtra el CSS. */
