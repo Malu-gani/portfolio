@@ -48,45 +48,41 @@ const externos = [
   // El enlace es y sigue siendo un `mailto:`. Copiar se engancha encima: si no
   // hay JavaScript, o el navegador no expone el portapapeles, el clic hace lo
   // que siempre hizo y nadie se queda sin camino.
+  import { engancharCopiar } from '../scripts/copiar';
+
   const MS_AVISO = 2000;
   let temporizador: ReturnType<typeof setTimeout> | undefined;
 
-  // El listener va sobre `document` en vez de sobre el enlace para sobrevivir a
-  // las view transitions, que reemplazan el nodo: delegar evita tener que
-  // re-enganchar en cada `astro:after-swap`.
-  document.addEventListener('click', async (evento) => {
-    const objetivo = evento.target as Element | null;
-    const enlace = objetivo?.closest<HTMLAnchorElement>('[data-testid="hero-email"]');
-    if (!enlace) return;
-    // Sin portapapeles no interceptamos: el navegador sigue con el `mailto:`.
-    if (!navigator.clipboard) return;
+  function partes(enlace: HTMLElement) {
+    return {
+      etiqueta: enlace.querySelector<HTMLElement>('[data-etiqueta]'),
+      aviso: enlace.parentElement?.querySelector<HTMLElement>('[data-testid="hero-email-aviso"]'),
+    };
+  }
 
-    evento.preventDefault();
-    const etiqueta = enlace.querySelector<HTMLElement>('[data-etiqueta]');
-    const aviso = enlace.parentElement?.querySelector<HTMLElement>('[data-testid="hero-email-aviso"]');
-    if (!etiqueta || !aviso) return;
+  engancharCopiar({
+    selectorDisparador: '[data-testid="hero-email"]',
+    texto: (enlace) => (enlace as HTMLAnchorElement).href.replace(/^mailto:/, ''),
+    alCopiar: (enlace) => {
+      const { etiqueta, aviso } = partes(enlace);
+      if (!etiqueta || !aviso) return;
+      const copiado = enlace.dataset.copiado ?? '';
+      etiqueta.textContent = copiado;
+      aviso.textContent = copiado;
 
-    try {
-      await navigator.clipboard.writeText(enlace.href.replace(/^mailto:/, ''));
-    } catch {
-      // El portapapeles existía pero rechazó la escritura. En vez de avisar de
-      // un error que el visitante no puede resolver, se hace lo que el enlace
-      // prometía: abrir el cliente de correo.
-      window.location.href = enlace.href;
-      return;
-    }
-
-    const copiado = enlace.dataset.copiado ?? '';
-    etiqueta.textContent = copiado;
-    aviso.textContent = copiado;
-
-    // El texto original se restaura desde el atributo y no desde lo que hay en
-    // pantalla: un segundo clic dentro de los dos segundos leería "Copiado" y
-    // lo dejaría ahí para siempre.
-    clearTimeout(temporizador);
-    temporizador = setTimeout(() => {
-      etiqueta.textContent = etiqueta.dataset.etiqueta ?? '';
-      aviso.textContent = '';
-    }, MS_AVISO);
+      // El texto original se restaura desde el atributo y no desde lo que hay
+      // en pantalla: un segundo clic dentro de los dos segundos leería
+      // "Copiado" y lo dejaría ahí para siempre.
+      clearTimeout(temporizador);
+      temporizador = setTimeout(() => {
+        etiqueta.textContent = etiqueta.dataset.etiqueta ?? '';
+        aviso.textContent = '';
+      }, MS_AVISO);
+    },
+    // El portapapeles existía pero rechazó la escritura: se hace lo que el
+    // enlace prometía, abrir el cliente de correo.
+    alFallar: (enlace) => {
+      window.location.href = (enlace as HTMLAnchorElement).href;
+    },
   });
 </script>
