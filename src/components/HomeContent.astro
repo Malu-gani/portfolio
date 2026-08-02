@@ -5,6 +5,7 @@ import ProyectoListadoFiltrable from './ProyectoListadoFiltrable.astro';
 import StackGrid from './StackGrid.astro';
 import Formacion from './Formacion.astro';
 import ContactContent from './ContactContent.astro';
+import Reportar from './Reportar.astro';
 import type { Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
@@ -31,6 +32,8 @@ const { lang } = Astro.props;
 <section data-testid="bloque-contacto" id="contacto" class="revelar scroll-mt-24 py-16 sm:py-20">
   <ContactContent lang={lang} nivelTitulo={2} />
 </section>
+
+<Reportar lang={lang} />
 
 <script>
   // Un solo observador para todas las secciones, mismo patrón que el scroll-spy

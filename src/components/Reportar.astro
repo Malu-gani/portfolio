@@ -1,0 +1,75 @@
+---
+import { plantillaReporte } from '../data/reporte';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+/**
+ * El sitio se ofrece como objeto de prueba. La plantilla se muestra en la
+ * página en vez de describirse: quien solo lee ya se lleva la señal de cómo se
+ * pide un reporte, y el botón de copiar no copia algo invisible.
+ *
+ * Nada del visitante se precarga en la URL del Issue. Se evaluó completar
+ * navegador, viewport y tema automáticamente y se descartó: son datos del
+ * visitante viajando en una URL para ahorrarle tres renglones.
+ */
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// GitHub no tiene i18n en las plantillas de Issue: van dos archivos y cada
+// idioma enlaza directo al suyo, así nadie pasa por el selector.
+const issueNuevo = `https://github.com/Malu-gani/portfolio/issues/new?template=bug-${lang}.yml`;
+const plantilla = plantillaReporte(lang);
+---
+<section data-testid="bloque-reportar" id="reportar" class="revelar scroll-mt-24 py-16 sm:py-20">
+  <h2 class="text-center text-2xl font-semibold">{t('reportar.titulo')}</h2>
+  <p class="mx-auto mt-3 max-w-prose text-center text-muted">{t('reportar.bajada')}</p>
+
+  <h3 class="mt-8 text-center text-sm font-semibold text-text">{t('reportar.plantillaTitulo')}</h3>
+  <pre data-testid="reportar-plantilla"
+    class="mx-auto mt-3 max-w-prose overflow-x-auto rounded-lg border border-border bg-surface p-5 font-mono text-sm text-muted">{plantilla}</pre>
+
+  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+    <a href={issueNuevo} data-testid="reportar-github" target="_blank" rel="noopener noreferrer"
+      class="rounded-md border border-accent px-4 py-2 text-sm text-accent transition-colors hover:bg-surface">
+      {t('reportar.enGithub')}
+    </a>
+    <button type="button" data-testid="reportar-copiar"
+      data-copiado={t('reportar.copiado')} data-error={t('reportar.errorCopiar')}
+      class="rounded-md border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent">
+      {t('reportar.copiar')}
+    </button>
+  </div>
+
+  <p data-testid="reportar-aviso" role="status" aria-live="polite"
+    class="mt-3 text-center text-sm text-muted"></p>
+
+  <p class="mx-auto mt-6 max-w-prose text-center text-sm text-muted">{t('reportar.despues')}</p>
+</section>
+
+<script>
+  import { engancharCopiar } from '../scripts/copiar';
+
+  const MS_AVISO = 3000;
+  let temporizador: ReturnType<typeof setTimeout> | undefined;
+
+  function avisar(texto: string) {
+    const aviso = document.querySelector<HTMLElement>('[data-testid="reportar-aviso"]');
+    if (!aviso) return;
+    aviso.textContent = texto;
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => {
+      aviso.textContent = '';
+    }, MS_AVISO);
+  }
+
+  engancharCopiar({
+    selectorDisparador: '[data-testid="reportar-copiar"]',
+    // Se copia lo que está en pantalla, no una segunda copia del texto: si el
+    // bloque cambiara, lo copiado cambia con él y no quedan dos verdades.
+    texto: () =>
+      document.querySelector<HTMLElement>('[data-testid="reportar-plantilla"]')?.textContent ?? '',
+    alCopiar: (boton) => avisar(boton.dataset.copiado ?? ''),
+    alFallar: (boton) => avisar(boton.dataset.error ?? ''),
+  });
+</script>
