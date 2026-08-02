@@ -2,7 +2,7 @@ import type { Page, Locator } from '@playwright/test';
 import { BasePage, type Lang } from './BasePage';
 
 /** Los anclajes de la home one-page, en el orden en que se recorren. */
-export const SECCIONES = ['inicio', 'sobre-mi', 'proyectos', 'stack', 'contacto'] as const;
+export const SECCIONES = ['inicio', 'sobre-mi', 'proyectos', 'stack', 'formacion', 'contacto'] as const;
 export type Seccion = (typeof SECCIONES)[number];
 
 export class HomePage extends BasePage {
@@ -17,6 +17,8 @@ export class HomePage extends BasePage {
   /** Todas las cards renderizadas, visibles u ocultas por el filtro. */
   readonly cards: Locator;
   readonly retrato: Locator;
+  readonly bloqueFormacion: Locator;
+  readonly itemsFormacion: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -29,6 +31,8 @@ export class HomePage extends BasePage {
     this.lista = page.getByTestId('lista-proyectos');
     this.cards = this.lista.getByTestId('proyecto-card');
     this.retrato = page.getByTestId('hero-retrato');
+    this.bloqueFormacion = page.getByTestId('bloque-formacion');
+    this.itemsFormacion = page.getByTestId('formacion-item');
   }
 
   /** Cards de un carril que además están visibles: es lo que filtra el CSS. */

@@ -79,6 +79,41 @@ test.describe('Home', () => {
   });
 });
 
+test.describe('Formación', () => {
+  for (const lang of ['es', 'en'] as const) {
+    test(`lista los cuatro ítems en ${lang}`, async ({ page }) => {
+      const home = new HomePage(page);
+      await home.abrir(lang);
+      await expect(home.bloqueFormacion).toBeVisible();
+      await expect(home.itemsFormacion).toHaveCount(4);
+    });
+  }
+
+  // El estado va en texto, no solo por color ni por posición: es la misma
+  // restricción que ya rige para severidad, estado de caso y nivel de stack.
+  test('cada ítem declara su estado en texto', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const estados = home.itemsFormacion.getByTestId('formacion-estado');
+    await expect(estados).toHaveCount(4);
+    for (const texto of await estados.allTextContents()) {
+      expect(texto.trim().length, 'un estado quedó vacío').toBeGreaterThan(0);
+    }
+  });
+
+  // Ninguno de los cuatro ítems puede prometer más de lo que hay: el de la UTN
+  // se cursó sin completar y el examen de ISTQB no está rendido.
+  test('ningún ítem promete más de lo que hay', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const textos = (await home.itemsFormacion.allTextContents()).join(' ');
+    expect(textos).toContain('Cursado sin completar');
+    expect(textos).toContain('examen pendiente');
+    // "Título" o "Graduado" serían afirmaciones que no se sostienen.
+    expect(textos).not.toMatch(/Graduado|Titulado|Certificado ISTQB/);
+  });
+});
+
 test.describe('El filtro de la home funciona sin JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 

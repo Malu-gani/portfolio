@@ -3,6 +3,7 @@ import Hero from './Hero.astro';
 import SobreMiResumen from './SobreMiResumen.astro';
 import ProyectoListadoFiltrable from './ProyectoListadoFiltrable.astro';
 import StackGrid from './StackGrid.astro';
+import Formacion from './Formacion.astro';
 import ContactContent from './ContactContent.astro';
 import type { Lang } from '../i18n/ui';
 
@@ -24,6 +25,8 @@ const { lang } = Astro.props;
 </section>
 
 <StackGrid lang={lang} />
+
+<Formacion lang={lang} />
 
 <section data-testid="bloque-contacto" id="contacto" class="scroll-mt-24 border-t border-border py-10">
   <ContactContent lang={lang} nivelTitulo={2} />
