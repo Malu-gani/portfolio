@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formacion, ESTADOS_FORMACION, type EstadoFormacion } from '../../src/data/formacion';
+import { formacion, ESTADOS_FORMACION } from '../../src/data/formacion';
 import { ui } from '../../src/i18n/ui';
 
 const CLAVES_POR_ITEM = ['tituloClave', 'institucionClave', 'detalleClave', 'estadoClave'] as const;
@@ -33,27 +33,20 @@ describe('formacion', () => {
     }
   });
 
-  it('todas las claves existen en los dos diccionarios', () => {
-    for (const item of formacion) {
-      for (const campo of CLAVES_POR_ITEM) {
-        for (const lang of ['es', 'en'] as const) {
-          expect(ui[lang][item[campo]], `falta ${item[campo]} en ${lang}`).toBeDefined();
-        }
-      }
-    }
-  });
-
   // La spec descartó explícitamente declarar un nivel CEFR de inglés hasta que
   // haya certificado con URL verificable, y descartó el rango
   // "intermedio/avanzado". Este test evita que vuelvan sin que alguien lo
-  // decida a propósito.
+  // decida a propósito. Recorre los cuatro campos porque un "B2" colado en
+  // `detalleClave` es tan promesa como uno en `estadoClave`.
   it('el ítem de inglés no promete un nivel que no está respaldado', () => {
     const ingles = formacion.find((f) => f.id === 'ingles');
     expect(ingles, 'falta el ítem de inglés').toBeDefined();
-    for (const lang of ['es', 'en'] as const) {
-      const texto = ui[lang][ingles!.estadoClave];
-      expect(texto).not.toMatch(/\b[ABC][12]\b/);
-      expect(texto).not.toMatch(/\//);
+    for (const campo of CLAVES_POR_ITEM) {
+      for (const lang of ['es', 'en'] as const) {
+        const texto = ui[lang][ingles![campo]];
+        expect(texto).not.toMatch(/\b[ABC][12]\b/);
+        expect(texto).not.toMatch(/\//);
+      }
     }
   });
 });

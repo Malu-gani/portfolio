@@ -57,9 +57,9 @@ test.describe('Scroll-spy del navbar', () => {
 
   // Se navega por el ancla en vez de scrollear con `scrollIntoViewIfNeeded`:
   // ese método scrollea lo mínimo indispensable y deja la sección más abajo de
-  // la banda del IntersectionObserver (medido: `#qa` quedaba en y=252 con la
-  // banda en 144–216, y el marcado correcto era `sobre-mi`). El ancla, además,
-  // es cómo llega el usuario de verdad.
+  // la banda del IntersectionObserver (medido: `#proyectos` quedaba en y=252
+  // con la banda en 144–216, y el marcado correcto era `sobre-mi`). El ancla,
+  // además, es cómo llega el usuario de verdad.
   test('la sección a la que se salta queda marcada en el menú', async ({ page }) => {
     await page.goto('/es/');
     await expect(page.getByTestId('nav-inicio')).toHaveAttribute('aria-current', 'true');

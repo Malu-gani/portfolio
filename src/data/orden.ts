@@ -4,8 +4,10 @@ export interface Ordenable {
 }
 
 /**
- * `destacado` ya no decide quién entra —la home muestra todo— así que decide el
- * orden: los destacados primero, el resto por fecha descendente. Un campo
+ * `destacado` ya no decide quién entra en el HTML —la home embebe con el
+ * filtro en `qa` y las cards de desarrollo arrancan ocultas por CSS— así que
+ * decide el orden: los destacados primero, el resto por fecha descendente. Un
+ * campo
  * declarado en el esquema sin consumidor es el problema que ya tuvo `demo`, así
  * que o se le da uso o se saca.
  *

@@ -154,6 +154,21 @@ test.describe('El filtro de la home funciona sin JavaScript', () => {
 test.describe('Aparición al scrollear', () => {
   test('las secciones terminan en su posición al recorrer la página', async ({ page }) => {
     await page.goto('/es/');
+
+    // Antes de scrollear el efecto tiene que estar vivo: la clase que habilita
+    // el CSS está puesta y al menos una sección bajo el pliegue sigue
+    // desplazada. Si el <script> desapareciera esto nunca sería cierto, y sin
+    // esta aserción el test de abajo pasaría igual con el efecto borrado.
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.classList.contains('js-revelar')))
+      .toBe(true);
+    const hayDesplazada = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('.revelar')].some(
+        (el) => getComputedStyle(el).transform !== 'none'
+      )
+    );
+    expect(hayDesplazada, 'con el efecto vivo debería haber al menos una sección desplazada').toBe(true);
+
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     // El observador es asíncrono y el desplazamiento se retira con una
     // transición de 500ms: `toBeVisible` no sirve de gate porque ni la clase

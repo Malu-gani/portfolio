@@ -48,9 +48,12 @@ test.describe('Elevación de las cards', () => {
     const reposo = await card.evaluate((el) => getComputedStyle(el).transform);
 
     await card.getByRole('link').first().focus();
-    const enfocada = await card.evaluate((el) => getComputedStyle(el).transform);
 
-    expect(enfocada, 'la card no se eleva al enfocar: el hover quedó sin equivalente en focus-visible')
+    // La transición dura 150ms: leer el transform apenas se llama a `focus()`
+    // depende de cuánto tardó el round-trip. `expect.poll` espera a que
+    // termine de verdad en vez de confiar en la latencia de turno.
+    await expect
+      .poll(() => card.evaluate((el) => getComputedStyle(el).transform))
       .not.toBe(reposo);
   });
 

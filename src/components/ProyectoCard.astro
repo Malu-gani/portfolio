@@ -37,7 +37,7 @@ const href = `/${lang}/${tipo === 'qa' ? 'qa' : 'dev'}/${slug}`;
 const chips = tipo === 'qa' ? (datos.tags ?? []) : datos.stack;
 ---
 <article data-testid="proyecto-card" data-tipo={tipo}
-  class="tarjeta relative flex flex-col rounded-lg border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] hover:border-accent">
+  class="tarjeta relative flex flex-col rounded-lg border border-border bg-surface p-5 transition-[transform,border-color] hover:border-accent">
   <div class="flex items-center gap-2">
     <span data-testid="card-distintivo"
       class="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted">
