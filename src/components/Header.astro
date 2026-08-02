@@ -2,6 +2,7 @@
 import ThemeToggle from './ThemeToggle.tsx';
 import LangToggle from './LangToggle.astro';
 import NavMobile from './NavMobile.astro';
+import IconoBug from './IconoBug.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -26,7 +27,8 @@ const secciones = [
 <header class="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur">
   <nav data-testid="nav-principal" aria-label={t('nav.principal')}
     class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-    <NavMobile lang={lang} enHome={enHome} secciones={secciones} />
+    <NavMobile lang={lang} enHome={enHome} secciones={secciones}
+      reportar={{ href: enHome ? '#reportar' : `${home}#reportar`, texto: t('nav.reportar') }} />
     <ul data-testid="nav-secciones" class="hidden flex-wrap gap-4 sm:flex">
       {secciones.map((s) => (
         <li>
@@ -38,7 +40,23 @@ const secciones = [
         </li>
       ))}
     </ul>
-    <div class="flex gap-2">
+    <div class="flex items-center gap-2">
+      <!--
+        El acceso a reportar no entra en la lista de secciones: entra acá, en
+        el grupo de herramientas. Así deja de ser hermano de "Proyectos" -con
+        el que no debe competir- y pasa a leerse como lo que es, una acción y
+        no un destino del recorrido. De paso no ensancha la fila de secciones,
+        que es la que se aprieta en pantallas medianas.
+
+        Lleva `data-seccion` y el del panel mobile no: el scroll-spy indexa por
+        ese atributo en un Map y dos enlaces con el mismo id se pisarían.
+      -->
+      <a href={enHome ? '#reportar' : `${home}#reportar`}
+        data-testid="nav-reportar" data-seccion="reportar"
+        aria-label={t('reportar.abrir')} title={t('reportar.abrir')}
+        class="hidden h-9 w-9 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-accent focus-visible:text-accent aria-[current=true]:text-accent sm:flex">
+        <IconoBug />
+      </a>
       <LangToggle />
       <ThemeToggle
         etiqueta={t('tema.cambiar')}
