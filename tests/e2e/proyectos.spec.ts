@@ -186,3 +186,27 @@ test('ninguna ruta muestra el aviso de contenido de ejemplo', async ({ page }) =
       `${ruta} todavía muestra el aviso de contenido de ejemplo`).toHaveCount(0);
   }
 });
+
+// El listado se embebe en la home además de servir /es/proyectos. Estas dos
+// props son lo que hace posible lo segundo sin romper lo primero.
+test.describe('El listado es embebible', () => {
+  test('en su propia página el título es h1', async ({ page }) => {
+    await page.goto('/es/proyectos');
+    await expect(page.getByRole('heading', { level: 1, name: 'Proyectos' })).toHaveCount(1);
+  });
+
+  test('en su propia página el filtro sigue actualizando la URL', async ({ page }) => {
+    const p = new ProyectosPage(page);
+    await page.goto('/es/proyectos');
+    await p.botonFiltro('dev').click();
+    await expect(page).toHaveURL(/\/es\/proyectos\/dev$/);
+  });
+
+  // `contexto="home"` es lo que evita que, embebido en la home, el filtro deje
+  // la URL en /es/proyectos/dev mostrando la home: recargar daría otra página.
+  test('el atributo de contexto viaja al DOM', async ({ page }) => {
+    const p = new ProyectosPage(page);
+    await page.goto('/es/proyectos');
+    await expect(p.lista).toHaveAttribute('data-contexto', 'pagina');
+  });
+});

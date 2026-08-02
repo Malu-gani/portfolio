@@ -6,8 +6,24 @@ import { useTranslations } from '../i18n/utils';
 import { ordenarPorDestacadoYFecha } from '../data/orden';
 import type { Lang } from '../i18n/ui';
 
-interface Props { lang: Lang; activo: 'qa' | 'dev' | 'todos' }
-const { lang, activo } = Astro.props;
+interface Props {
+  lang: Lang;
+  activo: 'qa' | 'dev' | 'todos';
+  /**
+   * 1 en `/es/proyectos`, que es su propia página; 2 en la home, donde el h1 ya
+   * lo tiene el hero. Sin esto, embeberlo daría dos h1 y un salto de headings.
+   */
+  nivelTitulo?: 1 | 2;
+  /**
+   * `pagina` actualiza la URL al filtrar; `home` no la toca, porque los href
+   * del filtro apuntan a `/es/proyectos/...` y dejar la URL ahí mostrando la
+   * home haría que recargar diera otra página.
+   */
+  contexto?: 'pagina' | 'home';
+}
+const { lang, activo, nivelTitulo = 1, contexto = 'pagina' } = Astro.props;
+const Titulo = nivelTitulo === 1 ? 'h1' : 'h2';
+const nivelCard = nivelTitulo === 1 ? 2 : 3;
 const t = useTranslations(lang);
 const prefijo = `${lang}/`;
 
@@ -24,16 +40,16 @@ const proyectos = (await getCollection('proyectos'))
 // ni reconstruir el DOM: solo cambia un atributo.
 const todos = ordenarPorDestacadoYFecha([...casos, ...proyectos]);
 ---
-<h1 class="text-3xl font-bold sm:text-4xl">{t('proyectos.titulo')}</h1>
+<Titulo class="text-3xl font-bold sm:text-4xl">{t('proyectos.titulo')}</Titulo>
 <p class="mt-3 max-w-prose text-muted">{t('proyectos.bajada')}</p>
 
 <div class="mt-6"><FiltroProyectos lang={lang} activo={activo} /></div>
 
-<div data-testid="lista-proyectos" data-activo={activo}
+<div data-testid="lista-proyectos" data-activo={activo} data-contexto={contexto}
   class="mt-8 grid gap-4 sm:grid-cols-2">
   {todos.map((item) => (
     <div data-item-tipo={item.tipo}>
-      <ProyectoCard lang={lang} slug={item.slug} tipo={item.tipo} datos={item.datos} nivelTitulo={2} />
+      <ProyectoCard lang={lang} slug={item.slug} tipo={item.tipo} datos={item.datos} nivelTitulo={nivelCard} />
     </div>
   ))}
 </div>
@@ -74,7 +90,10 @@ const todos = ordenarPorDestacadoYFecha([...casos, ...proyectos]);
           a.classList.add('text-muted', 'hover:text-text');
         }
       }
-      history.pushState({}, '', enlace.href);
+      // Embebido en la home, los href del filtro apuntan a /es/proyectos/...:
+      // empujarlos dejaría la URL en otra página mostrando la home, y recargar
+      // daría algo distinto de lo que se está viendo.
+      if (lista.dataset.contexto !== 'home') history.pushState({}, '', enlace.href);
     });
   }
 
