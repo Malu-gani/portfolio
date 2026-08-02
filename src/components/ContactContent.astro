@@ -23,8 +23,18 @@ const textos: Record<Lang, { titulo: string; bajada: string }> = {
 const c = textos[lang];
 ---
 <div data-testid="contacto">
-  <TituloTag class:list={[nivelTitulo === 1 ? 'text-3xl sm:text-4xl' : 'text-2xl', 'font-bold']}>{c.titulo}</TituloTag>
-  <p class="mt-3 max-w-prose text-muted">{c.bajada}</p>
+  <!--
+    Embebido en la home el encabezado va centrado, como el del resto de las
+    secciones; en `/es/contacto`, que es su propia página, sigue alineado a la
+    izquierda. Es la misma condicionalidad que `ProyectoListadoFiltrable`, y por
+    el mismo motivo: el ritmo de sección aplica a la home, no a las páginas.
+  -->
+  <TituloTag class:list={
+    nivelTitulo === 1
+      ? 'text-3xl font-bold sm:text-4xl'
+      : 'text-center text-2xl font-semibold'
+  }>{c.titulo}</TituloTag>
+  <p class:list={['mt-3 max-w-prose text-muted', nivelTitulo === 2 && 'mx-auto text-center']}>{c.bajada}</p>
 
   <div class="mt-8">
     <CopyEmail

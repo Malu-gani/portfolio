@@ -15,7 +15,7 @@ describe('getLangFromUrl', () => {
 
 describe('useTranslations', () => {
   it('devuelve texto en inglés', () => {
-    expect(useTranslations('en')('nav.qa')).toBe('QA');
+    expect(useTranslations('en')('nav.contacto')).toBe('Contact');
   });
   it('devuelve texto en español', () => {
     expect(useTranslations('es')('nav.sobre')).toBe('Sobre mí');

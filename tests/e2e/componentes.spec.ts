@@ -34,3 +34,37 @@ test.describe('Componentes de dominio QA', () => {
     await expect(componentes.metricaValores().first()).toBeVisible();
   });
 });
+
+// En mobile el hover no existe y con teclado tampoco se dispara: una elevación
+// que solo responda a `:hover` deja el estado de foco sin ninguna señal visual.
+// Es la regla firme de la spec, y esta es la única forma de que se sostenga.
+test.describe('Elevación de las cards', () => {
+  test.use({ viewport: { width: 1280, height: 720 } });
+
+  test('la card se eleva al enfocar su enlace con teclado', async ({ page }) => {
+    await page.goto('/es/proyectos');
+    const card = page.getByTestId('proyecto-card').first();
+
+    const reposo = await card.evaluate((el) => getComputedStyle(el).transform);
+
+    await card.getByRole('link').first().focus();
+
+    // La transición dura 150ms: leer el transform apenas se llama a `focus()`
+    // depende de cuánto tardó el round-trip. `expect.poll` espera a que
+    // termine de verdad en vez de confiar en la latencia de turno.
+    await expect
+      .poll(() => card.evaluate((el) => getComputedStyle(el).transform))
+      .not.toBe(reposo);
+  });
+
+  test('la card se eleva al pasar el mouse', async ({ page }) => {
+    await page.goto('/es/proyectos');
+    const card = page.getByTestId('proyecto-card').first();
+
+    const reposo = await card.evaluate((el) => getComputedStyle(el).transform);
+    await card.hover();
+    const encima = await card.evaluate((el) => getComputedStyle(el).transform);
+
+    expect(encima).not.toBe(reposo);
+  });
+});

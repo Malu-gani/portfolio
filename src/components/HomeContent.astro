@@ -1,63 +1,112 @@
 ---
-import { getCollection } from 'astro:content';
 import Hero from './Hero.astro';
 import SobreMiResumen from './SobreMiResumen.astro';
+import ProyectoListadoFiltrable from './ProyectoListadoFiltrable.astro';
 import StackGrid from './StackGrid.astro';
-import ProyectoCard from './ProyectoCard.astro';
+import Formacion from './Formacion.astro';
 import ContactContent from './ContactContent.astro';
-import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const t = useTranslations(lang);
-const prefijo = `${lang}/`;
-const base = lang === 'es' ? '/es/proyectos' : '/en/projects';
-
-const casos = (await getCollection('casos-qa'))
-  .filter((c) => c.id.startsWith(prefijo) && c.data.destacado)
-  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
-
-const proyectos = (await getCollection('proyectos'))
-  .filter((p) => p.id.startsWith(prefijo) && p.data.destacado)
-  .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
 ---
 <Hero lang={lang} />
 
 <SobreMiResumen lang={lang} />
 
-<section data-testid="bloque-qa" id="qa" class="scroll-mt-24 border-t border-border py-10">
-  <h2 class="text-2xl font-semibold">{t('home.qa.titulo')}</h2>
-  <div class="mt-6 grid gap-4 sm:grid-cols-2">
-    {casos.map((c) => (
-      <ProyectoCard lang={lang} slug={c.id.replace(prefijo, '')} tipo="qa"
-        datos={c.data} nivelTitulo={3} />
-    ))}
-  </div>
-  <a href={base} data-testid="ver-todos-qa"
-    class="mt-6 inline-block text-accent hover:underline">{t('home.qa.ver')} →</a>
-</section>
-
 <!--
-  Dev usa el mismo tamaño de encabezado y el mismo tipo de card que QA. La
-  asimetría entre carriles la sostiene el orden de las secciones y el rol
-  declarado en el hero, no achicar el bloque secundario.
+  Es el mismo componente que sirve /es/proyectos, no una copia: la home no
+  duplica el listado, lo embebe con el título un nivel más abajo y sin tocar la
+  URL al filtrar. /es/proyectos se mantiene porque da una URL propia,
+  compartible e indexable, y es el destino de los redirects de /es/qa y /es/dev.
 -->
-<section data-testid="bloque-dev" id="dev" class="scroll-mt-24 border-t border-border py-10">
-  <h2 class="text-2xl font-semibold">{t('home.dev.titulo')}</h2>
-  <p class="mt-2 max-w-prose text-muted">{t('home.dev.bajada')}</p>
-  <div class="mt-6 grid gap-4 sm:grid-cols-2">
-    {proyectos.map((p) => (
-      <ProyectoCard lang={lang} slug={p.id.replace(prefijo, '')} tipo="dev"
-        datos={p.data} nivelTitulo={3} />
-    ))}
-  </div>
-  <a href={`${base}/dev`} data-testid="ver-todos-dev"
-    class="mt-6 inline-block text-accent hover:underline">{t('home.dev.ver')} →</a>
+<section data-testid="bloque-proyectos" id="proyectos" class="revelar scroll-mt-24 py-16 sm:py-20">
+  <ProyectoListadoFiltrable lang={lang} activo="qa" nivelTitulo={2} contexto="home" />
 </section>
 
 <StackGrid lang={lang} />
 
-<section data-testid="bloque-contacto" id="contacto" class="scroll-mt-24 border-t border-border py-10">
+<Formacion lang={lang} />
+
+<section data-testid="bloque-contacto" id="contacto" class="revelar scroll-mt-24 py-16 sm:py-20">
   <ContactContent lang={lang} nivelTitulo={2} />
 </section>
+
+<script>
+  // Un solo observador para todas las secciones, mismo patrón que el scroll-spy
+  // del header. No es un island de React: pagar hidratación para un fade no se
+  // justifica.
+  let observador: IntersectionObserver | null = null;
+  let controlador: AbortController | null = null;
+
+  // Idempotente: una sección ya revelada (`visible`) se salta. Devuelve si
+  // quedan secciones pendientes, para que quien la llama sepa si todavía hace
+  // falta seguir escuchando.
+  function revelarPendientes(secciones: HTMLElement[]) {
+    let quedan = false;
+    for (const s of secciones) {
+      if (s.classList.contains('visible')) continue;
+      if (s.getBoundingClientRect().top < window.innerHeight) {
+        s.classList.add('visible');
+        observador?.unobserve(s);
+      } else {
+        quedan = true;
+      }
+    }
+    return quedan;
+  }
+
+  function activarRevelado() {
+    observador?.disconnect();
+    controlador?.abort();
+
+    const secciones = [...document.querySelectorAll<HTMLElement>('.revelar')];
+    if (secciones.length === 0) return;
+
+    // La clase va primero y desde acá: es lo que habilita el CSS que esconde.
+    // Sin JavaScript nunca se agrega y las secciones se ven de entrada.
+    document.documentElement.classList.add('js-revelar');
+
+    observador = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) {
+          // `isIntersecting` solo cubre lo que entra por abajo. Una sección
+          // que ya quedó por encima del viewport en la primera observación
+          // —se llegó con `#ancla`— nunca va a intersectar la banda, y sin
+          // esto se quedaría desplazada para siempre.
+          const yaPaso = entrada.boundingClientRect.top < 0;
+          if (!entrada.isIntersecting && !yaPaso) continue;
+          entrada.target.classList.add('visible');
+          // Una vez revelada no se vuelve a esconder: el efecto es de entrada,
+          // no un parpadeo cada vez que la sección cruza el borde.
+          observador?.unobserve(entrada.target);
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' }
+    );
+
+    for (const s of secciones) observador.observe(s);
+
+    // El observador solo emite una entrada cuando la intersección *cruza* un
+    // umbral. Un salto instantáneo —clickear el navbar apenas cargó la
+    // home— puede llevar una sección de completamente abajo a completamente
+    // arriba sin que el navegador vea ningún cruce en el medio, y esa sección
+    // se quedaría desplazada para siempre. Firefox y WebKit lo exponen;
+    // Chromium lo tapaba porque alcanza a disparar durante el recorrido. Este
+    // listener es la red que cubre lo que el observador no puede ver por
+    // construcción, y se desengancha solo cuando ya no queda nada pendiente.
+    controlador = new AbortController();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!revelarPendientes(secciones)) controlador?.abort();
+      },
+      { passive: true, signal: controlador.signal }
+    );
+  }
+
+  activarRevelado();
+  // Las view transitions no recargan la página: sin esto, volver a la home tras
+  // navegar dejaría las secciones escondidas y sin nadie que las revele.
+  document.addEventListener('astro:after-swap', activarRevelado);
+</script>

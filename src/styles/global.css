@@ -69,7 +69,19 @@
    alcanza (reserva el espacio pero el documento sigue pasando de no
    scrolleable a scrolleable, y el crash persiste). Ver
    docs/cross-browser-diagnostico.md. */
-html { color-scheme: light dark; overflow-y: scroll; scroll-behavior: smooth; }
+/* Acá vivió un `scroll-snap-type: y proximity`. Se revirtió el 02/08/2026, con
+   el criterio que la spec del tramo había escrito antes de implementarlo.
+   Motivo medido, no impresión: el snap tira del viewport después de que el
+   scroll llega a destino, así que un click sobre un elemento a mitad de sección
+   no aterriza — Playwright lo reporta como "element is not stable" y después
+   "outside of the viewport". El test del filtro sin JavaScript fallaba 6 de 6
+   corridas con el snap puesto y pasaba 6 de 6 sin él, en chromium y en mobile.
+   El sitio de referencia del que salió este diseño tampoco lo usa. */
+html {
+  color-scheme: light dark;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
 [data-theme='dark'] { color-scheme: dark; }
 
 body {
@@ -87,5 +99,30 @@ body {
   }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
     animation: none !important;
+  }
+}
+
+/* El efecto de entrada se habilita desde JavaScript, no desde acá: el script
+   pone `js-revelar` en <html> antes de observar nada. Sin JavaScript la clase
+   nunca aparece, estas reglas no aplican y todo se ve —que es el estado por
+   defecto correcto.
+
+   Es desplazamiento sin fade, a propósito. Un `opacity: 0` en el estado oculto
+   deja el texto de las secciones bajo el pliegue atenuado mientras axe evalúa
+   la página, y lo reporta como contraste insuficiente: 434 violaciones de
+   `color-contrast` en la home, en los dos temas. El gate del proyecto es cero
+   violaciones, así que el fade sale y el desplazamiento queda. */
+.js-revelar .revelar {
+  transform: translateY(12px);
+  transition: transform 500ms ease-out;
+}
+
+.js-revelar .revelar.visible {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-revelar .revelar {
+    transform: none;
   }
 }

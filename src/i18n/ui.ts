@@ -4,8 +4,7 @@ export const defaultLang: Lang = 'es';
 
 export type ClaveUI =
   | 'nav.inicio'
-  | 'nav.qa'
-  | 'nav.dev'
+  | 'nav.proyectos'
   | 'nav.sobre'
   | 'nav.stack'
   | 'nav.contacto'
@@ -18,11 +17,7 @@ export type ClaveUI =
   | 'home.rol'
   | 'home.disponible'
   | 'home.posicionamiento'
-  | 'home.qa.titulo'
-  | 'home.dev.titulo'
-  | 'home.dev.bajada'
-  | 'home.qa.ver'
-  | 'home.dev.ver'
+  | 'home.fotoAlt'
   | 'home.stack'
   | 'stack.lenguajes'
   | 'stack.testing'
@@ -32,8 +27,6 @@ export type ClaveUI =
   | 'stack.nivel.avanzado'
   | 'stack.nivel.intermedio'
   | 'stack.nivel.aprendiendo'
-  | 'qa.titulo'
-  | 'dev.titulo'
   | 'proyectos.titulo'
   | 'proyectos.bajada'
   | 'filtro.qa'
@@ -54,14 +47,32 @@ export type ClaveUI =
   | 'contacto.copiar'
   | 'contacto.copiado'
   | 'contacto.errorCopiar'
-  | 'ejemplo.aviso';
+  | 'ejemplo.aviso'
+  | 'nav.formacion'
+  | 'formacion.titulo'
+  | 'formacion.bajada'
+  | 'formacion.bootcamp.titulo'
+  | 'formacion.bootcamp.institucion'
+  | 'formacion.bootcamp.detalle'
+  | 'formacion.istqb.titulo'
+  | 'formacion.istqb.institucion'
+  | 'formacion.istqb.detalle'
+  | 'formacion.utn.titulo'
+  | 'formacion.utn.institucion'
+  | 'formacion.utn.detalle'
+  | 'formacion.ingles.titulo'
+  | 'formacion.ingles.institucion'
+  | 'formacion.ingles.detalle'
+  | 'formacion.estado.completado'
+  | 'formacion.estado.examenPendiente'
+  | 'formacion.estado.sinCompletar'
+  | 'formacion.estado.intermedio';
 
 type Diccionario = Record<ClaveUI, string>;
 
 const es = {
   'nav.inicio': 'Inicio',
-  'nav.qa': 'QA',
-  'nav.dev': 'Desarrollo',
+  'nav.proyectos': 'Projects',
   'nav.sobre': 'Sobre mí',
   'nav.stack': 'Stack',
   'nav.contacto': 'Contacto',
@@ -74,11 +85,7 @@ const es = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
   'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
-  'home.qa.titulo': 'Trabajo en QA',
-  'home.dev.titulo': 'También escribo código',
-  'home.dev.bajada': 'Escribo código, y eso me hace mejor testeando.',
-  'home.qa.ver': 'Ver todos los casos de QA',
-  'home.dev.ver': 'Ver todos los proyectos de desarrollo',
+  'home.fotoAlt': 'Retrato de Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Lenguajes',
   'stack.testing': 'Testing y automatización',
@@ -88,8 +95,6 @@ const es = {
   'stack.nivel.avanzado': 'Avanzado',
   'stack.nivel.intermedio': 'Intermedio',
   'stack.nivel.aprendiendo': 'Aprendiendo',
-  'qa.titulo': 'Casos de QA',
-  'dev.titulo': 'Proyectos de desarrollo',
   'proyectos.titulo': 'Proyectos',
   'proyectos.bajada': 'Casos de QA y proyectos de desarrollo. Cada uno documenta el contexto, lo que hice y qué aprendí.',
   'filtro.qa': 'QA · Automation',
@@ -111,12 +116,30 @@ const es = {
   'contacto.copiado': 'Copiado',
   'contacto.errorCopiar': 'No se pudo copiar. Copialo a mano.',
   'ejemplo.aviso': 'Contenido de ejemplo — pendiente de reemplazo.',
+  'nav.formacion': 'Formación',
+  'formacion.titulo': 'Formación',
+  'formacion.bajada': 'Dónde aprendí lo que aplico, y qué terminé de cada cosa.',
+  'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
+  'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.bootcamp.detalle': '43,5 horas · 372 lecciones',
+  'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
+  'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.istqb.detalle': '35 h 50 min · 340 lecciones',
+  'formacion.utn.titulo': 'Operador de Mercados Financieros',
+  'formacion.utn.institucion': 'UTN FRBA',
+  'formacion.utn.detalle': '94 horas · 12 unidades · 2022',
+  'formacion.ingles.titulo': 'Inglés',
+  'formacion.ingles.institucion': 'Autodidacta',
+  'formacion.ingles.detalle': 'Lectura técnica y documentación',
+  'formacion.estado.completado': 'Completado',
+  'formacion.estado.examenPendiente': 'Curso completo · examen pendiente',
+  'formacion.estado.sinCompletar': 'Cursado sin completar',
+  'formacion.estado.intermedio': 'Intermedio',
 } as const satisfies Diccionario;
 
 const en = {
   'nav.inicio': 'Home',
-  'nav.qa': 'QA',
-  'nav.dev': 'Development',
+  'nav.proyectos': 'Projects',
   'nav.sobre': 'About',
   'nav.stack': 'Stack',
   'nav.contacto': 'Contact',
@@ -129,11 +152,7 @@ const en = {
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',
   'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
-  'home.qa.titulo': 'QA work',
-  'home.dev.titulo': 'I also write code',
-  'home.dev.bajada': 'I write code, and that makes me a better tester.',
-  'home.qa.ver': 'See all QA cases',
-  'home.dev.ver': 'See all development projects',
+  'home.fotoAlt': 'Portrait of Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.lenguajes': 'Languages',
   'stack.testing': 'Testing & automation',
@@ -143,8 +162,6 @@ const en = {
   'stack.nivel.avanzado': 'Advanced',
   'stack.nivel.intermedio': 'Intermediate',
   'stack.nivel.aprendiendo': 'Learning',
-  'qa.titulo': 'QA case studies',
-  'dev.titulo': 'Development projects',
   'proyectos.titulo': 'Projects',
   'proyectos.bajada': 'QA cases and development projects. Each one documents the context, what I did, and what I learned.',
   'filtro.qa': 'QA · Automation',
@@ -166,6 +183,25 @@ const en = {
   'contacto.copiado': 'Copied',
   'contacto.errorCopiar': "Couldn't copy. Copy it manually.",
   'ejemplo.aviso': 'Sample content — pending replacement.',
+  'nav.formacion': 'Training',
+  'formacion.titulo': 'Training',
+  'formacion.bajada': 'Where I learned what I apply, and what I actually finished.',
+  'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
+  'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.bootcamp.detalle': '43.5 hours · 372 lessons',
+  'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
+  'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
+  'formacion.istqb.detalle': '35 h 50 min · 340 lessons',
+  'formacion.utn.titulo': 'Financial Markets Operator',
+  'formacion.utn.institucion': 'UTN FRBA',
+  'formacion.utn.detalle': '94 hours · 12 units · 2022',
+  'formacion.ingles.titulo': 'English',
+  'formacion.ingles.institucion': 'Self-taught',
+  'formacion.ingles.detalle': 'Technical reading and documentation',
+  'formacion.estado.completado': 'Completed',
+  'formacion.estado.examenPendiente': 'Course complete · exam pending',
+  'formacion.estado.sinCompletar': 'Attended, not completed',
+  'formacion.estado.intermedio': 'Intermediate',
 } as const satisfies Diccionario;
 
 export const ui = { es, en };

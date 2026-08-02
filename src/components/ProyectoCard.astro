@@ -37,7 +37,7 @@ const href = `/${lang}/${tipo === 'qa' ? 'qa' : 'dev'}/${slug}`;
 const chips = tipo === 'qa' ? (datos.tags ?? []) : datos.stack;
 ---
 <article data-testid="proyecto-card" data-tipo={tipo}
-  class="relative flex flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-accent">
+  class="tarjeta relative flex flex-col rounded-lg border border-border bg-surface p-5 transition-[transform,border-color] hover:border-accent">
   <div class="flex items-center gap-2">
     <span data-testid="card-distintivo"
       class="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted">
@@ -84,3 +84,27 @@ const chips = tipo === 'qa' ? (datos.tags ?? []) : datos.stack;
     </div>
   )}
 </article>
+
+<style>
+  /* La elevación acompaña al cambio de borde que ya existía. Va en `:hover` y
+     en `:focus-within` porque el enlace del título cubre la card entera con
+     `after:absolute`: enfocarlo con teclado es el equivalente exacto de pasarle
+     el mouse por encima, y sin esto ese estado no tendría ninguna señal visual.
+     `:focus-within` y no `:focus-visible` sobre la card: el foco lo recibe el
+     enlace de adentro, no el <article>. */
+  .tarjeta:hover,
+  .tarjeta:focus-within {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+
+  /* El bloque global de prefers-reduced-motion ya lleva las transiciones a
+     0.01ms, pero no anula la transformación en sí: sin esto el salto ocurre
+     igual, solo que instantáneo. */
+  @media (prefers-reduced-motion: reduce) {
+    .tarjeta:hover,
+    .tarjeta:focus-within {
+      transform: none;
+    }
+  }
+</style>
