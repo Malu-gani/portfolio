@@ -40,7 +40,7 @@ visual moderno sin romper ninguno de los gates que ya están en verde.
 ### 3.1 Estructura de la home
 
 ```
-#inicio      Hero        dos columnas: nombre, rol, 2-3 líneas, contacto · foto
+#inicio      Hero        una columna: foto, nombre, rol, 2-3 líneas, contacto
 #sobre-mi    Sobre mí    resumen + enlace a /es/sobre-mi
 #proyectos   Projects    filtro QA/Dev/Todos · QA por defecto · las 5 cards
 #stack       Skills      grilla por categoría, cada chip con su nivel
@@ -85,13 +85,22 @@ Un campo que sobrevive sin consumidor es el mismo problema que ya tuvo `demo`
 —declarado en el esquema y sin plantilla que lo leyera— así que o se le da uso o
 se saca. Se le da uso.
 
-### 3.4 Hero en dos columnas, con foto
+### 3.4 Hero en una columna, con retrato arriba
 
-Columna izquierda: badge de disponibilidad, nombre, rol en monoespaciada, dos o
-tres líneas de descripción, e íconos de contacto (`ContactoInline`, ya existe).
-Columna derecha: foto.
+**Revisado el 02/08/2026.** La versión anterior de esta sección pedía dos
+columnas con la foto a la derecha, ocupando 400-500 px de ancho. Se cambió al
+confirmarse que el original de 800×800 no existe y no se puede recuperar: ver la
+sección 8, que ahora fija el techo de exhibición en 200 px. Un retrato de 200 px
+en una columna propia deja esa columna casi vacía, así que la estructura de dos
+columnas pierde sentido.
 
-Por debajo de `sm` las columnas se apilan y la foto va arriba.
+Una sola columna centrada, en este orden: retrato circular de **200 px**, badge
+de disponibilidad, nombre, rol en monoespaciada, dos o tres líneas de
+descripción, e íconos de contacto (`ContactoInline`, ya existe).
+
+El orden no cambia entre breakpoints: al ser una sola columna, mobile y desktop
+comparten la misma secuencia. Esto elimina la regla de apilado que tenía la
+versión anterior.
 
 La descripción del hero se mantiene breve a propósito. La sección `#sobre-mi`
 sigue existiendo con el resumen y el enlace a la página completa: si el hero
@@ -208,7 +217,7 @@ bloque global de `global.css` ya anula animaciones, transiciones y
 patrón que `src/data/stack.ts`, para poder verificar desde un test unitario que
 ningún ítem quede sin estado o con un estado inválido).
 
-**Reescritos:** `Hero.astro` (dos columnas + foto), `HomeContent.astro`
+**Reescritos:** `Hero.astro` (una columna + retrato de 200 px), `HomeContent.astro`
 (`#qa` + `#dev` → `#proyectos`), `Header.astro` (items del navbar),
 `NavMobile.astro` (mismos items), `StackGrid.astro` (densidad),
 `ProyectoCard.astro` (hover), `Footer.astro` (estructura de la referencia).
@@ -267,13 +276,24 @@ visible con JavaScript deshabilitado.
 
 ## 8. Dependencias antes de implementar
 
-- **La foto, en un original de al menos 800×800 px.** Bloquea el hero. El archivo
-  entregado el 02/08/2026 (`juan-manuel-malugani.jpg`) mide **317×317 px y 17 KB**
-  —tamaño de avatar— y se vería borroso en la columna del hero, que ronda los
-  400-500 px de ancho y se duplica en pantallas de alta densidad. Agrandarlo por
-  software solo agrega desenfoque. Una foto de celular sirve.
+- ~~La foto, en un original de al menos 800×800 px.~~ **Resuelto el 02/08/2026, y
+  no como pedía esta sección.** El original de alta resolución se perdió y no se
+  puede recuperar: `juan-manuel-malugani.jpg` a **317×317 px y 17 KB** es todo lo
+  que hay. Ya está en el repo, en `src/assets/`.
 - Nada más: el resto del contenido ya existe o está definido en esta spec.
 
-Cuando llegue la foto definitiva se maneja con `astro:assets`, que genera WebP y
-los tamaños responsivos en build y deduce `width`/`height` — así el requisito de
-CLS de 3.4 se cumple sin escribirlo a mano.
+**Techo de exhibición: 200 px.** Con un original de 317 px, mostrarlo a 200 px da
+1,59× de densidad efectiva; a 160 px da 1,98×, prácticamente nítido en retina. A
+los 400-500 px que pedía la versión anterior de 3.4 daría 0,79×, visiblemente
+blando. Escalar por software no agrega detalle, solo desenfoque, así que la
+restricción se absorbe en el diseño y no en el procesamiento: **el hero pasa a
+una sola columna con retrato de 200 px arriba** (sección 3.4, reescrita).
+
+Se maneja con `astro:assets`, que genera WebP y deduce `width`/`height` en build
+— así el requisito de CLS de 3.4 se cumple sin escribirlo a mano. **Importante:
+no declarar `widths` mayores a 317**, porque Astro generaría variantes
+_upscaleadas_ que pesan más sin verse mejor.
+
+Si en algún momento aparece un original de 800×800 o se saca una foto nueva —una
+de celular sirve—, alcanza con reemplazar el archivo y subir el tamaño de
+exhibición; el resto del hero no depende de esto.
