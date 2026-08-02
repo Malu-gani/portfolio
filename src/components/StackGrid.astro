@@ -29,8 +29,8 @@ const colorNivel: Record<Nivel, string> = {
   aprendiendo: 'text-sev-medio',
 };
 ---
-<section data-testid="stack" id="stack" class="scroll-mt-24 py-10">
-  <h2 class="text-2xl font-semibold">{t('home.stack')}</h2>
+<section data-testid="stack" id="stack" class="scroll-mt-24 py-16 sm:py-20">
+  <h2 class="text-center text-2xl font-semibold">{t('home.stack')}</h2>
   <div class="mt-6 space-y-8">
     {ordenCategorias.map((categoria) => (
       <div data-testid={`stack-grupo-${categoria}`}>

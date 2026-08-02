@@ -15,9 +15,9 @@ const colorEstado: Record<EstadoFormacion, string> = {
   nivel: 'text-muted',
 };
 ---
-<section data-testid="bloque-formacion" id="formacion" class="scroll-mt-24 py-10">
-  <h2 class="text-2xl font-semibold">{t('formacion.titulo')}</h2>
-  <p class="mt-2 max-w-prose text-muted">{t('formacion.bajada')}</p>
+<section data-testid="bloque-formacion" id="formacion" class="scroll-mt-24 py-16 sm:py-20">
+  <h2 class="text-center text-2xl font-semibold">{t('formacion.titulo')}</h2>
+  <p class="mx-auto mt-2 max-w-prose text-center text-muted">{t('formacion.bajada')}</p>
 
   <ul class="mt-6 space-y-3">
     {formacion.map((item) => (

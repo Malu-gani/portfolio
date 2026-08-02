@@ -77,6 +77,23 @@ test.describe('Home', () => {
     await home.abrir('es');
     await expect(home.retrato).toHaveAttribute('src', /\.webp/);
   });
+
+  // La separación entre secciones pasa a ser espacio, no una línea. Si volviera
+  // un `border-t`, la home tendría dos sistemas de separación conviviendo.
+  test('las secciones se separan por espacio, no por línea', async ({ page }) => {
+    await page.goto('/es/');
+    const conBorde = await page.evaluate(() =>
+      ['bloque-sobre', 'bloque-proyectos', 'stack', 'bloque-formacion', 'bloque-contacto']
+        .map((id) => {
+          const el = document.querySelector(`[data-testid="${id}"]`);
+          if (!el) return `${id}: no existe`;
+          const w = getComputedStyle(el).borderTopWidth;
+          return w === '0px' ? null : `${id}: ${w}`;
+        })
+        .filter(Boolean)
+    );
+    expect(conBorde, 'quedaron secciones con border-t').toEqual([]);
+  });
 });
 
 test.describe('Formación', () => {
