@@ -120,65 +120,47 @@ test.describe('Estabilidad del scroll entre navegaciones', () => {
   }
 });
 
-test.describe('Scroll-snap', () => {
-  // El valor computado NO incluye "proximity": es el valor inicial de la
-  // componente de rigidez, así que todos los motores lo eliden al serializar
-  // (`y proximity` computa a `y`; `y mandatory` computa a `y mandatory`).
-  // Por eso se afirma el eje y la ausencia de `mandatory`, que es el invariante
-  // que importa: `mandatory` obligaría a que cada sección midiera 100vh, y las
-  // de esta home tienen alturas muy distintas.
-  test('la home declara snap por proximidad en el eje vertical', async ({ page }) => {
-    await page.goto('/es/');
-    const tipo = await page.evaluate(
-      () => getComputedStyle(document.documentElement).scrollSnapType
-    );
-    expect(tipo).toContain('y');
-    expect(tipo, 'el snap quedó en mandatory: recortaría contenido o dejaría huecos').not.toContain('mandatory');
-  });
+test.describe('Navegación por ancla', () => {
+  test.use({ viewport: { width: 1280, height: 720 } });
 
-  // Si el selector de `scroll-snap-align` no matcheara las secciones, el snap no
-  // se aplicaría a nada y los tests de anclas pasarían igual: falso verde. Esta
-  // aserción es la que hace que el snap sea observable y no solo declarado.
-  test('las seis secciones de la home declaran punto de anclaje', async ({ page }) => {
+  // No alcanza con `toBeInViewport`: acepta una intersección parcial, así que
+  // una sección que quedó medio tapada por el header sticky lo satisface igual.
+  // Se mide dónde aterriza el borde superior, que es lo que el usuario ve.
+  test('la sección aterriza por debajo del header, no tapada', async ({ page }) => {
     await page.goto('/es/');
-    const alineadas = await page.evaluate(() =>
-      ['inicio', 'sobre-mi', 'proyectos', 'stack', 'formacion', 'contacto'].filter((id) => {
-        const el = document.getElementById(id);
-        return el !== null && getComputedStyle(el).scrollSnapAlign.startsWith('start');
-      })
+    const alturaHeader = await page.evaluate(
+      () => document.querySelector('header')!.getBoundingClientRect().height
     );
-    expect(alineadas).toHaveLength(6);
-  });
 
-  // El bloque global de reduced-motion anula animaciones, transiciones y
-  // scroll-behavior, pero `scroll-snap-type` es una propiedad aparte: sin esta
-  // regla, alguien con la preferencia activada seguiría teniendo el scroll
-  // agarrándose solo, que es exactamente el movimiento que pidió no tener.
-  test('con reduced-motion el snap se desactiva', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/es/');
-    const tipo = await page.evaluate(
-      () => getComputedStyle(document.documentElement).scrollSnapType
-    );
-    expect(tipo).toBe('none');
+    for (const [testid, id] of [
+      ['nav-sobre', 'sobre-mi'],
+      ['nav-proyectos', 'proyectos'],
+      ['nav-formacion', 'formacion'],
+    ] as const) {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.getByTestId(testid).click();
+      await expect
+        .poll(
+          async () => page.evaluate((s) => Math.round(document.getElementById(s)!.getBoundingClientRect().top), id),
+          { message: `#${id} nunca llegó a su posición`, timeout: 5000 }
+        )
+        .toBeLessThan(alturaHeader + 40);
+      const top = await page.evaluate((s) => document.getElementById(s)!.getBoundingClientRect().top, id);
+      expect(top, `#${id} quedó tapada por el header sticky`).toBeGreaterThanOrEqual(alturaHeader - 2);
+    }
   });
+});
 
-  // El invariante que evita el crash de WebKit no se puede perder por sumar
-  // snap: `overflow-y: scroll` tiene que seguir ahí.
-  test('el snap no se come el overflow que evita el crash de WebKit', async ({ page }) => {
-    await page.goto('/es/');
-    const overflowY = await page.evaluate(
-      () => getComputedStyle(document.documentElement).overflowY
-    );
-    expect(overflowY).toBe('scroll');
-  });
-
-  // El navbar ancla contra los ids: si el snap rompiera el salto, el sitio
-  // perdería su navegación principal sin que nada más lo notara.
-  test('la navegación por ancla sigue llegando a la sección', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto('/es/');
-    await page.getByTestId('nav-formacion').click();
-    await expect(page.getByTestId('bloque-formacion')).toBeInViewport({ timeout: 5000 });
-  });
+// `scroll-snap-type: y proximity` estuvo en `html` y se revirtió el 02/08/2026.
+// El snap tira del viewport después de que el scroll llega a destino, así que un
+// click sobre un elemento a mitad de sección no aterriza: el test del filtro sin
+// JavaScript fallaba 6 de 6 corridas con el snap puesto y pasaba 6 de 6 sin él,
+// en chromium y en mobile. Esta guarda existe para que no vuelva sin que alguien
+// lo decida a propósito y mida de nuevo — si vuelve, este test avisa.
+test('la home no reintroduce scroll-snap', async ({ page }) => {
+  await page.goto('/es/');
+  const tipo = await page.evaluate(
+    () => getComputedStyle(document.documentElement).scrollSnapType
+  );
+  expect(tipo, 'volvió el scroll-snap: rompe el click sobre elementos a mitad de sección').toBe('none');
 });
