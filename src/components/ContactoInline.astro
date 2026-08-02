@@ -7,30 +7,86 @@ import type { Lang } from '../i18n/ui';
  * home y en `/contacto`: son los dos momentos en que alguien quiere
  * contactarte, apenas llega y cuando terminó de leer.
  *
- * El email es un `mailto:` y no el botón de copiar del island: acá alcanza con
- * el atajo, y sumar un tercer punto de montaje de React por esto no se
- * justifica.
+ * El email es un `mailto:` en el HTML y copia al portapapeles con un script
+ * suelto, no con el island de React de la sección Contacto. El `mailto:` solo
+ * era un click muerto para quien no tiene cliente de correo configurado —el
+ * caso más común en Windows—, y montar un tercer punto de hidratación en el
+ * hero, que es lo primero que carga, no se justificaba por un botón de copiar.
  */
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const email = 'maluganijuanmanuel@gmail.com';
 
-const enlaces = [
-  { testid: 'hero-github', href: 'https://github.com/Malu-gani', texto: 'GitHub', externo: true },
-  { testid: 'hero-linkedin', href: 'https://www.linkedin.com/in/maluganijuanmanuel', texto: 'LinkedIn', externo: true },
-  { testid: 'hero-email', href: `mailto:${email}`, texto: 'Email', externo: false },
+const clase =
+  'inline-block rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent';
+
+const externos = [
+  { testid: 'hero-github', href: 'https://github.com/Malu-gani', texto: 'GitHub' },
+  { testid: 'hero-linkedin', href: 'https://www.linkedin.com/in/maluganijuanmanuel', texto: 'LinkedIn' },
 ];
 ---
 <ul data-testid="contacto-inline" aria-label={t('contacto.enlaces')} class="mt-6 flex flex-wrap gap-3">
-  {enlaces.map((e) => (
+  {externos.map((e) => (
     <li>
-      <a href={e.href} data-testid={e.testid}
-        target={e.externo ? '_blank' : undefined}
-        rel={e.externo ? 'noopener noreferrer' : undefined}
-        class="inline-block rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent">
+      <a href={e.href} data-testid={e.testid} target="_blank" rel="noopener noreferrer" class={clase}>
         {e.texto}
       </a>
     </li>
   ))}
+  <li>
+    <a href={`mailto:${email}`} data-testid="hero-email"
+      data-copiado={t('contacto.copiado')} class={clase}>
+      <!-- "Email" queda igual en los dos idiomas, como "Stack" y "Projects". -->
+      <span data-etiqueta="Email">Email</span>
+    </a>
+    <span data-testid="hero-email-aviso" role="status" aria-live="polite" class="sr-only"></span>
+  </li>
 </ul>
+
+<script>
+  // El enlace es y sigue siendo un `mailto:`. Copiar se engancha encima: si no
+  // hay JavaScript, o el navegador no expone el portapapeles, el clic hace lo
+  // que siempre hizo y nadie se queda sin camino.
+  const MS_AVISO = 2000;
+  let temporizador: ReturnType<typeof setTimeout> | undefined;
+
+  // El listener va sobre `document` en vez de sobre el enlace para sobrevivir a
+  // las view transitions, que reemplazan el nodo: delegar evita tener que
+  // re-enganchar en cada `astro:after-swap`.
+  document.addEventListener('click', async (evento) => {
+    const objetivo = evento.target as Element | null;
+    const enlace = objetivo?.closest<HTMLAnchorElement>('[data-testid="hero-email"]');
+    if (!enlace) return;
+    // Sin portapapeles no interceptamos: el navegador sigue con el `mailto:`.
+    if (!navigator.clipboard) return;
+
+    evento.preventDefault();
+    const etiqueta = enlace.querySelector<HTMLElement>('[data-etiqueta]');
+    const aviso = enlace.parentElement?.querySelector<HTMLElement>('[data-testid="hero-email-aviso"]');
+    if (!etiqueta || !aviso) return;
+
+    try {
+      await navigator.clipboard.writeText(enlace.href.replace(/^mailto:/, ''));
+    } catch {
+      // El portapapeles existía pero rechazó la escritura. En vez de avisar de
+      // un error que el visitante no puede resolver, se hace lo que el enlace
+      // prometía: abrir el cliente de correo.
+      window.location.href = enlace.href;
+      return;
+    }
+
+    const copiado = enlace.dataset.copiado ?? '';
+    etiqueta.textContent = copiado;
+    aviso.textContent = copiado;
+
+    // El texto original se restaura desde el atributo y no desde lo que hay en
+    // pantalla: un segundo clic dentro de los dos segundos leería "Copiado" y
+    // lo dejaría ahí para siempre.
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => {
+      etiqueta.textContent = etiqueta.dataset.etiqueta ?? '';
+      aviso.textContent = '';
+    }, MS_AVISO);
+  });
+</script>
