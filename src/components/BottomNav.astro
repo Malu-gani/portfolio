@@ -1,0 +1,41 @@
+---
+interface Props {
+  enHome: boolean;
+  home: string;
+  secciones: { id: string; testid: string; texto: string }[];
+}
+// Reemplaza al menú hamburguesa en mobile (<640px): en vez de un drawer que
+// hay que abrir para saltar de sección, esto queda siempre a mano del
+// pulgar. HTML/CSS nativo, sin hidratación — mismo criterio que el
+// scroll-spy de Header.astro.
+//
+// `data-seccion={id}` en cada link es lo que hace que el scroll-spy ya
+// existente en Header.astro (que selecciona genéricamente `a[data-seccion]`)
+// marque el ítem activo acá también, sin tocar ese script.
+const { enHome, home, secciones } = Astro.props;
+
+const iconos: Record<string, string> = {
+  inicio: 'M3 11.5 12 4l9 7.5M5.5 10.5V20h4v-6h5v6h4v-9.5',
+  'sobre-mi': 'M12 12.8a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8ZM5.5 19.5c1.4-3.4 3.9-4.9 6.5-4.9s5.1 1.5 6.5 4.9',
+  proyectos: 'M3.5 7.5a1 1 0 0 1 1-1h4l1.8 1.8H19a1 1 0 0 1 1 1V17a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1V7.5Z',
+  stack: 'm12 4-8.5 4.5L12 13l8.5-4.5L12 4Zm-8.5 8L12 16.5l8.5-4.5M3.5 15.5 12 20l8.5-4.5',
+  formacion: 'M4.5 5.5a1 1 0 0 1 1-1H11v15H5.5a1 1 0 0 1-1-1v-13ZM19.5 5.5a1 1 0 0 0-1-1H13v15h5.5a1 1 0 0 0 1-1v-13Z',
+  contacto: 'M4 6.5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-11Zm1 0 8 6.5 8-6.5',
+};
+---
+<nav data-testid="nav-bottom" aria-label="Navegación de secciones"
+  class="fixed inset-x-0 bottom-0 z-50 flex overflow-x-auto border-t border-border bg-bg/95 backdrop-blur [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden"
+  style="scroll-snap-type: x mandatory;">
+  {secciones.map((s) => (
+    <a href={enHome ? `#${s.id}` : `${home}#${s.id}`}
+      data-testid={`bn-${s.testid}`} data-seccion={s.id}
+      style="scroll-snap-align: start;"
+      class="flex min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-1 py-2 text-muted transition-colors hover:text-accent focus-visible:text-accent aria-[current=true]:text-accent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+        <path d={iconos[s.id]} />
+      </svg>
+      <span class="text-[0.65rem] leading-none">{s.texto}</span>
+    </a>
+  ))}
+</nav>

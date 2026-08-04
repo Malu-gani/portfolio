@@ -44,7 +44,7 @@ test.describe('Navegación', () => {
     const pie = page.getByTestId('pie');
     await expect(pie.getByTestId('pie-github')).toHaveAttribute('href', /github\.com/);
     await expect(pie.getByTestId('pie-linkedin')).toHaveAttribute('href', /linkedin\.com/);
-    await expect(pie.getByTestId('pie-secciones').getByRole('link')).toHaveCount(4);
+    await expect(pie.getByTestId('pie-secciones').getByRole('link')).toHaveCount(5);
   });
 });
 
@@ -76,20 +76,19 @@ test.describe('Scroll-spy del navbar', () => {
   });
 });
 
-test.describe('Menú en pantallas chicas', () => {
+test.describe('Bottom Nav en pantallas chicas', () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
-  test('el menú de escritorio se oculta y el desplegable navega', async ({ page }) => {
+  test('el menú de escritorio se oculta y la barra fija navega', async ({ page }) => {
     await page.goto('/es/');
     await expect(page.getByTestId('nav-secciones')).toBeHidden();
 
-    const menu = page.getByTestId('nav-mobile');
-    await menu.locator('summary').click();
-    await expect(page.getByTestId('m-nav-proyectos')).toBeVisible();
+    const bottomNav = page.getByTestId('nav-bottom');
+    await expect(bottomNav).toBeVisible();
 
-    await page.getByTestId('m-nav-proyectos').click();
-    // El panel se cierra solo: si quedara abierto, taparía la sección.
-    await expect(page.getByTestId('m-nav-proyectos')).toBeHidden();
+    const item = page.getByTestId('bn-nav-proyectos');
+    await item.click();
+    await expect(item).toHaveAttribute('aria-current', 'true', { timeout: 5000 });
   });
 });
 

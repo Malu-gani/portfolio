@@ -9,7 +9,6 @@ export type ClaveUI =
   | 'nav.stack'
   | 'nav.contacto'
   | 'nav.principal'
-  | 'nav.abrir'
   | 'tema.cambiar'
   | 'tema.claro'
   | 'tema.oscuro'
@@ -76,7 +75,9 @@ export type ClaveUI =
   | 'reportar.copiar'
   | 'reportar.copiado'
   | 'reportar.errorCopiar'
-  | 'reportar.despues';
+  | 'reportar.despues'
+  | 'footer.volverArriba'
+  | 'volverArriba.aria';
 
 type Diccionario = Record<ClaveUI, string>;
 
@@ -87,7 +88,6 @@ const es = {
   'nav.stack': 'Stack',
   'nav.contacto': 'Contacto',
   'nav.principal': 'Navegación principal',
-  'nav.abrir': 'Abrir menú',
   'tema.cambiar': 'Cambiar tema',
   'tema.claro': 'Claro',
   'tema.oscuro': 'Oscuro',
@@ -155,6 +155,8 @@ const es = {
   'reportar.copiado': 'Plantilla copiada',
   'reportar.errorCopiar': 'No se pudo copiar. Seleccionala a mano.',
   'reportar.despues': 'Leo todo lo que llega. Lo que sea un defecto real se arregla; lo que no, te explico por qué.',
+  'footer.volverArriba': 'Volver arriba ↑',
+  'volverArriba.aria': 'Volver arriba',
 } as const satisfies Diccionario;
 
 const en = {
@@ -164,7 +166,6 @@ const en = {
   'nav.stack': 'Stack',
   'nav.contacto': 'Contact',
   'nav.principal': 'Main navigation',
-  'nav.abrir': 'Open menu',
   'tema.cambiar': 'Toggle theme',
   'tema.claro': 'Light',
   'tema.oscuro': 'Dark',
@@ -232,6 +233,8 @@ const en = {
   'reportar.copiado': 'Template copied',
   'reportar.errorCopiar': "Couldn't copy. Select it manually.",
   'reportar.despues': "I read everything that comes in. Anything that's a real defect gets fixed; anything that isn't, I'll explain why.",
+  'footer.volverArriba': 'Back to top ↑',
+  'volverArriba.aria': 'Back to top',
 } as const satisfies Diccionario;
 
 export const ui = { es, en };

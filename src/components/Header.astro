@@ -1,7 +1,7 @@
 ---
 import ThemeToggle from './ThemeToggle.tsx';
 import LangToggle from './LangToggle.astro';
-import NavMobile from './NavMobile.astro';
+import BottomNav from './BottomNav.astro';
 import IconoBug from './IconoBug.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -27,8 +27,6 @@ const secciones = [
 <header class="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur">
   <nav data-testid="nav-principal" aria-label={t('nav.principal')}
     class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-    <NavMobile lang={lang} enHome={enHome} secciones={secciones}
-      reportar={{ href: enHome ? '#reportar' : `${home}#reportar`, texto: t('nav.reportar') }} />
     <ul data-testid="nav-secciones" class="hidden flex-wrap gap-4 sm:flex">
       {secciones.map((s) => (
         <li>
@@ -54,7 +52,7 @@ const secciones = [
       <a href={enHome ? '#reportar' : `${home}#reportar`}
         data-testid="nav-reportar" data-seccion="reportar"
         aria-label={t('reportar.abrir')} title={t('reportar.abrir')}
-        class="hidden h-9 w-9 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-accent focus-visible:text-accent aria-[current=true]:text-accent sm:flex">
+        class="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-accent focus-visible:text-accent aria-[current=true]:text-accent">
         <IconoBug />
       </a>
       <LangToggle />
@@ -67,6 +65,8 @@ const secciones = [
     </div>
   </nav>
 </header>
+
+<BottomNav enHome={enHome} home={home} secciones={secciones} />
 
 <script>
   // Scroll-spy en vanilla: marcar el enlace de la sección visible. No se hace
@@ -85,9 +85,16 @@ const secciones = [
     const enlaces = document.querySelectorAll<HTMLAnchorElement>('a[data-seccion]');
     if (enlaces.length === 0) return;
 
-    const porId = new Map<string, HTMLAnchorElement>();
+    // Un mismo id de sección puede tener más de un link marcándola -desktop y
+    // BottomNav repiten los mismos data-seccion-, así que cada id guarda una
+    // lista, no un único link.
+    const porId = new Map<string, HTMLAnchorElement[]>();
     for (const a of enlaces) {
-      if (a.dataset.seccion) porId.set(a.dataset.seccion, a);
+      const id = a.dataset.seccion;
+      if (!id) continue;
+      const lista = porId.get(id) ?? [];
+      lista.push(a);
+      porId.set(id, lista);
     }
 
     const secciones = [...porId.keys()]
@@ -99,8 +106,10 @@ const secciones = [
     if (secciones.length === 0) return;
 
     function marcar(id: string) {
-      for (const a of porId.values()) a.removeAttribute('aria-current');
-      porId.get(id)?.setAttribute('aria-current', 'true');
+      for (const lista of porId.values()) {
+        for (const a of lista) a.removeAttribute('aria-current');
+      }
+      for (const a of porId.get(id) ?? []) a.setAttribute('aria-current', 'true');
     }
 
     // La última sección nunca alcanza la banda del observador: la página toca
@@ -139,17 +148,6 @@ const secciones = [
         if (enElFondo()) marcar(ultima);
       },
       { passive: true, signal: controlador.signal }
-    );
-
-    // Sin esto, al tocar una sección el panel queda abierto tapando el
-    // contenido al que acaba de saltar.
-    const menu = document.querySelector<HTMLDetailsElement>('[data-testid="nav-mobile"]');
-    menu?.addEventListener(
-      'click',
-      (evento) => {
-        if ((evento.target as HTMLElement).closest('a')) menu.open = false;
-      },
-      { signal: controlador.signal }
     );
   }
 
