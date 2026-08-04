@@ -71,5 +71,9 @@ const plantilla = plantillaReporte(lang);
       document.querySelector<HTMLElement>('[data-testid="reportar-plantilla"]')?.textContent ?? '',
     alCopiar: (boton) => avisar(boton.dataset.copiado ?? ''),
     alFallar: (boton) => avisar(boton.dataset.error ?? ''),
+    // El botón no tiene acción por defecto propia -a diferencia del `mailto:`
+    // del hero-, así que sin portapapeles hay que avisar en vez de no hacer
+    // nada: un clic mudo es peor que uno que explica por qué no copió.
+    sinPortapapeles: (boton) => avisar(boton.dataset.error ?? ''),
   });
 </script>

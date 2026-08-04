@@ -19,6 +19,15 @@ export interface OpcionesCopiar {
    * no copiar.
    */
   alFallar: (disparador: HTMLElement) => void;
+  /**
+   * Qué hacer si el portapapeles no existe (contexto no seguro, o navegador
+   * viejo). Si no se pasa, no se intercepta el clic y el elemento hace su
+   * acción por defecto -que en el hero es abrir el cliente de correo desde el
+   * `mailto:`-. Un disparador sin acción por defecto propia, como un
+   * `<button>`, tiene que pasarlo: si no, el clic no hace nada y no avisa
+   * nada, que es peor que fallar con un mensaje.
+   */
+  sinPortapapeles?: (disparador: HTMLElement) => void;
 }
 
 export function engancharCopiar(opciones: OpcionesCopiar): void {
@@ -26,9 +35,12 @@ export function engancharCopiar(opciones: OpcionesCopiar): void {
     const objetivo = evento.target as Element | null;
     const disparador = objetivo?.closest<HTMLElement>(opciones.selectorDisparador);
     if (!disparador) return;
-    // Sin portapapeles no se intercepta: el navegador sigue con la acción por
-    // defecto del elemento, que en el hero es abrir el cliente de correo.
-    if (!navigator.clipboard) return;
+    if (!navigator.clipboard) {
+      if (!opciones.sinPortapapeles) return;
+      evento.preventDefault();
+      opciones.sinPortapapeles(disparador);
+      return;
+    }
 
     evento.preventDefault();
     try {

@@ -68,6 +68,19 @@ test.describe('Sección Reportar un problema', () => {
     await reportar.botonCopiar.click();
     await expect(reportar.aviso).toHaveText('No se pudo copiar. Seleccionala a mano.');
   });
+
+  // El botón no tiene acción por defecto como el `mailto:` del hero: si no
+  // avisa, el clic no hace absolutamente nada.
+  test('sin portapapeles avisa en vez de no hacer nada', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Sobrescribe navigator.clipboard; estable solo en Chromium');
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'clipboard', { configurable: true, value: undefined });
+    });
+    const reportar = new ReportarPage(page);
+    await reportar.abrir('es');
+    await reportar.botonCopiar.click();
+    await expect(reportar.aviso).toHaveText('No se pudo copiar. Seleccionala a mano.');
+  });
 });
 
 // El botón de copiar no puede esconder la plantilla detrás suyo: sin
