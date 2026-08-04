@@ -11,8 +11,8 @@ export class BasePage {
   readonly nav: Locator;
   /** El menú de secciones de escritorio; oculto por debajo del breakpoint sm. */
   readonly navSecciones: Locator;
-  /** El `<details>` del menú de pantallas chicas. */
-  readonly navMobile: Locator;
+  /** La barra fija de pantallas chicas; oculta desde el breakpoint sm. */
+  readonly navBottom: Locator;
 
   constructor(protected readonly page: Page) {
     this.themeToggle = page.getByTestId('theme-toggle');
@@ -21,7 +21,7 @@ export class BasePage {
     this.langToggle = page.getByTestId('lang-toggle');
     this.nav = page.getByTestId('nav-principal');
     this.navSecciones = page.getByTestId('nav-secciones');
-    this.navMobile = page.getByTestId('nav-mobile');
+    this.navBottom = page.getByTestId('nav-bottom');
   }
 
   /** Enlace del menú de escritorio a una sección de la home. */
@@ -29,13 +29,9 @@ export class BasePage {
     return this.page.getByTestId(`nav-${id === 'sobre-mi' ? 'sobre' : id}`);
   }
 
-  /** El mismo enlace, en el desplegable de pantallas chicas. */
-  enlaceSeccionMobile(id: string): Locator {
-    return this.page.getByTestId(`m-nav-${id === 'sobre-mi' ? 'sobre' : id}`);
-  }
-
-  async abrirMenuMobile(): Promise<void> {
-    await this.navMobile.locator('summary').click();
+  /** El mismo enlace, en la barra de pantallas chicas. */
+  enlaceSeccionBottomNav(id: string): Locator {
+    return this.page.getByTestId(`bn-nav-${id === 'sobre-mi' ? 'sobre' : id}`);
   }
 
   async temaActual(): Promise<string | null> {

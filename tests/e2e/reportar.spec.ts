@@ -138,12 +138,14 @@ test.describe('El acceso del navbar', () => {
   test.describe('en pantalla chica', () => {
     test.use({ viewport: { width: 375, height: 700 } });
 
-    test('el ítem está en el panel desplegable, con texto', async ({ page }) => {
+    // El ícono ya no vive en un panel desplegable propio: sin el menú
+    // hamburguesa (reemplazado por BottomNav), queda siempre visible en el
+    // header, igual que en desktop.
+    test('el ícono está siempre visible en el header', async ({ page }) => {
       const reportar = new ReportarPage(page);
       await reportar.abrir('es');
-      await reportar.abrirPanelMobile();
-      await expect(reportar.accesoMobile).toBeVisible();
-      await expect(reportar.accesoMobile).toHaveText('Reportar');
+      await expect(reportar.accesoDesktop).toBeVisible();
+      await expect(reportar.accesoDesktop).toHaveAccessibleName('Reportar un problema del sitio');
     });
   });
 });
