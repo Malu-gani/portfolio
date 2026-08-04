@@ -1,5 +1,7 @@
 ---
 import { stack, ordenCategorias, type Categoria, type Nivel } from '../data/stack';
+import { stackIconos } from '../data/stack-iconos';
+import StackFiltro from './StackFiltro.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang, ClaveUI } from '../i18n/ui';
 
@@ -8,11 +10,9 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const claveCategoria: Record<Categoria, ClaveUI> = {
-  lenguajes: 'stack.lenguajes',
-  testing: 'stack.testing',
-  frameworks: 'stack.frameworks',
-  datos: 'stack.datos',
-  herramientas: 'stack.herramientas',
+  'qa-testing': 'stack.qaTesting',
+  'desarrollo-datos': 'stack.desarrolloDatos',
+  'devops-herramientas': 'stack.devopsHerramientas',
 };
 
 const claveNivel: Record<Nivel, ClaveUI> = {
@@ -20,18 +20,14 @@ const claveNivel: Record<Nivel, ClaveUI> = {
   intermedio: 'stack.nivel.intermedio',
   aprendiendo: 'stack.nivel.aprendiendo',
 };
-
-// El nivel se comunica con texto, no solo con color: es la misma restricción
-// que rige para severidad y estado en el resto del sitio.
-const colorNivel: Record<Nivel, string> = {
-  avanzado: 'text-accent',
-  intermedio: 'text-muted',
-  aprendiendo: 'text-sev-medio',
-};
 ---
 <section data-testid="stack" id="stack" class="revelar scroll-mt-24 py-16 sm:py-20">
   <h2 class="text-center text-2xl font-semibold">{t('home.stack')}</h2>
-  <div class="mt-6 space-y-6">
+  <div class="mt-6 flex justify-center">
+    <StackFiltro lang={lang} />
+  </div>
+  <div data-testid="stack-bloques" data-filtro-activo="todos"
+    class="mt-8 space-y-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
     {ordenCategorias.map((categoria) => (
       <div data-testid={`stack-grupo-${categoria}`}>
         <h3 class="text-sm font-semibold uppercase tracking-wide text-muted">
@@ -39,12 +35,12 @@ const colorNivel: Record<Nivel, string> = {
         </h3>
         <ul class="mt-3 flex flex-wrap gap-1.5">
           {stack.filter((tec) => tec.categoria === categoria).map((tec) => (
-            <li data-testid="stack-item"
-              class="flex items-baseline gap-2 rounded-md border border-border bg-surface px-2.5 py-1.5">
+            <li data-testid="stack-item" data-nivel={tec.nivel}
+              aria-label={`${tec.nombre} — ${t(claveNivel[tec.nivel])}`}
+              class="flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 transition-opacity">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"
+                class="shrink-0 text-muted" set:html={stackIconos[tec.icono]} />
               <span class="text-sm font-medium text-text">{tec.nombre}</span>
-              <span class={`text-xs ${colorNivel[tec.nivel]}`}>
-                {t(claveNivel[tec.nivel])}
-              </span>
             </li>
           ))}
         </ul>
@@ -52,3 +48,45 @@ const colorNivel: Record<Nivel, string> = {
     ))}
   </div>
 </section>
+
+<style>
+  /* Atenuado por atributo, CSS puro: sin JS no hay filtro activo distinto de
+     'todos', así que todo se ve al 100% igual que antes. */
+  [data-filtro-activo='avanzado'] [data-nivel]:not([data-nivel='avanzado']),
+  [data-filtro-activo='intermedio'] [data-nivel]:not([data-nivel='intermedio']) {
+    opacity: 0.35;
+  }
+</style>
+
+<script>
+  // Mismo patrón que `activarFiltro()` de ProyectoListadoFiltrable: progresivo,
+  // sobrevive a las view transitions vía astro:after-swap.
+  function activarFiltroStack() {
+    const bloques = document.querySelector<HTMLElement>('[data-testid="stack-bloques"]');
+    const grupo = document.querySelector<HTMLElement>('[data-testid="stack-filtro"]');
+    if (!bloques || !grupo) return;
+
+    grupo.addEventListener('click', (evento) => {
+      const boton = (evento.target as HTMLElement).closest<HTMLButtonElement>('button[data-filtro]');
+      if (!boton) return;
+      const valor = boton.dataset.filtro;
+      if (!valor) return;
+
+      bloques.dataset.filtroActivo = valor;
+      for (const b of grupo.querySelectorAll<HTMLButtonElement>('button[data-filtro]')) {
+        if (b === boton) {
+          b.setAttribute('aria-current', 'true');
+          b.classList.add('bg-bg', 'text-text');
+          b.classList.remove('text-muted', 'hover:text-text');
+        } else {
+          b.removeAttribute('aria-current');
+          b.classList.remove('bg-bg', 'text-text');
+          b.classList.add('text-muted', 'hover:text-text');
+        }
+      }
+    });
+  }
+
+  activarFiltroStack();
+  document.addEventListener('astro:after-swap', activarFiltroStack);
+</script>

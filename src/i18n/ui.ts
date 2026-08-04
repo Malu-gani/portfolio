@@ -18,14 +18,16 @@ export type ClaveUI =
   | 'home.posicionamiento'
   | 'home.fotoAlt'
   | 'home.stack'
-  | 'stack.lenguajes'
-  | 'stack.testing'
-  | 'stack.frameworks'
-  | 'stack.datos'
-  | 'stack.herramientas'
+  | 'stack.qaTesting'
+  | 'stack.desarrolloDatos'
+  | 'stack.devopsHerramientas'
   | 'stack.nivel.avanzado'
   | 'stack.nivel.intermedio'
   | 'stack.nivel.aprendiendo'
+  | 'stack.filtro.etiqueta'
+  | 'stack.filtro.todos'
+  | 'stack.filtro.avanzado'
+  | 'stack.filtro.intermedio'
   | 'proyectos.titulo'
   | 'proyectos.bajada'
   | 'filtro.qa'
@@ -97,14 +99,16 @@ const es = {
   'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
   'home.fotoAlt': 'Retrato de Juan Manuel Malugani',
   'home.stack': 'Stack',
-  'stack.lenguajes': 'Lenguajes',
-  'stack.testing': 'Testing y automatización',
-  'stack.frameworks': 'Frameworks y librerías',
-  'stack.datos': 'Bases de datos',
-  'stack.herramientas': 'Herramientas y plataformas',
+  'stack.qaTesting': 'QA & Testing Automation',
+  'stack.desarrolloDatos': 'Desarrollo & Bases de Datos',
+  'stack.devopsHerramientas': 'DevOps & Herramientas',
   'stack.nivel.avanzado': 'Avanzado',
   'stack.nivel.intermedio': 'Intermedio',
   'stack.nivel.aprendiendo': 'Aprendiendo',
+  'stack.filtro.etiqueta': 'Filtrar por nivel',
+  'stack.filtro.todos': 'Todos',
+  'stack.filtro.avanzado': 'Avanzado',
+  'stack.filtro.intermedio': 'Intermedio',
   'proyectos.titulo': 'Proyectos',
   'proyectos.bajada': 'Casos de QA y proyectos de desarrollo. Cada uno documenta el contexto, lo que hice y qué aprendí.',
   'filtro.qa': 'QA · Automation',
@@ -175,14 +179,16 @@ const en = {
   'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
   'home.fotoAlt': 'Portrait of Juan Manuel Malugani',
   'home.stack': 'Stack',
-  'stack.lenguajes': 'Languages',
-  'stack.testing': 'Testing & automation',
-  'stack.frameworks': 'Frameworks & libraries',
-  'stack.datos': 'Databases',
-  'stack.herramientas': 'Tools & platforms',
+  'stack.qaTesting': 'QA & Testing Automation',
+  'stack.desarrolloDatos': 'Development & Databases',
+  'stack.devopsHerramientas': 'DevOps & Tools',
   'stack.nivel.avanzado': 'Advanced',
   'stack.nivel.intermedio': 'Intermediate',
   'stack.nivel.aprendiendo': 'Learning',
+  'stack.filtro.etiqueta': 'Filter by level',
+  'stack.filtro.todos': 'All',
+  'stack.filtro.avanzado': 'Advanced',
+  'stack.filtro.intermedio': 'Intermediate',
   'proyectos.titulo': 'Projects',
   'proyectos.bajada': 'QA cases and development projects. Each one documents the context, what I did, and what I learned.',
   'filtro.qa': 'QA · Automation',
