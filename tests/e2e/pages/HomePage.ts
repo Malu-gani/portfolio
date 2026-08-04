@@ -12,6 +12,8 @@ export class HomePage extends BasePage {
   readonly bloqueProyectos: Locator;
   readonly bloqueContacto: Locator;
   readonly stack: Locator;
+  readonly stackFiltro: Locator;
+  readonly stackItems: Locator;
   /** El listado embebido, el mismo componente que sirve /es/proyectos. */
   readonly lista: Locator;
   /** Todas las cards renderizadas, visibles u ocultas por el filtro. */
@@ -31,6 +33,8 @@ export class HomePage extends BasePage {
     this.bloqueProyectos = page.getByTestId('bloque-proyectos');
     this.bloqueContacto = page.getByTestId('bloque-contacto');
     this.stack = page.getByTestId('stack');
+    this.stackFiltro = page.getByTestId('stack-filtro');
+    this.stackItems = page.getByTestId('stack-item');
     this.lista = page.getByTestId('lista-proyectos');
     this.cards = this.lista.getByTestId('proyecto-card');
     this.retrato = page.getByTestId('hero-retrato');
@@ -47,6 +51,10 @@ export class HomePage extends BasePage {
 
   botonFiltro(clave: 'qa' | 'dev' | 'todos'): Locator {
     return this.page.getByTestId(`filtro-${clave}`);
+  }
+
+  botonFiltroStack(nivel: 'todos' | 'avanzado' | 'intermedio'): Locator {
+    return this.page.getByTestId(`stack-filtro-${nivel}`);
   }
 
   /** La sección anclada, por su id: es lo que apunta el navbar. */
