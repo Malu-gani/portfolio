@@ -44,7 +44,7 @@ test.describe('Navegación', () => {
     const pie = page.getByTestId('pie');
     await expect(pie.getByTestId('pie-github')).toHaveAttribute('href', /github\.com/);
     await expect(pie.getByTestId('pie-linkedin')).toHaveAttribute('href', /linkedin\.com/);
-    await expect(pie.getByTestId('pie-secciones').getByRole('link')).toHaveCount(3);
+    await expect(pie.getByTestId('pie-secciones').getByRole('link')).toHaveCount(4);
   });
 });
 

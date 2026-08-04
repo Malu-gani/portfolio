@@ -1,0 +1,16 @@
+---
+/**
+ * Ícono de bug, SVG inline y no una librería: la regla del proyecto exige
+ * justificar por escrito toda dependencia nueva, y un `<path>` no la
+ * justifica. Va siempre `aria-hidden`: el nombre accesible lo pone el control
+ * que lo contiene, no el dibujo.
+ */
+interface Props { clase?: string }
+const { clase = 'h-5 w-5' } = Astro.props;
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round" class={clase} aria-hidden="true">
+  <path d="M8 6a4 4 0 0 1 8 0v1H8V6Z" />
+  <rect x="7" y="7" width="10" height="11" rx="5" />
+  <path d="M3 11h4M17 11h4M3 17h4M17 17h4M5 6l2 2M19 6l-2 2" />
+</svg>

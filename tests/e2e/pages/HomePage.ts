@@ -19,6 +19,9 @@ export class HomePage extends BasePage {
   readonly retrato: Locator;
   readonly bloqueFormacion: Locator;
   readonly itemsFormacion: Locator;
+  /** El atajo de contacto del hero: `mailto:` que además copia si puede. */
+  readonly emailHero: Locator;
+  readonly sobreResumen: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -33,6 +36,8 @@ export class HomePage extends BasePage {
     this.retrato = page.getByTestId('hero-retrato');
     this.bloqueFormacion = page.getByTestId('bloque-formacion');
     this.itemsFormacion = page.getByTestId('formacion-item');
+    this.emailHero = page.getByTestId('hero-email');
+    this.sobreResumen = page.getByTestId('sobre-resumen');
   }
 
   /** Cards de un carril que además están visibles: es lo que filtra el CSS. */

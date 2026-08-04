@@ -11,8 +11,9 @@ interface Props {
   lang: Lang;
   enHome: boolean;
   secciones: { id: string; testid: string; texto: string }[];
+  reportar: { href: string; texto: string };
 }
-const { lang, enHome, secciones } = Astro.props;
+const { lang, enHome, secciones, reportar } = Astro.props;
 const t = useTranslations(lang);
 const home = `/${lang}/`;
 ---
@@ -32,5 +33,17 @@ const home = `/${lang}/`;
           class="block rounded-md px-3 py-2 text-sm text-text hover:bg-bg">{s.texto}</a>
       </li>
     ))}
+    <!--
+      Acá va con texto y no con ícono: el panel es una lista vertical con
+      espacio de sobra, y un ícono suelto entre palabras se lee peor. La línea
+      lo separa porque es una acción, no una sección más del recorrido.
+
+      Sin `data-seccion`, igual que el resto de los ítems del panel: el
+      scroll-spy indexa por ese atributo y el enlace de desktop ya lo ocupa.
+    -->
+    <li class="mt-1 border-t border-border pt-1">
+      <a href={reportar.href} data-testid="m-nav-reportar"
+        class="block rounded-md px-3 py-2 text-sm text-text hover:bg-bg">{reportar.texto}</a>
+    </li>
   </ul>
 </details>

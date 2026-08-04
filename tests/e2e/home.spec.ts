@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { HomePage, SECCIONES } from './pages/HomePage';
 
+const EMAIL = 'maluganijuanmanuel@gmail.com';
+
 test.describe('Home', () => {
   for (const lang of ['es', 'en'] as const) {
     test(`muestra hero, disponibilidad y las secciones en ${lang}`, async ({ page }) => {
@@ -93,6 +95,75 @@ test.describe('Home', () => {
         .filter(Boolean)
     );
     expect(conBorde, 'quedaron secciones con border-t').toEqual([]);
+  });
+
+  // Todas las secciones de la home centran su bajada bajo un título centrado.
+  // Sobre mí era la única que no: el párrafo y el enlace colgaban del borde
+  // izquierdo, y la asimetría se veía al compararla con Proyectos o Formación.
+  test('la bajada de Sobre mí queda centrada como la del resto de las secciones', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    await expect(home.sobreResumen).toHaveCSS('text-align', 'center');
+
+    // El `text-align` centra el renglón dentro de la caja; lo que faltaba
+    // además era centrar la caja misma. Sin el margen automático el párrafo
+    // arranca pegado a la izquierda de la sección y esta diferencia lo delata.
+    const desvio = await page.evaluate(() => {
+      const seccion = document.querySelector('[data-testid="bloque-sobre"]')!.getBoundingClientRect();
+      const parrafo = document.querySelector('[data-testid="sobre-resumen"]')!.getBoundingClientRect();
+      return Math.abs(parrafo.left - seccion.left - (seccion.right - parrafo.right));
+    });
+    expect(desvio, 'la caja del párrafo no está centrada en su sección').toBeLessThanOrEqual(1);
+  });
+});
+
+test.describe('El atajo de email del hero', () => {
+  // Copiar es una mejora encima del `mailto:`, no un reemplazo: sin JavaScript,
+  // o en un navegador sin portapapeles, el clic tiene que seguir haciendo lo que
+  // siempre hizo. Si el href se fuera del HTML, ese camino desaparecería.
+  test('sigue siendo un mailto en el HTML', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    await expect(home.emailHero).toHaveAttribute('href', `mailto:${EMAIL}`);
+  });
+
+  test('al clickearlo copia la dirección y avisa', async ({ context, page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Clipboard solo en Chromium');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const home = new HomePage(page);
+    await home.abrir('es');
+    await home.emailHero.click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(EMAIL);
+    await expect(home.emailHero).toHaveText('Copiado');
+  });
+
+  // El aviso tiene que llegar también a quien no ve el cambio de texto.
+  test('anuncia la copia por región viva', async ({ context, page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Clipboard solo en Chromium');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const home = new HomePage(page);
+    await home.abrir('es');
+    await home.emailHero.click();
+    // Acotado al hero a propósito: la sección Contacto monta su propio
+    // `role="status"` y sin el acote el locator resolvería a dos elementos.
+    await expect(home.hero.getByRole('status')).toHaveText('Copiado');
+  });
+
+  // El modo en que esto falla importa: si el portapapeles no está, el botón no
+  // puede decir "Copiado" igual. Mentir es peor que no copiar.
+  test('sin portapapeles no finge que copió', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Sobrescribe navigator.clipboard; estable solo en Chromium');
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'clipboard', { configurable: true, value: undefined });
+    });
+    const home = new HomePage(page);
+    await home.abrir('es');
+    // El clic cae al `mailto:`, que es justamente lo que queremos. Lo frenamos
+    // acá para no dejar que el runner intente abrir un cliente de correo que no
+    // existe; nuestro listener ya corrió antes que este, en el mismo document.
+    await page.evaluate(() => document.addEventListener('click', (e) => e.preventDefault()));
+    await home.emailHero.click();
+    await expect(home.emailHero).toHaveText('Email');
   });
 });
 

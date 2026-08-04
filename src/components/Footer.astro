@@ -7,12 +7,14 @@ const t = useTranslations(lang);
 const anio = new Date().getFullYear();
 const home = `/${lang}/`;
 
-// Tres secciones y no las seis del navbar: el pie repite los destinos que
+// Cuatro secciones y no las seis del navbar: el pie repite los destinos que
 // alguien busca cuando terminó de leer, no duplica la navegación entera.
+// Reportar entra por ese mismo criterio -- es algo que se busca al final.
 const secciones = [
   { id: 'proyectos', texto: t('nav.proyectos') },
   { id: 'formacion', texto: t('nav.formacion') },
   { id: 'contacto', texto: t('nav.contacto') },
+  { id: 'reportar', texto: t('nav.reportar') },
 ];
 
 const redes = [
