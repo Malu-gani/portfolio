@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { stack, ordenCategorias, type Categoria, type Nivel } from '../../src/data/stack';
+import { stackIconos } from '../../src/data/stack-iconos';
 
-const CATEGORIAS: Categoria[] = ['lenguajes', 'testing', 'frameworks', 'datos', 'herramientas'];
+const CATEGORIAS: Categoria[] = ['qa-testing', 'desarrollo-datos', 'devops-herramientas'];
 const NIVELES: Nivel[] = ['avanzado', 'intermedio', 'aprendiendo'];
 
 describe('stack', () => {
@@ -21,6 +22,12 @@ describe('stack', () => {
     }
   });
 
+  it('todo ícono referenciado existe en stack-iconos.ts', () => {
+    for (const t of stack) {
+      expect(stackIconos, `ícono "${t.icono}" de ${t.nombre} no existe`).toHaveProperty(t.icono);
+    }
+  });
+
   it('no hay tecnologías repetidas', () => {
     const nombres = stack.map((t) => t.nombre);
     expect(new Set(nombres).size).toBe(nombres.length);
@@ -33,9 +40,10 @@ describe('stack', () => {
 
   it('no declara tecnologías sin respaldo en ningún proyecto', () => {
     // Se retiraron el 2026-07-31 tras escanear los repositorios en disco:
-    // ninguna aparecía en un proyecto real. Este test evita que vuelvan sin
-    // que alguien lo decida a propósito.
-    const retiradas = ['Cypress', 'Selenium', 'TestRail', 'Xray'];
+    // ninguna aparecía en un proyecto real. Trello se suma el 2026-08-04:
+    // se muda a una futura sección de Metodología de Trabajo (PORT-US-04).
+    // Este test evita que vuelvan sin que alguien lo decida a propósito.
+    const retiradas = ['Cypress', 'Selenium', 'TestRail', 'Xray', 'Trello'];
     const nombres = stack.map((t) => t.nombre);
     for (const r of retiradas) {
       expect(nombres, `${r} volvió al stack sin justificación`).not.toContain(r);

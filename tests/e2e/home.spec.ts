@@ -222,6 +222,45 @@ test.describe('El filtro de la home funciona sin JavaScript', () => {
   });
 });
 
+test.describe('El filtro del Stack', () => {
+  test('los 3 bloques se ven con sus títulos', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    for (const grupo of ['stack-grupo-qa-testing', 'stack-grupo-desarrollo-datos', 'stack-grupo-devops-herramientas']) {
+      await expect(page.getByTestId(grupo)).toBeVisible();
+    }
+  });
+
+  // Atenúa, no oculta: el badge sigue en el DOM y sigue "visible" para
+  // Playwright, solo cambia su opacidad.
+  test('filtrar por Avanzado atenúa las tecnologías de otro nivel sin ocultarlas', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const noAvanzado = page.locator('[data-testid="stack-item"]:not([data-nivel="avanzado"])').first();
+    await expect(noAvanzado).toHaveCSS('opacity', '1');
+
+    await home.botonFiltroStack('avanzado').click();
+    await expect(home.botonFiltroStack('avanzado')).toHaveAttribute('aria-current', 'true');
+    await expect(noAvanzado).toHaveCSS('opacity', '0.35');
+    await expect(noAvanzado).toBeVisible();
+  });
+
+  test('el filtro sigue funcionando después de una view transition', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    // Ida y vuelta por clicks reales (no page.goto) para disparar el
+    // <ClientRouter/> de Astro dos veces: sin volver a registrar el listener
+    // en astro:after-swap, este click final no haría nada.
+    await page.getByTestId('link-sobre-completo').click();
+    await expect(page).toHaveURL(/\/es\/sobre-mi$/);
+    await page.getByTestId('nav-inicio').click();
+    await expect(page).toHaveURL(/\/es\/(#inicio)?$/);
+
+    await home.botonFiltroStack('intermedio').click();
+    await expect(home.botonFiltroStack('intermedio')).toHaveAttribute('aria-current', 'true');
+  });
+});
+
 test.describe('Aparición al scrollear', () => {
   test('las secciones terminan en su posición al recorrer la página', async ({ page }) => {
     await page.goto('/es/');
