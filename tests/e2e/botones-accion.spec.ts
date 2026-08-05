@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Locator } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 
 /**
  * Guarda contra una regresión futura a `rounded-md`, mismo espíritu que el
