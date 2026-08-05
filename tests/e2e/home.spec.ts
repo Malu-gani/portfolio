@@ -248,13 +248,16 @@ test.describe('El filtro del Stack', () => {
   test('el filtro sigue funcionando después de una view transition', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
-    // Ida y vuelta por clicks reales (no page.goto) para disparar el
-    // <ClientRouter/> de Astro dos veces: sin volver a registrar el listener
-    // en astro:after-swap, este click final no haría nada.
+    // Ida y vuelta real (no page.goto) para disparar el <ClientRouter/> de
+    // Astro dos veces: sin volver a registrar el listener en
+    // astro:after-swap, este click final no haría nada. `goBack()` en vez de
+    // clickear un link del navbar: el navbar de escritorio (`nav-inicio`)
+    // está oculto en mobile (ahí vive la Bottom Nav), así que un click
+    // directo no serviría en todos los viewports.
     await page.getByTestId('link-sobre-completo').click();
     await expect(page).toHaveURL(/\/es\/sobre-mi$/);
-    await page.getByTestId('nav-inicio').click();
-    await expect(page).toHaveURL(/\/es\/(#inicio)?$/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/es\/$/);
 
     await home.botonFiltroStack('intermedio').click();
     await expect(home.botonFiltroStack('intermedio')).toHaveAttribute('aria-current', 'true');
