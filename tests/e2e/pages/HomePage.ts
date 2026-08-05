@@ -2,7 +2,7 @@ import type { Page, Locator } from '@playwright/test';
 import { BasePage, type Lang } from './BasePage';
 
 /** Los anclajes de la home one-page, en el orden en que se recorren. */
-export const SECCIONES = ['inicio', 'sobre-mi', 'proyectos', 'stack', 'formacion', 'contacto'] as const;
+export const SECCIONES = ['inicio', 'sobre-mi', 'proyectos', 'qa-board', 'stack', 'formacion', 'contacto'] as const;
 export type Seccion = (typeof SECCIONES)[number];
 
 export class HomePage extends BasePage {
@@ -14,6 +14,11 @@ export class HomePage extends BasePage {
   readonly stack: Locator;
   readonly stackFiltro: Locator;
   readonly stackItems: Locator;
+  readonly qaBoard: Locator;
+  readonly qaBoardFiltro: Locator;
+  readonly qaBoardKpis: Locator;
+  readonly qaBoardFeed: Locator;
+  readonly qaBoardItems: Locator;
   /** El listado embebido, el mismo componente que sirve /es/proyectos. */
   readonly lista: Locator;
   /** Todas las cards renderizadas, visibles u ocultas por el filtro. */
@@ -35,6 +40,11 @@ export class HomePage extends BasePage {
     this.stack = page.getByTestId('stack');
     this.stackFiltro = page.getByTestId('stack-filtro');
     this.stackItems = page.getByTestId('stack-item');
+    this.qaBoard = page.getByTestId('qa-board');
+    this.qaBoardFiltro = page.getByTestId('qa-board-filtro');
+    this.qaBoardKpis = page.getByTestId('qa-board-kpi');
+    this.qaBoardFeed = page.getByTestId('qa-board-feed');
+    this.qaBoardItems = page.getByTestId('qa-board-item');
     this.lista = page.getByTestId('lista-proyectos');
     this.cards = this.lista.getByTestId('proyecto-card');
     this.retrato = page.getByTestId('hero-retrato');
@@ -55,6 +65,10 @@ export class HomePage extends BasePage {
 
   botonFiltroStack(nivel: 'todos' | 'avanzado' | 'intermedio'): Locator {
     return this.page.getByTestId(`stack-filtro-${nivel}`);
+  }
+
+  botonFiltroQaBoard(valor: 'todos' | 'bug' | 'us'): Locator {
+    return this.page.getByTestId(`qa-board-filtro-${valor}`);
   }
 
   /** La sección anclada, por su id: es lo que apunta el navbar. */
