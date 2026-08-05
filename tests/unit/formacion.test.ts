@@ -67,4 +67,18 @@ describe('formacion', () => {
     const ingles = formacion.find((f) => f.id === 'ingles');
     expect(ingles?.descripcionClave).toBeUndefined();
   });
+
+  it('UTN muestra el título y la carga horaria reales del programa', () => {
+    expect(ui.es['formacion.utn.titulo']).toBe('Experto Universitario en Mercado de Capitales');
+    expect(ui.en['formacion.utn.titulo']).toBe('University Expert in Capital Markets');
+    expect(ui.es['formacion.utn.detalle']).toBe('165 horas · 22 unidades · 2022');
+    expect(ui.en['formacion.utn.detalle']).toBe('165 hours · 22 units · 2022');
+  });
+
+  it('los estados de ISTQB y UTN no suenan negativos ni prometen de más', () => {
+    expect(ui.es['formacion.estado.examenPendiente']).toBe('Syllabus V4.0 completo · examen pendiente');
+    expect(ui.en['formacion.estado.examenPendiente']).toBe('Syllabus V4.0 complete · exam pending');
+    expect(ui.es['formacion.estado.sinCompletar']).toBe('Cursado');
+    expect(ui.en['formacion.estado.sinCompletar']).toBe('Attended');
+  });
 });
