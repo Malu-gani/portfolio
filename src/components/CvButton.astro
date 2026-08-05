@@ -1,11 +1,10 @@
 ---
+import AccionBoton from './AccionBoton.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<a href={`/cv/cv-${lang}.pdf`} download data-testid="cv-descargar"
-  class="inline-block rounded-md border border-accent px-4 py-2 font-medium text-accent hover:bg-surface">
-  {t('cv.descargar')} &darr;
-</a>
+<AccionBoton href={`/cv/cv-${lang}.pdf`} download testid="cv-descargar"
+  variante="descargar" tono="acento" tamano="grande" texto={t('cv.descargar')} />

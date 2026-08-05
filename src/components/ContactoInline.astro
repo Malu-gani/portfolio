@@ -1,4 +1,6 @@
 ---
+import AccionBoton from './AccionBoton.astro';
+import { claseAccionBoton, iconosAccion } from '../data/boton-accion';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -18,8 +20,10 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 const email = 'maluganijuanmanuel@gmail.com';
 
-const clase =
-  'inline-block rounded-md border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent';
+// El email tiene lógica de copiar-al-portapapeles propia (muta su texto en
+// runtime), así que no pasa por AccionBoton: se le aplican las mismas
+// clases e ícono directo, sin el componente.
+const claseEmail = `${claseAccionBoton.chica} border-border text-muted hover:border-accent hover:text-accent`;
 
 const externos = [
   { testid: 'hero-github', href: 'https://github.com/Malu-gani', texto: 'GitHub' },
@@ -29,14 +33,14 @@ const externos = [
 <ul data-testid="contacto-inline" aria-label={t('contacto.enlaces')} class="mt-6 flex flex-wrap gap-3">
   {externos.map((e) => (
     <li>
-      <a href={e.href} data-testid={e.testid} target="_blank" rel="noopener noreferrer" class={clase}>
-        {e.texto}
-      </a>
+      <AccionBoton href={e.href} testid={e.testid} target="_blank"
+        variante="ir" tono="neutro" tamano="chica" texto={e.texto} />
     </li>
   ))}
   <li>
     <a href={`mailto:${email}`} data-testid="hero-email"
-      data-copiado={t('contacto.copiado')} class={clase}>
+      data-copiado={t('contacto.copiado')} class={claseEmail}>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" set:html={iconosAccion.copiar} />
       <!-- "Email" queda igual en los dos idiomas, como "Stack" y "Projects". -->
       <span data-etiqueta="Email">Email</span>
     </a>

@@ -1,4 +1,24 @@
 import { useState } from 'react';
+import { claseAccionBoton } from '../data/boton-accion';
+
+// Ícono de copiar como JSX fijo: es el único caso en React del sitio y no
+// vale un dangerouslySetInnerHTML por un pictograma estático. Mismo trazo
+// que `iconosAccion.copiar` en boton-accion.ts.
+function IconoCopiar() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+      <rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 interface Props {
   email: string;
@@ -37,9 +57,10 @@ export default function CopyEmail({ email, textoCopiar, textoCopiado, textoError
         type="button"
         data-testid="email-copiar"
         onClick={copiar}
-        className="rounded-md border border-border px-3 py-1 text-sm hover:bg-surface"
+        className={`${claseAccionBoton.chica} border-border text-muted hover:border-accent hover:text-accent`}
       >
-        {textoBoton}
+        <IconoCopiar />
+        <span>{textoBoton}</span>
       </button>
       <span role="status" aria-live="polite" className="sr-only">
         {estado !== 'inicial' ? textoBoton : ''}
