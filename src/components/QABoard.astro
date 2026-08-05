@@ -1,0 +1,108 @@
+---
+import { fetchQaBoardData } from '../lib/qa-board';
+import { qaBoardLinks } from '../data/qa-board-links';
+import QABoardFiltro from './QABoardFiltro.astro';
+import AccionBoton from './AccionBoton.astro';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const { kpis, feed } = await fetchQaBoardData();
+
+const colorEstado: Record<string, string> = {
+  Resuelto: 'border-est-paso text-est-paso',
+  'En Progreso': 'border-sev-medio text-sev-medio',
+  Reportado: 'border-border text-muted',
+};
+---
+<section data-testid="qa-board" id="qa-board" class="revelar scroll-mt-24 py-16 sm:py-20">
+  <h2 class="text-center text-2xl font-semibold">{t('qaBoard.titulo')}</h2>
+  <p class="mx-auto mt-2 max-w-prose text-center text-muted">{t('qaBoard.bajada')}</p>
+
+  <dl data-testid="qa-board-kpis" class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="rounded-lg border border-border bg-surface p-4 text-center" data-testid="qa-board-kpi">
+      <dt class="text-xs text-muted">{t('qaBoard.kpi.bugsReportados')}</dt>
+      <dd class="mt-1 text-2xl font-semibold text-text">{kpis.bugsReportados}</dd>
+    </div>
+    <div class="rounded-lg border border-border bg-surface p-4 text-center" data-testid="qa-board-kpi">
+      <dt class="text-xs text-muted">{t('qaBoard.kpi.bugsResueltosPct')}</dt>
+      <dd class="mt-1 text-2xl font-semibold text-text">{kpis.bugsResueltosPct}%</dd>
+    </div>
+    <div class="rounded-lg border border-border bg-surface p-4 text-center" data-testid="qa-board-kpi">
+      <dt class="text-xs text-muted">{t('qaBoard.kpi.usResueltas')}</dt>
+      <dd class="mt-1 text-2xl font-semibold text-text">{kpis.usResueltas}</dd>
+    </div>
+    <div class="rounded-lg border border-border bg-surface p-4 text-center" data-testid="qa-board-kpi">
+      <dt class="text-xs text-muted">{t('qaBoard.kpi.enProgreso')}</dt>
+      <dd class="mt-1 text-2xl font-semibold text-text">{kpis.enProgreso}</dd>
+    </div>
+  </dl>
+
+  <div class="mt-8 flex justify-center">
+    <QABoardFiltro lang={lang} />
+  </div>
+
+  <ul data-testid="qa-board-feed" data-filtro-activo="todos" class="mt-6 space-y-3">
+    {feed.map((item) => (
+      <li data-testid="qa-board-item" data-tipo={item.tipo}
+        class="rounded-lg border border-border bg-surface p-5 transition-opacity">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h3 class="text-sm font-medium text-text">{item.titulo}</h3>
+          <span data-testid="qa-board-estado"
+            class={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${colorEstado[item.estado]}`}>
+            {item.estado}
+          </span>
+        </div>
+        <p class="mt-1 text-sm text-muted">{item.prioridad}</p>
+      </li>
+    ))}
+  </ul>
+
+  <div class="mt-8 flex flex-wrap justify-center gap-3">
+    <AccionBoton href={qaBoardLinks.bugs} variante="ir" tono="neutro" tamano="chica"
+      texto={t('qaBoard.cta.bugs')} testid="qa-board-cta-bugs" target="_blank" />
+    <AccionBoton href={qaBoardLinks.tareas} variante="ir" tono="neutro" tamano="chica"
+      texto={t('qaBoard.cta.tareas')} testid="qa-board-cta-tareas" target="_blank" />
+  </div>
+</section>
+
+<style>
+  [data-filtro-activo='bug'] [data-tipo]:not([data-tipo='bug']),
+  [data-filtro-activo='us'] [data-tipo]:not([data-tipo='us']) {
+    opacity: 0.35;
+  }
+</style>
+
+<script>
+  function activarFiltroQaBoard() {
+    const feed = document.querySelector<HTMLElement>('[data-testid="qa-board-feed"]');
+    const grupo = document.querySelector<HTMLElement>('[data-testid="qa-board-filtro"]');
+    if (!feed || !grupo) return;
+
+    grupo.addEventListener('click', (evento) => {
+      const boton = (evento.target as HTMLElement).closest<HTMLButtonElement>('button[data-filtro]');
+      if (!boton) return;
+      const valor = boton.dataset.filtro;
+      if (!valor) return;
+
+      feed.dataset.filtroActivo = valor;
+      for (const b of grupo.querySelectorAll<HTMLButtonElement>('button[data-filtro]')) {
+        if (b === boton) {
+          b.setAttribute('aria-current', 'true');
+          b.classList.add('bg-bg', 'text-text');
+          b.classList.remove('text-muted', 'hover:text-text');
+        } else {
+          b.removeAttribute('aria-current');
+          b.classList.remove('bg-bg', 'text-text');
+          b.classList.add('text-muted', 'hover:text-text');
+        }
+      }
+    });
+  }
+
+  activarFiltroQaBoard();
+  document.addEventListener('astro:after-swap', activarFiltroQaBoard);
+</script>
