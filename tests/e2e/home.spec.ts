@@ -200,6 +200,7 @@ test.describe('Formación', () => {
     expect(textos).toContain('examen pendiente');
     expect(textos).toContain('Experto Universitario en Mercado de Capitales');
     expect(textos).not.toContain('Operador de Mercados Financieros');
+    expect(textos).not.toContain('Cursado sin completar');
     // "Título" o "Graduado" serían afirmaciones que no se sostienen.
     expect(textos).not.toMatch(/Graduado|Titulado|Certificado ISTQB/);
   });

@@ -55,8 +55,8 @@ export const formacion: ItemFormacion[] = [
     estado: 'examen-pendiente',
   },
   // El curso de la UTN entra porque la pieza destacada del portfolio es una
-  // aplicación financiera: 94 horas de mercado de capitales explican por qué se
-  // pudo modelar y testear ese dominio. Se declara "cursado sin completar" y
+  // aplicación financiera: 165 horas de mercado de capitales explican por qué se
+  // pudo modelar y testear ese dominio. Se declara "cursado" y
   // nada más; estar en condiciones de rendir el examen de idóneo es una
   // afirmación a futuro, repreguntable, y no aporta a un puesto de QA.
   {
