@@ -173,7 +173,7 @@ const es = {
   'reportar.despues': 'Leo todo lo que llega. Lo que sea un defecto real se arregla; lo que no, te explico por qué.',
   'footer.volverArriba': 'Volver arriba ↑',
   'volverArriba.aria': 'Volver arriba',
-  'qaBoard.titulo': 'QA Board & Backlog Live',
+  'qaBoard.titulo': 'Tablero QA y Backlog en Vivo',
   'qaBoard.bajada': 'Métricas y actividad reciente de mi propio proceso de gestión de calidad (ISTQB v4.0) — actualizado en cada despliegue, con acceso directo al tablero real en Notion.',
   'qaBoard.kpi.bugsReportados': 'Bugs reportados',
   'qaBoard.kpi.bugsResueltosPct': '% de bugs resueltos',

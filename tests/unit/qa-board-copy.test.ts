@@ -27,7 +27,7 @@ describe('copy del QA Board', () => {
     }
   }
 
-  it('el título es igual en ambos idiomas (es un nombre propio de sección)', () => {
-    expect(ui.es['qaBoard.titulo']).toBe(ui.en['qaBoard.titulo']);
+  it('el título en inglés se mantiene como nombre propio de la sección', () => {
+    expect(ui.en['qaBoard.titulo']).toBe('QA Board & Backlog Live');
   });
 });
