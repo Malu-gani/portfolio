@@ -1,0 +1,31 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+/**
+ * A diferencia de `FiltroProyectos`, acá no hay una ruta por nivel: es
+ * estado puro en cliente, así que son `<button>` en vez de `<a>`. El script
+ * que reacciona a los clicks vive en `StackGrid.astro`, dueño del contenedor
+ * que lleva `data-filtro-activo`.
+ */
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const opciones = [
+  { valor: 'todos' as const, texto: t('stack.filtro.todos') },
+  { valor: 'avanzado' as const, texto: t('stack.filtro.avanzado') },
+  { valor: 'intermedio' as const, texto: t('stack.filtro.intermedio') },
+];
+---
+<div role="group" aria-label={t('stack.filtro.etiqueta')} data-testid="stack-filtro"
+  class="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-surface p-1">
+  {opciones.map((o, i) => (
+    <button type="button" data-testid={`stack-filtro-${o.valor}`} data-filtro={o.valor}
+      aria-current={i === 0 ? 'true' : undefined}
+      class:list={[
+        'rounded-md px-3 py-1.5 text-sm transition-colors',
+        i === 0 ? 'bg-bg text-text' : 'text-muted hover:text-text',
+      ]}>{o.texto}</button>
+  ))}
+</div>
