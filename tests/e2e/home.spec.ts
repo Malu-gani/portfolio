@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { HomePage, SECCIONES } from './pages/HomePage';
+import { esPill } from './utils/es-pill';
 
 const EMAIL = 'maluganijuanmanuel@gmail.com';
 
@@ -190,15 +191,41 @@ test.describe('Formación', () => {
   });
 
   // Ninguno de los cuatro ítems puede prometer más de lo que hay: el de la UTN
-  // se cursó sin completar y el examen de ISTQB no está rendido.
+  // se cursó sin rendir el examen final y el de ISTQB no está rendido.
   test('ningún ítem promete más de lo que hay', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
     const textos = (await home.itemsFormacion.allTextContents()).join(' ');
-    expect(textos).toContain('Cursado sin completar');
+    expect(textos).toContain('Cursado');
     expect(textos).toContain('examen pendiente');
+    expect(textos).toContain('Experto Universitario en Mercado de Capitales');
+    expect(textos).not.toContain('Operador de Mercados Financieros');
+    expect(textos).not.toContain('Cursado sin completar');
     // "Título" o "Graduado" serían afirmaciones que no se sostienen.
     expect(textos).not.toMatch(/Graduado|Titulado|Certificado ISTQB/);
+  });
+
+  // Mismo criterio ya aplicado a los botones de acción: el estado no puede
+  // volver a ser un rectángulo `rounded-md` sin que un test lo note.
+  test('los 4 estados de Formación usan badge pill', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const estados = home.itemsFormacion.getByTestId('formacion-estado');
+    const total = await estados.count();
+    for (let i = 0; i < total; i++) {
+      await esPill(estados.nth(i));
+    }
+  });
+
+  // Bootcamp, ISTQB y UTN explican qué le aportan al perfil de QA; inglés no
+  // suma esta línea porque ya está cubierto por su detalle.
+  test('bootcamp, ISTQB y UTN muestran una descripción de qué aportan', async ({ page }) => {
+    const home = new HomePage(page);
+    await home.abrir('es');
+    const items = home.itemsFormacion;
+    await expect(items.nth(0)).toContainText('Fundamentos de testing manual y automatizado');
+    await expect(items.nth(1)).toContainText('Fundamentos de testing según el estándar ISTQB');
+    await expect(items.nth(2)).toContainText('Operar en bolsa y administrar carteras');
   });
 });
 

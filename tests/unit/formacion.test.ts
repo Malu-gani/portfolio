@@ -49,4 +49,36 @@ describe('formacion', () => {
       }
     }
   });
+
+  // La descripción es opcional: bootcamp/istqb/utn explican qué aportan al
+  // perfil de QA, inglés no la suma porque ya está cubierto por `detalle`.
+  it('bootcamp, istqb y utn declaran una descripción con contenido en los dos idiomas', () => {
+    for (const id of ['bootcamp', 'istqb', 'utn'] as const) {
+      const item = formacion.find((f) => f.id === id);
+      expect(item?.descripcionClave, `${id} sin descripcionClave`).toBeDefined();
+      for (const lang of ['es', 'en'] as const) {
+        const texto = ui[lang][item!.descripcionClave!];
+        expect(texto?.trim().length, `${id} sin descripción en ${lang}`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('inglés no declara descripción (ya cubierta por el detalle)', () => {
+    const ingles = formacion.find((f) => f.id === 'ingles');
+    expect(ingles?.descripcionClave).toBeUndefined();
+  });
+
+  it('UTN muestra el título y la carga horaria reales del programa', () => {
+    expect(ui.es['formacion.utn.titulo']).toBe('Experto Universitario en Mercado de Capitales');
+    expect(ui.en['formacion.utn.titulo']).toBe('University Expert in Capital Markets');
+    expect(ui.es['formacion.utn.detalle']).toBe('165 horas · 22 unidades · 2022');
+    expect(ui.en['formacion.utn.detalle']).toBe('165 hours · 22 units · 2022');
+  });
+
+  it('los estados de ISTQB y UTN no suenan negativos ni prometen de más', () => {
+    expect(ui.es['formacion.estado.examenPendiente']).toBe('Syllabus V4.0 completo · examen pendiente');
+    expect(ui.en['formacion.estado.examenPendiente']).toBe('Syllabus V4.0 complete · exam pending');
+    expect(ui.es['formacion.estado.sinCompletar']).toBe('Cursado');
+    expect(ui.en['formacion.estado.sinCompletar']).toBe('Attended');
+  });
 });

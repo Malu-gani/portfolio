@@ -19,3 +19,6 @@ CLAUDE.md
 
 # configuracion local de herramientas
 .claude/
+
+# worktrees aislados de tareas en curso
+.worktrees/
