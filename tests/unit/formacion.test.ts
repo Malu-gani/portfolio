@@ -49,4 +49,22 @@ describe('formacion', () => {
       }
     }
   });
+
+  // La descripción es opcional: bootcamp/istqb/utn explican qué aportan al
+  // perfil de QA, inglés no la suma porque ya está cubierto por `detalle`.
+  it('bootcamp, istqb y utn declaran una descripción con contenido en los dos idiomas', () => {
+    for (const id of ['bootcamp', 'istqb', 'utn'] as const) {
+      const item = formacion.find((f) => f.id === id);
+      expect(item?.descripcionClave, `${id} sin descripcionClave`).toBeDefined();
+      for (const lang of ['es', 'en'] as const) {
+        const texto = ui[lang][item!.descripcionClave!];
+        expect(texto?.trim().length, `${id} sin descripción en ${lang}`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('inglés no declara descripción (ya cubierta por el detalle)', () => {
+    const ingles = formacion.find((f) => f.id === 'ingles');
+    expect(ingles?.descripcionClave).toBeUndefined();
+  });
 });

@@ -55,12 +55,15 @@ export type ClaveUI =
   | 'formacion.bootcamp.titulo'
   | 'formacion.bootcamp.institucion'
   | 'formacion.bootcamp.detalle'
+  | 'formacion.bootcamp.descripcion'
   | 'formacion.istqb.titulo'
   | 'formacion.istqb.institucion'
   | 'formacion.istqb.detalle'
+  | 'formacion.istqb.descripcion'
   | 'formacion.utn.titulo'
   | 'formacion.utn.institucion'
   | 'formacion.utn.detalle'
+  | 'formacion.utn.descripcion'
   | 'formacion.ingles.titulo'
   | 'formacion.ingles.institucion'
   | 'formacion.ingles.detalle'
@@ -136,12 +139,15 @@ const es = {
   'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
   'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
   'formacion.bootcamp.detalle': '43,5 horas · 372 lecciones',
+  'formacion.bootcamp.descripcion': 'Fundamentos de testing manual y automatizado: diseño de casos, Agile/Scrum, API testing con Postman, y nociones de Selenium, JMeter y SQL.',
   'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
   'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
   'formacion.istqb.detalle': '35 h 50 min · 340 lecciones',
+  'formacion.istqb.descripcion': 'Fundamentos de testing según el estándar ISTQB: ciclo de vida, técnicas de diseño de casos, tipos de prueba.',
   'formacion.utn.titulo': 'Operador de Mercados Financieros',
   'formacion.utn.institucion': 'UTN FRBA',
   'formacion.utn.detalle': '94 horas · 12 unidades · 2022',
+  'formacion.utn.descripcion': 'Operar en bolsa y administrar carteras: acciones, bonos, opciones, monedas, commodities y ETFs, con análisis fundamental y técnico.',
   'formacion.ingles.titulo': 'Inglés',
   'formacion.ingles.institucion': 'Autodidacta',
   'formacion.ingles.detalle': 'Lectura técnica y documentación',
@@ -216,12 +222,15 @@ const en = {
   'formacion.bootcamp.titulo': 'The Complete 2026 Software Testing Bootcamp',
   'formacion.bootcamp.institucion': 'Tarek Roshdy · Nezam Academy',
   'formacion.bootcamp.detalle': '43.5 hours · 372 lessons',
+  'formacion.bootcamp.descripcion': 'Manual and automated testing fundamentals: test case design, Agile/Scrum, API testing with Postman, and basics of Selenium, JMeter and SQL.',
   'formacion.istqb.titulo': 'ISTQB Foundation Level V4.0',
   'formacion.istqb.institucion': 'Tarek Roshdy · Nezam Academy',
   'formacion.istqb.detalle': '35 h 50 min · 340 lessons',
+  'formacion.istqb.descripcion': 'Testing fundamentals per the ISTQB standard: software lifecycle, test design techniques, test types.',
   'formacion.utn.titulo': 'Financial Markets Operator',
   'formacion.utn.institucion': 'UTN FRBA',
   'formacion.utn.detalle': '94 hours · 12 units · 2022',
+  'formacion.utn.descripcion': 'Trading and portfolio management: stocks, bonds, options, currencies, commodities and ETFs, with fundamental and technical analysis.',
   'formacion.ingles.titulo': 'English',
   'formacion.ingles.institucion': 'Self-taught',
   'formacion.ingles.detalle': 'Technical reading and documentation',

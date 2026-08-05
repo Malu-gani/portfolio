@@ -30,6 +30,7 @@ export interface ItemFormacion {
   tituloClave: ClaveUI;
   institucionClave: ClaveUI;
   detalleClave: ClaveUI;
+  descripcionClave?: ClaveUI;
   estadoClave: ClaveUI;
   estado: EstadoFormacion;
 }
@@ -40,6 +41,7 @@ export const formacion: ItemFormacion[] = [
     tituloClave: 'formacion.bootcamp.titulo',
     institucionClave: 'formacion.bootcamp.institucion',
     detalleClave: 'formacion.bootcamp.detalle',
+    descripcionClave: 'formacion.bootcamp.descripcion',
     estadoClave: 'formacion.estado.completado',
     estado: 'completado',
   },
@@ -48,6 +50,7 @@ export const formacion: ItemFormacion[] = [
     tituloClave: 'formacion.istqb.titulo',
     institucionClave: 'formacion.istqb.institucion',
     detalleClave: 'formacion.istqb.detalle',
+    descripcionClave: 'formacion.istqb.descripcion',
     estadoClave: 'formacion.estado.examenPendiente',
     estado: 'examen-pendiente',
   },
@@ -61,6 +64,7 @@ export const formacion: ItemFormacion[] = [
     tituloClave: 'formacion.utn.titulo',
     institucionClave: 'formacion.utn.institucion',
     detalleClave: 'formacion.utn.detalle',
+    descripcionClave: 'formacion.utn.descripcion',
     estadoClave: 'formacion.estado.sinCompletar',
     estado: 'sin-completar',
   },
