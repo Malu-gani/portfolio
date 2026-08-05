@@ -46,10 +46,11 @@ El detalle completo de ambos diagnósticos, con la evidencia, las alternativas c
 
 ```bash
 npm install
+cp .env.example .env.local   # completar NOTION_TOKEN antes de seguir
 npm run dev
 ```
 
-El servidor de desarrollo queda en `http://localhost:4321`.
+El servidor de desarrollo queda en `http://localhost:4321`. La sección "QA Board & Backlog Live" de la home consulta Notion en build time, así que `npm run dev` y `npm run build` fallan sin un `NOTION_TOKEN` válido en el entorno (ver `.env.example`).
 
 ## Cómo correr los tests
 
