@@ -5,6 +5,8 @@ import { NOTION_DB_BUGS_ID, NOTION_DB_TAREAS_ID, NOTION_PROYECTO_PORTFOLIO_ID } 
 export type TipoItem = 'bug' | 'us';
 export type EstadoQaBoard = 'Reportado' | 'En Progreso' | 'Resuelto';
 
+const ESTADOS_CONOCIDOS: readonly EstadoQaBoard[] = ['Reportado', 'En Progreso', 'Resuelto'];
+
 export interface QaBoardKpis {
   bugsReportados: number;
   bugsResueltosPct: number;
@@ -25,7 +27,7 @@ export interface QaBoardData {
   feed: QaBoardFeedItem[];
 }
 
-function esDePortfolio(pagina: NotionPage, propiedadRelacion: string): boolean {
+export function esDePortfolio(pagina: NotionPage, propiedadRelacion: string): boolean {
   const relacion = pagina.properties[propiedadRelacion]?.relation ?? [];
   return relacion.some((r: { id: string }) => r.id === NOTION_PROYECTO_PORTFOLIO_ID);
 }
@@ -36,6 +38,25 @@ function extraerTitulo(pagina: NotionPage, propiedadTitulo: string): string {
 
 function extraerSelect(pagina: NotionPage, propiedad: string): string {
   return pagina.properties[propiedad]?.select?.name ?? '';
+}
+
+/**
+ * `Estado` es un campo select de Notion que el autor del sitio puede renombrar
+ * desde la UI de Notion en cualquier momento, fuera de este código. Si el
+ * valor que llega no es uno de los tres estados conocidos, preferimos que el
+ * build falle ruidosamente acá a que los KPIs se cuenten mal en silencio
+ * (mismo criterio que notion-client.ts: si algo no es lo esperado, no se
+ * publica).
+ */
+function validarEstadosConocidos(paginas: NotionPage[]): void {
+  for (const pagina of paginas) {
+    const estado = extraerSelect(pagina, 'Estado');
+    if (!ESTADOS_CONOCIDOS.includes(estado as EstadoQaBoard)) {
+      throw new Error(
+        `QA Board: valor de "Estado" desconocido ("${estado}"). Esperados: ${ESTADOS_CONOCIDOS.join(', ')}.`
+      );
+    }
+  }
 }
 
 export function mapKpis(bugsPortfolio: NotionPage[], tareasPortfolio: NotionPage[]): QaBoardKpis {
@@ -82,6 +103,8 @@ export function fetchQaBoardData(): Promise<QaBoardData> {
       ]);
       const bugsPortfolio = bugs.filter((b) => esDePortfolio(b, 'PROYECTO'));
       const tareasPortfolio = tareas.filter((t) => esDePortfolio(t, 'PROYTECTO'));
+      validarEstadosConocidos(bugsPortfolio);
+      validarEstadosConocidos(tareasPortfolio);
       return {
         kpis: mapKpis(bugsPortfolio, tareasPortfolio),
         feed: mapFeed(bugsPortfolio, tareasPortfolio),

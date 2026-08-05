@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mapKpis, mapFeed } from '../../src/lib/qa-board';
+import { mapKpis, mapFeed, esDePortfolio } from '../../src/lib/qa-board';
 import type { NotionPage } from '../../src/lib/notion-client';
 import { NOTION_PROYECTO_PORTFOLIO_ID } from '../../src/data/qa-board-links';
 
@@ -101,6 +101,18 @@ describe('mapFeed', () => {
   it('extrae tipo, estado, prioridad y editadoEn de cada ítem', () => {
     const feed = mapFeed([bug({ estado: 'En Progreso', prioridad: 'Alta' })], []);
     expect(feed[0]).toMatchObject({ tipo: 'bug', estado: 'En Progreso', prioridad: 'Alta' });
+  });
+});
+
+describe('esDePortfolio', () => {
+  it('devuelve true cuando la relación incluye el id del proyecto Portfolio', () => {
+    const pagina = bug({ proyectoId: NOTION_PROYECTO_PORTFOLIO_ID });
+    expect(esDePortfolio(pagina, 'PROYECTO')).toBe(true);
+  });
+
+  it('devuelve false cuando la relación apunta a otro proyecto', () => {
+    const pagina = bug({ proyectoId: OTRO_PROYECTO_ID });
+    expect(esDePortfolio(pagina, 'PROYECTO')).toBe(false);
   });
 });
 
