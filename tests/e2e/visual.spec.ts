@@ -57,7 +57,15 @@ test.describe('Regresión visual', () => {
         // renderizado de fuentes entre corridas, y habría puesto en rojo ese
         // cambio de cabecera, que es exactamente lo que estas capturas existen
         // para avisar.
-        await expect(page).toHaveScreenshot(nombre, { fullPage: true, maxDiffPixelRatio: 0.002 });
+        //
+        // `/es/` (única ruta con la sección QA Board) enmascara
+        // `[data-testid="qa-board"]`: esa sección muestra KPIs y títulos de
+        // tickets reales traídos de Notion en build time, así que cualquier
+        // cambio en Notion (resolver un bug, editar un título) movería
+        // píxeles ahí sin que haya cambiado una sola línea de código —
+        // exactamente lo que este test no debe señalar como regresión.
+        const mask = ruta === '/es/' ? [page.getByTestId('qa-board')] : undefined;
+        await expect(page).toHaveScreenshot(nombre, { fullPage: true, maxDiffPixelRatio: 0.002, mask });
       });
     }
   }

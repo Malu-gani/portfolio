@@ -29,6 +29,8 @@ jobs:
 
       - name: Compilar
         run: npm run build
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 
       - name: Lighthouse
         run: npm run test:lighthouse
@@ -88,6 +90,8 @@ jobs:
         # excluirlos también por CLI sería redundante y frágil (dependería de
         # la capitalización exacta de un título en español).
         run: npx playwright test --project=${{ matrix.project }} --workers=1
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
 
       - name: Publicar reporte de Playwright (${{ matrix.project }})
         if: always()
