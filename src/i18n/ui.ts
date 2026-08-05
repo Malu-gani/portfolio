@@ -82,7 +82,19 @@ export type ClaveUI =
   | 'reportar.errorCopiar'
   | 'reportar.despues'
   | 'footer.volverArriba'
-  | 'volverArriba.aria';
+  | 'volverArriba.aria'
+  | 'qaBoard.titulo'
+  | 'qaBoard.bajada'
+  | 'qaBoard.kpi.bugsReportados'
+  | 'qaBoard.kpi.bugsResueltosPct'
+  | 'qaBoard.kpi.usResueltas'
+  | 'qaBoard.kpi.enProgreso'
+  | 'qaBoard.filtro.etiqueta'
+  | 'qaBoard.filtro.todos'
+  | 'qaBoard.filtro.bug'
+  | 'qaBoard.filtro.us'
+  | 'qaBoard.cta.bugs'
+  | 'qaBoard.cta.tareas';
 
 type Diccionario = Record<ClaveUI, string>;
 
@@ -167,6 +179,18 @@ const es = {
   'reportar.despues': 'Leo todo lo que llega. Lo que sea un defecto real se arregla; lo que no, te explico por qué.',
   'footer.volverArriba': 'Volver arriba ↑',
   'volverArriba.aria': 'Volver arriba',
+  'qaBoard.titulo': 'Tablero QA y Backlog en Vivo',
+  'qaBoard.bajada': 'Métricas y actividad reciente de mi propio proceso de gestión de calidad (ISTQB v4.0) — actualizado en cada despliegue, con acceso directo al tablero real en Notion.',
+  'qaBoard.kpi.bugsReportados': 'Bugs reportados',
+  'qaBoard.kpi.bugsResueltosPct': '% de bugs resueltos',
+  'qaBoard.kpi.usResueltas': 'User Stories resueltas',
+  'qaBoard.kpi.enProgreso': 'Ítems en progreso',
+  'qaBoard.filtro.etiqueta': 'Filtrar actividad reciente',
+  'qaBoard.filtro.todos': 'Todos',
+  'qaBoard.filtro.bug': 'Bugs',
+  'qaBoard.filtro.us': 'User Stories',
+  'qaBoard.cta.bugs': 'Ver Bug Reports en Notion',
+  'qaBoard.cta.tareas': 'Ver Tareas y US en Notion',
 } as const satisfies Diccionario;
 
 const en = {
@@ -250,6 +274,18 @@ const en = {
   'reportar.despues': "I read everything that comes in. Anything that's a real defect gets fixed; anything that isn't, I'll explain why.",
   'footer.volverArriba': 'Back to top ↑',
   'volverArriba.aria': 'Back to top',
+  'qaBoard.titulo': 'QA Board & Backlog Live',
+  'qaBoard.bajada': 'Metrics and recent activity from my own quality-management process (ISTQB v4.0) — updated on every deploy, with a direct link to the real board on Notion.',
+  'qaBoard.kpi.bugsReportados': 'Bugs reported',
+  'qaBoard.kpi.bugsResueltosPct': '% bugs resolved',
+  'qaBoard.kpi.usResueltas': 'User Stories resolved',
+  'qaBoard.kpi.enProgreso': 'Items in progress',
+  'qaBoard.filtro.etiqueta': 'Filter recent activity',
+  'qaBoard.filtro.todos': 'All',
+  'qaBoard.filtro.bug': 'Bugs',
+  'qaBoard.filtro.us': 'User Stories',
+  'qaBoard.cta.bugs': 'View Bug Reports on Notion',
+  'qaBoard.cta.tareas': 'View Tasks & US on Notion',
 } as const satisfies Diccionario;
 
 export const ui = { es, en };

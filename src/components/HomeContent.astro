@@ -3,6 +3,7 @@ import Hero from './Hero.astro';
 import SobreMiResumen from './SobreMiResumen.astro';
 import ProyectoListadoFiltrable from './ProyectoListadoFiltrable.astro';
 import StackGrid from './StackGrid.astro';
+import QABoard from './QABoard.astro';
 import Formacion from './Formacion.astro';
 import ContactContent from './ContactContent.astro';
 import Reportar from './Reportar.astro';
@@ -24,6 +25,8 @@ const { lang } = Astro.props;
 <section data-testid="bloque-proyectos" id="proyectos" class="revelar scroll-mt-24 py-16 sm:py-20">
   <ProyectoListadoFiltrable lang={lang} activo="qa" nivelTitulo={2} contexto="home" />
 </section>
+
+<QABoard lang={lang} />
 
 <StackGrid lang={lang} />
 

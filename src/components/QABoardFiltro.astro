@@ -1,0 +1,25 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const opciones = [
+  { valor: 'todos' as const, texto: t('qaBoard.filtro.todos') },
+  { valor: 'bug' as const, texto: t('qaBoard.filtro.bug') },
+  { valor: 'us' as const, texto: t('qaBoard.filtro.us') },
+];
+---
+<div role="group" aria-label={t('qaBoard.filtro.etiqueta')} data-testid="qa-board-filtro"
+  class="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-surface p-1">
+  {opciones.map((o, i) => (
+    <button type="button" data-testid={`qa-board-filtro-${o.valor}`} data-filtro={o.valor}
+      aria-current={i === 0 ? 'true' : undefined}
+      class:list={[
+        'rounded-md px-3 py-1.5 text-sm transition-colors',
+        i === 0 ? 'bg-bg text-text' : 'text-muted hover:text-text',
+      ]}>{o.texto}</button>
+  ))}
+</div>

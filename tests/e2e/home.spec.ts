@@ -86,7 +86,7 @@ test.describe('Home', () => {
   test('las secciones se separan por espacio, no por línea', async ({ page }) => {
     await page.goto('/es/');
     const conBorde = await page.evaluate(() =>
-      ['bloque-sobre', 'bloque-proyectos', 'stack', 'bloque-formacion', 'bloque-contacto']
+      ['bloque-sobre', 'bloque-proyectos', 'qa-board', 'stack', 'bloque-formacion', 'bloque-contacto']
         .map((id) => {
           const el = document.querySelector(`[data-testid="${id}"]`);
           if (!el) return `${id}: no existe`;
