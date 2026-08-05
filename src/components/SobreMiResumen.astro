@@ -1,4 +1,5 @@
 ---
+import AccionBoton from './AccionBoton.astro';
 import { useTranslations } from '../i18n/utils';
 import { rutas } from '../i18n/routes';
 import type { Lang } from '../i18n/ui';
@@ -17,7 +18,7 @@ const t = useTranslations(lang);
   -->
   <p data-testid="sobre-resumen" class="mx-auto mt-3 max-w-prose text-center text-muted">{t('sobre.resumen')}</p>
   <div class="mt-4 text-center">
-    <a href={rutas.about[lang]} data-testid="link-sobre-completo"
-      class="inline-block text-accent hover:underline">{t('sobre.ver')} →</a>
+    <AccionBoton href={rutas.about[lang]} testid="link-sobre-completo"
+      variante="ir" tono="neutro" tamano="chica" texto={t('sobre.ver')} />
   </div>
 </section>

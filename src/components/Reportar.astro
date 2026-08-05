@@ -1,4 +1,6 @@
 ---
+import AccionBoton from './AccionBoton.astro';
+import { claseAccionBoton, iconosAccion } from '../data/boton-accion';
 import { plantillaReporte } from '../data/reporte';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -30,14 +32,13 @@ const plantilla = plantillaReporte(lang);
     class="mx-auto mt-3 max-w-prose overflow-x-auto rounded-lg border border-border bg-surface p-5 font-mono text-sm text-muted">{plantilla}</pre>
 
   <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-    <a href={issueNuevo} data-testid="reportar-github" target="_blank" rel="noopener noreferrer"
-      class="rounded-md border border-accent px-4 py-2 text-sm text-accent transition-colors hover:bg-surface">
-      {t('reportar.enGithub')}
-    </a>
+    <AccionBoton href={issueNuevo} testid="reportar-github" target="_blank"
+      variante="ir" tono="acento" tamano="grande" texto={t('reportar.enGithub')} />
     <button type="button" data-testid="reportar-copiar"
       data-copiado={t('reportar.copiado')} data-error={t('reportar.errorCopiar')}
-      class="rounded-md border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent">
-      {t('reportar.copiar')}
+      class={`${claseAccionBoton.grande} border-border text-muted hover:border-accent hover:text-accent`}>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" set:html={iconosAccion.copiar} />
+      <span>{t('reportar.copiar')}</span>
     </button>
   </div>
 
