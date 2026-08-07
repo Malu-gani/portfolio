@@ -1,6 +1,6 @@
 ---
-titulo: "Diario de trading y gestor de riesgo"
-resumen: "Aplicación web para registrar operaciones de cripto y acciones, con saldos por cuenta y control de riesgo antes de entrar."
+titulo: "FolioTracker — gestor de operaciones y riesgo multi-cuenta"
+resumen: "FolioTracker centraliza en un solo lugar las operaciones de distintos agentes de bolsa y exchanges de cripto, con saldos por cuenta y control de riesgo antes de entrar."
 stack: [Next.js, TypeScript, Supabase, PostgreSQL, Tailwind]
 fecha: 2026-07-30
 destacado: true
@@ -11,13 +11,13 @@ demo: "https://registro-de-operaciones-chi.vercel.app"
 
 ## Descripción
 
-Una aplicación para llevar el registro de operaciones de trading y, sobre todo, para decidir el tamaño de cada posición antes de abrirla. Permite manejar varios portafolios, con el capital separado en cuentas por divisa y mercado (ARS, USD, USDT spot y USDT futuros) que nunca se mezclan ni se convierten entre sí.
+FolioTracker es la aplicación con la que llevo el registro de mis propias operaciones y, sobre todo, decido el tamaño de cada posición antes de abrirla. Permite manejar varios portafolios, con el capital separado en cuentas por divisa y mercado (ARS, USD, USDT spot y USDT futuros) que nunca se mezclan ni se convierten entre sí.
 
 Para cada operación calcula el tamaño de posición, la pérdida máxima proyectada y el ratio riesgo/beneficio, y clasifica el riesgo con umbrales distintos según la clase de activo: lo que es riesgo bajo en acciones es riesgo crítico en futuros apalancados.
 
 ## Motivación
 
-La construí porque llevaba el registro en planillas y el problema no era anotar las operaciones, era calcular el riesgo antes de entrar. Hacer esa cuenta a mano, con apalancamiento de por medio y en el momento en que hay que decidir rápido, es exactamente el escenario donde uno se equivoca.
+Medir el riesgo de una operación ya lo resuelve, por separado, cada una de las apps que uso para operar. El problema real es otro: opero mi portfolio regulado en IOL y BullMarket, y cripto —spot y futuros— en Bitget, y cada agente o exchange encapsula sus operaciones en su propia aplicación, sin una vista conjunta de mi operatoria. FolioTracker integra el registro, manual o por import, de operaciones de distintos agentes en un solo lugar, con el capital separado por cuenta pero con el riesgo visible en conjunto. Ese seguimiento consolidado importa todavía más en futuros, donde sigo una estrategia definida y opero de forma responsable, no especulativa.
 
 También me interesaba que las reglas de negocio no vivieran solo en el código. La lógica financiera está documentada aparte, con las fórmulas escritas en prosa, y el código apunta a ese documento como fuente de verdad. Esa decisión resultó ser la que después hizo posible escribir el plan de pruebas.
 

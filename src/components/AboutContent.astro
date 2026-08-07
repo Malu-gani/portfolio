@@ -7,7 +7,9 @@ const { lang } = Astro.props;
 const textos: Record<Lang, {
   titulo: string;
   recorrido: string;
+  dominio: string;
   motivacion: string;
+  actualidad: string;
   formaTrabajo: string;
   formacionTitulo: string;
   formacion: string[];
@@ -15,9 +17,13 @@ const textos: Record<Lang, {
   es: {
     titulo: 'Sobre mí',
     recorrido:
-      'Hace tres años trabajo como operador de monitoreo de alarmas: opero eventos que aparecen en pantalla, algunos generados manualmente, otros disparados por el sistema al detectar una anomalía real (luz, vibración, movimiento). Ahí reconocí el mismo patrón que después encontré en QA — leer una señal, decidir si es un problema real, y actuar con criterio. Hice el camino formal — un bootcamp de testing de 43 horas y la preparación para ISTQB Foundation Level — y lo sostuve con práctica real: armé suites de automatización con Playwright en TypeScript y Python, testing de API con Postman diseñando casos en Zephyr Scale/Jira, y le armé la suite de pruebas completa a una aplicación financiera que construí yo mismo, donde encontré diez defectos reales — dos de ellos permitían crear dinero salteándose la interfaz.',
+      'Siempre me gustó programar, y me interesé en la rama de testing porque es la que garantiza la calidad, mantenibilidad, seguridad y navegabilidad reales de un producto — no alcanza con que algo funcione una vez, tiene que seguir funcionando cuando el sistema cambia. Hice el camino formal — un bootcamp de testing de 43 horas y la preparación para ISTQB Foundation Level — y lo sostuve con práctica real: armé suites de automatización con Playwright en TypeScript y Python, testing de API con Postman diseñando casos en Zephyr Scale/Jira, y le armé la suite de pruebas completa a una aplicación financiera que construí yo mismo, donde encontré diez defectos reales — dos de ellos permitían crear dinero salteándose la interfaz.',
+    dominio:
+      'Esa aplicación nace de mi propia operatoria: en el mercado regulado opero acciones, letras, bonos y CEDEARs a través de IOL y BullMarket, y en cripto opero spot y futuros en Bitget (antes en Binance) — es esa experiencia real y activa en ambos mercados la que me permitió modelar el negocio con criterio real y no solo en base a documentación.',
     motivacion:
       'Lo que me atrae de QA es encontrar el caso que rompe el sistema antes de que lo encuentre un usuario, y dejar esa evidencia documentada de forma que cualquiera pueda entender qué pasó y por qué. Lo que me vuelve bueno en esto es criterio, rigurosidad, y la capacidad de abstraerme de un flujo puntual para tener panorama completo de una situación — no quedarme en lo obvio, sino entender qué más puede estar afectando un cambio antes de darlo por probado.',
+    actualidad:
+      'En paralelo, trabajo como operador de monitoreo de alarmas: superviso eventos críticos en tiempo real, gestiono incidentes coordinando con fuerzas de seguridad y unidades de campo siguiendo protocolo, y documento cada evento con precisión para fines de auditoría — atención al detalle y criterio bajo presión que sostengo también en QA.',
     formaTrabajo:
       'Prioridad por riesgo, no por cobertura total — si el tiempo es corto, primero lo que puede costar una venta o un dato mal cargado, después el resto. Documento con evidencia (capturas, logs, casos con ID trazable) porque un bug sin evidencia es una opinión. Automatizo cuando el flujo se repite y vale la pena mantenerlo; cuando no, testing exploratorio es más rápido y no deja código muerto. Y sigo estudiando de forma constante — la mayoría de lo que sé lo aprendí armando proyectos propios, no solo viendo cursos.',
     formacionTitulo: 'Formación y certificaciones',
@@ -32,9 +38,13 @@ const textos: Record<Lang, {
   en: {
     titulo: 'About me',
     recorrido:
-      "For three years I've worked as an alarm monitoring operator: I handle events that show up on screen, some triggered manually, others raised by the system when it detects a real anomaly (light, vibration, movement). That's where I recognized the same pattern I later found in QA — reading a signal, deciding whether it's a real problem, and acting with judgment. I did the formal path too — a 43-hour testing bootcamp and ISTQB Foundation Level prep — and backed it with real practice: I built automation suites with Playwright in TypeScript and Python, API testing with Postman designing cases in Zephyr Scale/Jira, and I built the full test suite for a financial application of my own, where I found ten real defects — two of them let you create money by bypassing the interface.",
+      "I've always liked programming, and I got into testing because it's the discipline that actually guarantees a product's quality, maintainability, security, and usability — it's not enough for something to work once, it has to keep working as the system changes. I did the formal path too — a 43-hour testing bootcamp and ISTQB Foundation Level prep — and backed it with real practice: I built automation suites with Playwright in TypeScript and Python, API testing with Postman designing cases in Zephyr Scale/Jira, and I built the full test suite for a financial application of my own, where I found ten real defects — two of them let you create money by bypassing the interface.",
+    dominio:
+      "That application comes out of my own trading: in the regulated market I trade stocks, treasury notes, bonds, and CEDEARs through IOL and BullMarket, and in crypto I trade spot and futures on Bitget (previously Binance) — it's that real, active experience across both markets that let me model the business with real domain judgment, not just documentation.",
     motivacion:
       "What draws me to QA is finding the case that breaks the system before a user does, and documenting that evidence clearly enough for anyone to understand what happened and why. What makes me good at it is judgment, rigor, and the ability to step back from a single flow to see the full picture of a situation — not stopping at the obvious, but understanding what else a change might be affecting before calling it tested.",
+    actualidad:
+      "In parallel, I work as an alarm monitoring operator: I oversee critical events in real time, manage incidents by coordinating with security forces and field units under protocol, and document every event with precision for audit purposes — attention to detail and composure under pressure that I also bring to QA.",
     formaTrabajo:
       "I prioritize by risk, not total coverage — if time is short, I start with whatever could cost a sale or corrupt data, then the rest. I document with evidence (screenshots, logs, traceable case IDs) because a bug without evidence is just an opinion. I automate when a flow repeats and is worth maintaining; when it's not, exploratory testing is faster and doesn't leave dead code behind. And I keep studying constantly — most of what I know I learned building my own projects, not just watching courses.",
     formacionTitulo: 'Education and certifications',
@@ -53,7 +63,9 @@ const c = textos[lang];
   <h1 class="text-3xl font-bold sm:text-4xl">{c.titulo}</h1>
   <div class="mt-6 max-w-prose space-y-4 text-muted">
     <p>{c.recorrido}</p>
+    <p>{c.dominio}</p>
     <p>{c.motivacion}</p>
+    <p>{c.actualidad}</p>
     <p>{c.formaTrabajo}</p>
   </div>
   <h2 class="mt-8 text-xl font-semibold">{c.formacionTitulo}</h2>

@@ -16,6 +16,7 @@ export type ClaveUI =
   | 'home.rol'
   | 'home.disponible'
   | 'home.posicionamiento'
+  | 'home.verProyectos'
   | 'home.fotoAlt'
   | 'home.stack'
   | 'stack.qaTesting'
@@ -111,7 +112,8 @@ const es = {
   'idioma.cambiar': 'Ver en inglés',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Disponible para trabajar',
-  'home.posicionamiento': 'Testing manual y automatización con Playwright. Busco mi primer puesto full-time en QA.',
+  'home.posicionamiento': 'Manual, automatizado y API testing — Playwright, Postman. Construyo suites de pruebas en todos mis proyectos, con criterio sobre qué automatizar y qué no. Busco mi primer puesto full-time en QA.',
+  'home.verProyectos': 'Ver proyectos',
   'home.fotoAlt': 'Retrato de Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.qaTesting': 'QA & Testing Automation',
@@ -138,7 +140,7 @@ const es = {
   'caso.verDemo': 'Ver la app',
   'cv.descargar': 'Descargar CV',
   'sobre.titulo': 'Sobre mí',
-  'sobre.resumen': 'Hoy trabajo en monitoreo de alarmas y dedico el resto del tiempo a QA. Aprendo construyendo: cada proyecto que hago termina documentado, con lo que salió bien y lo que no.',
+  'sobre.resumen': 'Aprendo construyendo: cada proyecto que hago termina con su propia suite de pruebas documentada, con lo que salió bien y lo que no. Hoy trabajo en monitoreo de alarmas y dedico el resto del tiempo a QA — manual, automatizado y testing de API.',
   'sobre.ver': 'Leer el recorrido completo',
   'contacto.enlaces': 'Enlaces de contacto',
   'contacto.copiar': 'Copiar email',
@@ -206,7 +208,8 @@ const en = {
   'idioma.cambiar': 'View in Spanish',
   'home.rol': 'QA Engineer · Manual & Automation',
   'home.disponible': 'Available for hire',
-  'home.posicionamiento': 'Manual testing and automation with Playwright. Looking for my first full-time QA role.',
+  'home.posicionamiento': 'Manual, automated, and API testing — Playwright, Postman. I build test suites for every project I take on, with judgment on what to automate and what not to. Looking for my first full-time QA role.',
+  'home.verProyectos': 'See projects',
   'home.fotoAlt': 'Portrait of Juan Manuel Malugani',
   'home.stack': 'Stack',
   'stack.qaTesting': 'QA & Testing Automation',
@@ -233,7 +236,7 @@ const en = {
   'caso.verDemo': 'View the app',
   'cv.descargar': 'Download CV',
   'sobre.titulo': 'About me',
-  'sobre.resumen': 'I currently work in alarm monitoring and spend the rest of my time on QA. I learn by building: every project I take on ends up documented, including what worked and what did not.',
+  'sobre.resumen': 'I learn by building: every project I take on ends up with its own documented test suite, including what worked and what did not. I currently work in alarm monitoring and spend the rest of my time on QA — manual, automation, and API testing.',
   'sobre.ver': 'Read the full story',
   'contacto.enlaces': 'Contact links',
   'contacto.copiar': 'Copy email',

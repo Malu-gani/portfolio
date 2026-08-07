@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import ContactoInline from './ContactoInline.astro';
+import AccionBoton from './AccionBoton.astro';
 import retrato from '../assets/juan-manuel-malugani.jpg';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -39,5 +40,9 @@ const t = useTranslations(lang);
   <h1 class="mt-4 text-4xl font-bold sm:text-5xl">Juan Manuel Malugani</h1>
   <p class="mt-2 font-mono text-accent">{t('home.rol')}</p>
   <p class="mx-auto mt-4 max-w-prose text-lg text-muted">{t('home.posicionamiento')}</p>
+  <div class="mt-4 flex justify-center">
+    <AccionBoton href="#proyectos" testid="hero-ver-proyectos"
+      variante="bajar" tono="neutro" tamano="chica" texto={t('home.verProyectos')} />
+  </div>
   <div class="flex justify-center"><ContactoInline lang={lang} /></div>
 </section>
