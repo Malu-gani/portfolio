@@ -1,5 +1,5 @@
 ---
-titulo: "Suite de pruebas de una app financiera propia"
+titulo: "Suite de pruebas de FolioTracker, mi app financiera propia"
 resumen: "275 pruebas sobre un diario de trading que construí. Encontró 10 defectos: dos permitían que cualquier usuario logueado creara dinero salteándose el formulario."
 tags: [manual, automation, e2e, api]
 stack: [Vitest, Playwright, Testing Library, PostgreSQL, Supabase, TypeScript, Docker, GitHub Actions]
@@ -18,7 +18,7 @@ demo: "https://registro-de-operaciones-chi.vercel.app"
 
 ## Contexto
 
-Una aplicación web propia para registrar operaciones de trading (cripto y acciones) y controlar el riesgo antes de entrar a cada operación. Multi-portafolio, con saldos separados por cuenta (ARS, USD, USDT spot y USDT futuros), cálculo de ratio riesgo/beneficio y un semáforo que clasifica cada operación por nivel de riesgo.
+FolioTracker es una aplicación web propia para registrar operaciones de trading (cripto y acciones) y controlar el riesgo antes de entrar a cada operación. Multi-portafolio, con saldos separados por cuenta (ARS, USD, USDT spot y USDT futuros), cálculo de ratio riesgo/beneficio y un semáforo que clasifica cada operación por nivel de riesgo.
 
 Es una app financiera personal: no maneja dinero de terceros, pero sí calcula los números con los que después se decide operar. Un cálculo mal hecho que se muestra con confianza es peor que un error visible, porque nadie lo va a cuestionar.
 

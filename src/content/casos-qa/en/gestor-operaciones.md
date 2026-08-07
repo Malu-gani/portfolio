@@ -1,5 +1,5 @@
 ---
-titulo: "Test suite for a financial app I built"
+titulo: "Test suite for FolioTracker, my own financial app"
 resumen: "275 tests on a trading journal I built. It found 10 defects: two let any logged-in user create money by bypassing the form entirely."
 tags: [manual, automation, e2e, api]
 stack: [Vitest, Playwright, Testing Library, PostgreSQL, Supabase, TypeScript, Docker, GitHub Actions]
@@ -18,7 +18,7 @@ demo: "https://registro-de-operaciones-chi.vercel.app"
 
 ## Context
 
-A web application I built to log trading operations (crypto and stocks) and control risk before entering each position. Multi-portfolio, with balances kept separate per account (ARS, USD, USDT spot and USDT futures), risk/reward ratio calculation, and a traffic-light system that classifies every operation by risk level.
+FolioTracker is a web application I built to log trading operations (crypto and stocks) and control risk before entering each position. Multi-portfolio, with balances kept separate per account (ARS, USD, USDT spot and USDT futures), risk/reward ratio calculation, and a traffic-light system that classifies every operation by risk level.
 
 It's a personal financial app: it doesn't handle anyone else's money, but it does calculate the numbers used to decide whether to trade. A wrong calculation displayed with confidence is worse than a visible error, because nobody questions it.
 

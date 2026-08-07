@@ -1,6 +1,6 @@
 ---
-titulo: "Trading journal and risk manager"
-resumen: "Web app for logging crypto and stock trades, with per-account balances and risk control before entering a position."
+titulo: "FolioTracker — multi-account trading and risk manager"
+resumen: "FolioTracker centralizes trades from different brokers and crypto exchanges in one place, with per-account balances and risk control before entering a position."
 stack: [Next.js, TypeScript, Supabase, PostgreSQL, Tailwind]
 fecha: 2026-07-30
 destacado: true
@@ -11,13 +11,13 @@ demo: "https://registro-de-operaciones-chi.vercel.app"
 
 ## Description
 
-An application for keeping a record of trades and, above all, for deciding the size of each position before opening it. It supports multiple portfolios, with capital kept in separate accounts per currency and market (ARS, USD, USDT spot and USDT futures) that are never mixed or converted into one another.
+FolioTracker is the application I use to keep a record of my own trades and, above all, to decide the size of each position before opening it. It supports multiple portfolios, with capital kept in separate accounts per currency and market (ARS, USD, USDT spot and USDT futures) that are never mixed or converted into one another.
 
 For each trade it computes position size, projected maximum loss and the risk/reward ratio, and classifies risk using different thresholds per asset class: what counts as low risk on stocks is critical risk on leveraged futures.
 
 ## Motivation
 
-I built it because I was keeping the record in spreadsheets, and the problem wasn't logging the trades — it was calculating risk before entering. Doing that arithmetic by hand, with leverage involved, at the exact moment you need to decide quickly, is precisely the scenario where you get it wrong.
+Measuring the risk of a single trade is already something each of the apps I trade on handles on its own. The real problem is different: I trade my regulated portfolio on IOL and BullMarket, and crypto — spot and futures — on Bitget, and every broker or exchange keeps its trades locked inside its own app, with no combined view of my activity. FolioTracker brings that record together, entered manually or via import, from different brokers into one place — capital stays separated by account, but risk becomes visible across all of them at once. That consolidated view matters even more in futures, where I follow a defined strategy and trade responsibly, not speculatively.
 
 I also wanted the business rules to not live only in the code. The financial logic is documented separately, with the formulas written out in prose, and the code points to that document as its source of truth. That decision turned out to be what later made it possible to write the test plan.
 
