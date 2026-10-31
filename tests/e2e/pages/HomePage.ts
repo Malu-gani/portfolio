@@ -1,4 +1,4 @@
-import type { Page, Locator } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 import { BasePage, type Lang } from './BasePage';
 
 /** Los anclajes de la home one-page, en el orden en que se recorren. */
@@ -65,6 +65,22 @@ export class HomePage extends BasePage {
 
   botonFiltroStack(nivel: 'todos' | 'avanzado' | 'intermedio'): Locator {
     return this.page.getByTestId(`stack-filtro-${nivel}`);
+  }
+
+  /**
+   * Lleva una sección `.revelar` al viewport y espera a que termine su
+   * entrada. Se revelan con una transición de 500 ms (`translateY(12px)` ->
+   * `none`) que arranca justo cuando Playwright las scrollea a la vista; si el
+   * click sale mientras corre, el elemento se mueve entre que se calcula el
+   * punto y se despacha, y el click cae en la sección en vez de en el botón o
+   * el link (PORT-BUG-13). `visible` + `transform: none` es el estado final:
+   * de ahí no vuelve a moverse.
+   */
+  async revelarSeccion(id: Seccion): Promise<void> {
+    const seccion = this.seccion(id);
+    await seccion.scrollIntoViewIfNeeded();
+    await expect(seccion).toHaveClass(/\bvisible\b/);
+    await expect(seccion).toHaveCSS('transform', 'none');
   }
 
   botonFiltroQaBoard(valor: 'todos' | 'bug' | 'us'): Locator {
