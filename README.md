@@ -12,7 +12,7 @@ Portfolio bilingüe (ES/EN) de **Juan Manuel Malugani**, carta de presentación 
 
 ## Stack
 
-Astro 7 (`output: 'static'`) · React 19 solo en islands puntuales (el toggle de tema y el botón de copiar email en Contacto) · Tailwind 4 con configuración CSS-first · TypeScript strict · Playwright · axe-core · Vitest · Lighthouse CI. Node 22.12+.
+Astro 7 (`output: 'static'`) · React 19 solo en islands puntuales (el toggle de tema y el botón de copiar email en Contacto) · Tailwind 4 con configuración CSS-first · TypeScript strict · Playwright · axe-core · Vitest · Lighthouse. Node 22.19+.
 
 ## Cómo está verificado
 
