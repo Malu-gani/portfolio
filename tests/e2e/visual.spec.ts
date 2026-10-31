@@ -5,6 +5,11 @@ import { test, expect } from '@playwright/test';
 // captura del listado tiene que tomarse en su ruta real.
 const paginas = ['/es/', '/es/proyectos', '/es/qa/suite-e2e-portfolio', '/es/contacto'];
 
+// Altura fija del QA Board en la captura de /es/ (a 1280 px de ancho). Es la
+// altura medida al regenerar las referencias; el valor exacto no importa
+// mientras sea el mismo al generar y al comparar.
+const ALTO_QA_BOARD = 929;
+
 test.describe('Regresión visual', () => {
   // Las capturas de referencia se generan y comparan solo en el proyecto
   // `chromium` del config: no hay snapshot de referencia para firefox/webkit/
@@ -48,6 +53,17 @@ test.describe('Regresión visual', () => {
         // renderiza con la fuente de reemplazo, el layout shiftea entre
         // corridas y la referencia queda inestable.
         await page.evaluate(() => document.fonts.ready);
+        // La barra de herramientas de `astro dev` (píldora oscura con iconos en
+        // el borde inferior) solo existe en el servidor de desarrollo. Con
+        // `reuseExistingServer`, un `npm run dev` olvidado en el 4321 se reusa
+        // en vez del build de producción, y las capturas guardadas quedaban con
+        // la barra pintada: 4 de las 8 fallaban en cualquier corrida limpia
+        // (PORT-BUG-12). Se corta acá, con un mensaje claro, en vez de dejar
+        // que se genere o compare una referencia contaminada.
+        await expect(
+          page.locator('astro-dev-toolbar'),
+          'Hay un servidor de desarrollo en el 4321: cerralo para que Playwright levante el build de producción',
+        ).toHaveCount(0);
         const nombre = `${ruta.replace(/\//g, '_')}-${tema}.png`;
         // 0.002 y no el 0.01 anterior. Medido durante el rediseño de la home:
         // con 0.01, `/es/contacto` pasó con 7.606 píxeles distintos (light) y
@@ -64,6 +80,18 @@ test.describe('Regresión visual', () => {
         // cambio en Notion (resolver un bug, editar un título) movería
         // píxeles ahí sin que haya cambiado una sola línea de código —
         // exactamente lo que este test no debe señalar como regresión.
+        //
+        // La máscara tapa los píxeles pero no el layout: si la sección crece,
+        // todo lo de abajo se corre y la captura falla aunque nada haya
+        // cambiado en el código (el QA Board pasó de 909 a 929 px por datos de
+        // Notion y desplazó 20 px el resto de la home, PORT-BUG-12). Por eso
+        // además se le fija la altura: el contenido de abajo queda en su lugar
+        // pase lo que pase con los tickets.
+        if (ruta === '/es/') {
+          await page.addStyleTag({
+            content: `[data-testid="qa-board"] { height: ${ALTO_QA_BOARD}px; overflow: hidden; }`,
+          });
+        }
         const mask = ruta === '/es/' ? [page.getByTestId('qa-board')] : undefined;
         await expect(page).toHaveScreenshot(nombre, { fullPage: true, maxDiffPixelRatio: 0.002, mask });
       });
