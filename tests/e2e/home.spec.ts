@@ -266,6 +266,7 @@ test.describe('El filtro del Stack', () => {
     const noAvanzado = page.locator('[data-testid="stack-item"]:not([data-nivel="avanzado"])').first();
     await expect(noAvanzado).toHaveCSS('opacity', '1');
 
+    await home.revelarSeccion('stack');
     await home.botonFiltroStack('avanzado').click();
     await expect(home.botonFiltroStack('avanzado')).toHaveAttribute('aria-current', 'true');
     await expect(noAvanzado).toHaveCSS('opacity', '0.35');
@@ -281,11 +282,13 @@ test.describe('El filtro del Stack', () => {
     // clickear un link del navbar: el navbar de escritorio (`nav-inicio`)
     // está oculto en mobile (ahí vive la Bottom Nav), así que un click
     // directo no serviría en todos los viewports.
+    await home.revelarSeccion('sobre-mi');
     await page.getByTestId('link-sobre-completo').click();
     await expect(page).toHaveURL(/\/es\/sobre-mi$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/es\/$/);
 
+    await home.revelarSeccion('stack');
     await home.botonFiltroStack('intermedio').click();
     await expect(home.botonFiltroStack('intermedio')).toHaveAttribute('aria-current', 'true');
   });
