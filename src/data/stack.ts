@@ -36,8 +36,6 @@ export const ordenCategorias: Categoria[] = [
 
 export const stack: Tecnologia[] = [
   { nombre: 'Playwright', categoria: 'qa-testing', nivel: 'avanzado', icono: 'playwright' },
-  { nombre: 'Jira', categoria: 'qa-testing', nivel: 'avanzado', icono: 'jira' },
-  { nombre: 'Zephyr Scale', categoria: 'qa-testing', nivel: 'avanzado', icono: 'zephyr' },
   { nombre: 'Vitest', categoria: 'qa-testing', nivel: 'avanzado', icono: 'vitest' },
   { nombre: 'Testing Library', categoria: 'qa-testing', nivel: 'avanzado', icono: 'testinglibrary' },
   { nombre: 'pytest', categoria: 'qa-testing', nivel: 'intermedio', icono: 'pytest' },
@@ -49,6 +47,12 @@ export const stack: Tecnologia[] = [
   // un pipeline. Cuando eso pase, sube de nivel.
   { nombre: 'Newman', categoria: 'qa-testing', nivel: 'aprendiendo', icono: 'newman' },
   { nombre: 'REST Assured', categoria: 'qa-testing', nivel: 'aprendiendo', icono: 'restassured' },
+  // Jira y Zephyr Scale se conocen solo por el curso de testing, sin proyecto
+  // propio: por eso 'aprendiendo' y no un nivel que se pueda repreguntar. El CV
+  // los declara igual ("Conocidos por formación"). Si algún día se usan en un
+  // proyecto real, suben de nivel.
+  { nombre: 'Jira', categoria: 'qa-testing', nivel: 'aprendiendo', icono: 'jira' },
+  { nombre: 'Zephyr Scale', categoria: 'qa-testing', nivel: 'aprendiendo', icono: 'zephyr' },
 
   { nombre: 'JavaScript', categoria: 'desarrollo-datos', nivel: 'avanzado', icono: 'javascript' },
   { nombre: 'TypeScript', categoria: 'desarrollo-datos', nivel: 'avanzado', icono: 'typescript' },

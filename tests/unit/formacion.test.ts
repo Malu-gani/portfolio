@@ -15,6 +15,14 @@ describe('formacion', () => {
     }
   });
 
+  // PORT-US-18: el bootcamp se cursó sin terminar los videos y sin certificado;
+  // el CV y LinkedIn dicen "cursado". El sitio no puede decir "Completado".
+  it('el bootcamp figura como cursado y no como completado', () => {
+    const bootcamp = formacion.find((f) => f.id === 'bootcamp');
+    expect(bootcamp?.estado).toBe('sin-completar');
+    expect(bootcamp?.estadoClave).toBe('formacion.estado.sinCompletar');
+  });
+
   it('no hay ids repetidos', () => {
     const ids = formacion.map((f) => f.id);
     expect(new Set(ids).size).toBe(ids.length);

@@ -42,8 +42,10 @@ export const formacion: ItemFormacion[] = [
     institucionClave: 'formacion.bootcamp.institucion',
     detalleClave: 'formacion.bootcamp.detalle',
     descripcionClave: 'formacion.bootcamp.descripcion',
-    estadoClave: 'formacion.estado.completado',
-    estado: 'completado',
+    // Se cursó y no se terminaron los videos ni hay certificado: "Cursado",
+    // igual que la UTN. Debe coincidir con el CV y con LinkedIn.
+    estadoClave: 'formacion.estado.sinCompletar',
+    estado: 'sin-completar',
   },
   {
     id: 'istqb',

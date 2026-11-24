@@ -38,6 +38,17 @@ describe('stack', () => {
     expect(new Set(ordenCategorias)).toEqual(usadas);
   });
 
+  // PORT-US-18: Jira y Zephyr Scale se conocen solo por el curso (el CV los
+  // declara "conocidos por formación"). Si alguna vez se usan en un proyecto
+  // real, este test se cambia a propósito.
+  it('Jira y Zephyr Scale figuran como "aprendiendo", igual que en el CV', () => {
+    for (const nombre of ['Jira', 'Zephyr Scale']) {
+      const tec = stack.find((t) => t.nombre === nombre);
+      expect(tec, `${nombre} no está en el stack`).toBeDefined();
+      expect(tec?.nivel, `${nombre} declara más nivel que el curso`).toBe('aprendiendo');
+    }
+  });
+
   it('no declara tecnologías sin respaldo en ningún proyecto', () => {
     // Se retiraron el 2026-07-31 tras escanear los repositorios en disco:
     // ninguna aparecía en un proyecto real. Trello se suma el 2026-08-04:
