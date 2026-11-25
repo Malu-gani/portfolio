@@ -48,6 +48,7 @@ test.describe('Home', () => {
   test('filtrar en la home no cambia la URL', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
+    await home.revelarSeccion('proyectos');
     await home.botonFiltro('dev').click();
     await expect(home.cardsDeTipo('dev').first()).toBeVisible();
     await expect(page).toHaveURL(/\/es\/$/);
