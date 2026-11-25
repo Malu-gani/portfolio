@@ -22,19 +22,19 @@ body:
         2.
         3.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: esperado
     attributes:
       label: Qué esperaba que pasara
     validations:
-      required: true
+      required: false
   - type: textarea
     id: obtenido
     attributes:
       label: Qué pasó en cambio
     validations:
-      required: true
+      required: false
   - type: input
     id: navegador
     attributes:
