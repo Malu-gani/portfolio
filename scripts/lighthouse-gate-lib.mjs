@@ -77,3 +77,14 @@ export function resolverRuta(distDir, pathname) {
   const base = normalize(distDir);
   return absoluta === base || absoluta.startsWith(base + sep) ? absoluta : null;
 }
+
+/**
+ * Una línea con los puntajes de una corrida, para que el log de CI deje ver
+ * cuánto varía cada categoría y no solo el mejor y el peor de cada una. Los
+ * puntajes de Lighthouse tienen dos decimales; se redondea para que un ruido
+ * de coma flotante (0.8800000000000001) no ensucie la línea.
+ */
+export function formatearCorrida(indice, total, puntajes) {
+  const partes = Object.entries(puntajes).map(([categoria, puntaje]) => `${categoria} ${Number(puntaje.toFixed(2))}`);
+  return `  corrida ${indice}/${total}: ${partes.join(' · ')}`;
+}

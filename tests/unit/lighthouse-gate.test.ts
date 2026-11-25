@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { join, resolve } from 'node:path';
-import { evaluarCategoria, resolverRuta, resolverUmbrales, tipoMime } from '../../scripts/lighthouse-gate-lib.mjs';
+import { evaluarCategoria, formatearCorrida, resolverRuta, resolverUmbrales, tipoMime } from '../../scripts/lighthouse-gate-lib.mjs';
 
 describe('resolverUmbrales', () => {
   it('lee los umbrales de lighthouserc.json', () => {
@@ -79,5 +79,21 @@ describe('tipoMime', () => {
 
   it('cae a octet-stream para lo desconocido', () => {
     expect(tipoMime('x.bin')).toBe('application/octet-stream');
+  });
+});
+
+describe('formatearCorrida', () => {
+  it('imprime el puntaje de cada categoría de la corrida, con su número', () => {
+    const linea = formatearCorrida(2, 5, { performance: 0.88, accessibility: 1, seo: 0.92 });
+    expect(linea).toBe('  corrida 2/5: performance 0.88 · accessibility 1 · seo 0.92');
+  });
+
+  it('conserva el orden en que se pasan las categorías', () => {
+    const linea = formatearCorrida(1, 3, { seo: 1, performance: 0.9 });
+    expect(linea).toBe('  corrida 1/3: seo 1 · performance 0.9');
+  });
+
+  it('no inventa decimales para un puntaje con ruido de coma flotante', () => {
+    expect(formatearCorrida(1, 1, { performance: 0.8800000000000001 })).toContain('performance 0.88');
   });
 });

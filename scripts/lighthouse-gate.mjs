@@ -8,7 +8,7 @@ import { createServer } from 'node:http';
 import { join, resolve } from 'node:path';
 import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';
-import { evaluarCategoria, resolverRuta, resolverUmbrales, tipoMime } from './lighthouse-gate-lib.mjs';
+import { evaluarCategoria, formatearCorrida, resolverRuta, resolverUmbrales, tipoMime } from './lighthouse-gate-lib.mjs';
 
 const DIST = resolve('dist');
 const { ci } = JSON.parse(readFileSync('lighthouserc.json', 'utf8'));
@@ -49,7 +49,7 @@ async function medir(url) {
     // En Windows Chrome puede tener la carpeta temporal tomada y el borrado
     // falla con EPERM aunque la medición ya terminó. No es un fallo del gate.
     try {
-      await chrome.kill();
+      chrome.kill();
     } catch (error) {
       if (error.code !== 'EPERM') throw error;
     }
@@ -64,11 +64,14 @@ try {
     for (let i = 0; i < corridas; i++) {
       const lhr = await medir(`${origen}${pathname}`);
       if (lhr.runtimeError) throw new Error(`Lighthouse falló en ${pathname}: ${lhr.runtimeError.message}`);
+      const puntajesCorrida = {};
       for (const u of umbrales) {
         const categoria = lhr.categories[u.categoria];
         if (!categoria) throw new Error(`La categoría "${u.categoria}" no existe en el reporte de Lighthouse.`);
         porCategoria[u.categoria].push(categoria.score);
+        puntajesCorrida[u.categoria] = categoria.score;
       }
+      console.log(formatearCorrida(i + 1, corridas, puntajesCorrida));
     }
     for (const u of umbrales) {
       const { mejor, peor, pasa } = evaluarCategoria(porCategoria[u.categoria], u.minScore);
