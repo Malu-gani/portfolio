@@ -36,6 +36,7 @@ test.describe('QA Board & Backlog Live', () => {
     test.skip(!hayNoBug, 'no hay ítems que no sean bug en el feed actual para probar la atenuación');
 
     await expect(noBug).toHaveCSS('opacity', '1');
+    await home.revelarSeccion('qa-board');
     await home.botonFiltroQaBoard('bug').click();
     await expect(home.botonFiltroQaBoard('bug')).toHaveAttribute('aria-current', 'true');
     await expect(noBug).toHaveCSS('opacity', '0.35');
@@ -45,6 +46,7 @@ test.describe('QA Board & Backlog Live', () => {
   test('el filtro cambia data-filtro-activo al elegir User Stories', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
+    await home.revelarSeccion('qa-board');
     await home.botonFiltroQaBoard('us').click();
     await expect(home.botonFiltroQaBoard('us')).toHaveAttribute('aria-current', 'true');
     await expect(home.qaBoardFeed).toHaveAttribute('data-filtro-activo', 'us');
@@ -53,11 +55,16 @@ test.describe('QA Board & Backlog Live', () => {
   test('el filtro sigue funcionando después de una view transition', async ({ page }) => {
     const home = new HomePage(page);
     await home.abrir('es');
+    // Cada click sobre una sección `.revelar` espera antes a que termine su
+    // entrada (PORT-BUG-13, PORT-US-19); si no, a veces cae en la sección y no
+    // en el botón o el link.
+    await home.revelarSeccion('sobre-mi');
     await page.getByTestId('link-sobre-completo').click();
     await expect(page).toHaveURL(/\/es\/sobre-mi$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/es\/$/);
 
+    await home.revelarSeccion('qa-board');
     await home.botonFiltroQaBoard('bug').click();
     await expect(home.botonFiltroQaBoard('bug')).toHaveAttribute('aria-current', 'true');
   });
