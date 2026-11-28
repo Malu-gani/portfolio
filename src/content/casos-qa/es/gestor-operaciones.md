@@ -1,6 +1,6 @@
 ---
 titulo: "Suite de pruebas de FolioTracker, mi app financiera propia"
-resumen: "275 pruebas sobre un diario de trading que construí. Encontró 10 defectos: dos permitían que cualquier usuario logueado creara dinero salteándose el formulario."
+resumen: "Más de 400 pruebas sobre un diario de trading que construí. Encontró 10 defectos: dos permitían que cualquier usuario logueado creara dinero salteándose el formulario."
 tags: [manual, automation, e2e, api]
 stack: [Vitest, Playwright, Testing Library, PostgreSQL, Supabase, TypeScript, Docker, GitHub Actions]
 fecha: 2026-07-30
@@ -9,7 +9,7 @@ estado: completo
 ejemplo: false
 metricas:
   - etiqueta: pruebas
-    valor: "275"
+    valor: "400+"
   - etiqueta: defectos
     valor: "10"
 repo: "https://github.com/Malu-gani/Registro-de-Operaciones"
@@ -22,7 +22,7 @@ FolioTracker es una aplicación web propia para registrar operaciones de trading
 
 Es una app financiera personal: no maneja dinero de terceros, pero sí calcula los números con los que después se decide operar. Un cálculo mal hecho que se muestra con confianza es peor que un error visible, porque nadie lo va a cuestionar.
 
-**El plan de pruebas que sigue se publicó antes de escribir el primer test.** Ahora están las dos mitades: la estrategia con la que decidí atacar la app, y lo que pasó al ejecutarla — 275 pruebas, 10 defectos encontrados y arreglados, y tres severidades que había estimado mal. El repositorio es público, así que todo lo que digo acá se puede contrastar contra el código, los tests y los commits que los arreglaron.
+**El plan de pruebas que sigue se publicó antes de escribir el primer test.** Ahora están las dos mitades: la estrategia con la que decidí atacar la app, y lo que pasó al ejecutarla — 275 pruebas en el cierre de julio, 10 defectos encontrados y arreglados, y tres severidades que había estimado mal. El repositorio es público, así que todo lo que digo acá se puede contrastar contra el código, los tests y los commits que los arreglaron.
 
 ## Estrategia de prueba
 
@@ -52,9 +52,9 @@ Regla operativa: **ningún test P2 se escribe mientras quede un camino P0 sin cu
 
 ## Ejecución
 
-La suite quedó en **275 pruebas**: 186 unitarias, 18 de componentes, 66 de integración contra Postgres y 5 flujos end-to-end, que después de sumar la verificación por email pasaron a 9. La forma no es casual: los cálculos de riesgo son funciones puras y se prueban en milisegundos, así que ahí está la base; el end-to-end es el nivel más caro de mantener y quedó reservado para los recorridos donde el valor está en que las piezas funcionen juntas.
+El primer cierre, en julio, dejó la suite en **275 pruebas**: 186 unitarias, 18 de componentes, 66 de integración contra Postgres y 5 flujos end-to-end, que después de sumar la verificación por email pasaron a 9. Desde entonces creció junto con la aplicación: la corrida completa de integración continua del 25/11/2026 pasó **428 pruebas**, 258 unitarias y de componentes, 161 de integración y 9 end-to-end. La forma no es casual: los cálculos de riesgo son funciones puras y se prueban en milisegundos, así que ahí está la base; el end-to-end es el nivel más caro de mantener y quedó reservado para los recorridos donde el valor está en que las piezas funcionen juntas.
 
-**La base de datos se prueba de verdad, no simulada.** Levanto una Postgres local y efímera en Docker, con las migraciones aplicadas en orden por script, y contra eso corren las 66 pruebas de integración. Eso permite ejercitar Row Level Security con una sesión de usuario real, que era el punto: una política de aislamiento simulada no prueba nada.
+**La base de datos se prueba de verdad, no simulada.** Levanto una Postgres local y efímera en Docker, con las migraciones aplicadas en orden por script, y contra eso corren las pruebas de integración. Eso permite ejercitar Row Level Security con una sesión de usuario real, que era el punto: una política de aislamiento simulada no prueba nada.
 
 **El aislamiento entre pruebas lo da RLS, no un `truncate`.** Cada prueba crea su propio usuario con un email único, así que ninguna ve los datos de otra y todas pueden correr en paralelo. La alternativa habitual —limpiar las tablas entre pruebas— obliga a correr en serie y además desactiva justamente el mecanismo que quiero verificar.
 

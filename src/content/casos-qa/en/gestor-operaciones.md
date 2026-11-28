@@ -1,6 +1,6 @@
 ---
 titulo: "Test suite for FolioTracker, my own financial app"
-resumen: "275 tests on a trading journal I built. It found 10 defects: two let any logged-in user create money by bypassing the form entirely."
+resumen: "400+ tests on a trading journal I built. It found 10 defects: two let any logged-in user create money by bypassing the form entirely."
 tags: [manual, automation, e2e, api]
 stack: [Vitest, Playwright, Testing Library, PostgreSQL, Supabase, TypeScript, Docker, GitHub Actions]
 fecha: 2026-07-30
@@ -9,7 +9,7 @@ estado: completo
 ejemplo: false
 metricas:
   - etiqueta: tests
-    valor: "275"
+    valor: "400+"
   - etiqueta: defects
     valor: "10"
 repo: "https://github.com/Malu-gani/Registro-de-Operaciones"
@@ -22,7 +22,7 @@ FolioTracker is a web application I built to log trading operations (crypto and 
 
 It's a personal financial app: it doesn't handle anyone else's money, but it does calculate the numbers used to decide whether to trade. A wrong calculation displayed with confidence is worse than a visible error, because nobody questions it.
 
-**The test plan below was published before I wrote the first test.** Now both halves exist: the strategy I chose to attack the app with, and what happened when I executed it — 275 tests, 10 defects found and fixed, and three severities I had estimated wrong. The repository is public, so everything I claim here can be checked against the code, the tests, and the commits that fixed them.
+**The test plan below was published before I wrote the first test.** Now both halves exist: the strategy I chose to attack the app with, and what happened when I executed it — 275 tests at the July close, 10 defects found and fixed, and three severities I had estimated wrong. The repository is public, so everything I claim here can be checked against the code, the tests, and the commits that fixed them.
 
 ## Test strategy
 
@@ -52,9 +52,9 @@ Operating rule: **no P2 test gets written while a P0 path remains uncovered.** T
 
 ## Execution
 
-The suite ended up at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
+The first close, in July, left the suite at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. It has grown with the application since: the full continuous-integration run on November 25, 2026 passed **428 tests** — 258 unit and component, 161 integration, and 9 end-to-end. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
 
-**The database is tested for real, not simulated.** I spin up a local, ephemeral Postgres in Docker, with migrations applied in order by a script, and the 66 integration tests run against that. It lets me exercise Row Level Security with a real user session, which was the point: a simulated isolation policy proves nothing.
+**The database is tested for real, not simulated.** I spin up a local, ephemeral Postgres in Docker, with migrations applied in order by a script, and the integration tests run against that. It lets me exercise Row Level Security with a real user session, which was the point: a simulated isolation policy proves nothing.
 
 **Isolation between tests comes from RLS, not from a `truncate`.** Each test creates its own user with a unique email, so none of them sees another's data and they can all run in parallel. The usual alternative —wiping tables between tests— forces serial execution and, on top of that, disables exactly the mechanism I want to verify.
 
