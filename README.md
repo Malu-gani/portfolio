@@ -1,124 +1,156 @@
 [![CI](https://github.com/Malu-gani/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Malu-gani/portfolio/actions/workflows/ci.yml)
 
-*Si el badge de arriba se ve roto o en "unknown": el workflow todavía no corrió en `main` (falta el primer merge). No indica que el pipeline esté caído.*
-
 # Portfolio personal QA
 
-Portfolio bilingüe (ES/EN) de **Juan Manuel Malugani**, carta de presentación para una búsqueda laboral activa en QA. Sitio estático construido con Astro, con dos carriles: `/qa` es el principal, `/dev` es secundario y deliberadamente más chico — muestra que además de testear puedo escribir el código que se testea, sin competir con el carril principal.
+Portfolio bilingüe (ES/EN) de **Juan Manuel Malugani**, carta de presentación para una búsqueda laboral activa en QA. Es un sitio estático construido con Astro y probado como cualquier otro producto.
 
-> **Estado del contenido:** todo el contenido escrito del sitio es real — los dos casos de QA, el proyecto de `/dev` y la sección "Sobre mí". Ya no queda nada marcado con `ejemplo: true`, y `npm run check:listo` da verde; es un gate bloqueante del CI, así que reintroducir contenido de ejemplo pone el pipeline en rojo.
+- **Sitio publicado:** <https://portfolio-lovat-five-65.vercel.app>
+- **Reportes de Playwright de `main`:** [Chromium](https://malu-gani.github.io/portfolio/reporte/playwright-report-chromium/) · [Firefox](https://malu-gani.github.io/portfolio/reporte/playwright-report-firefox/) · [WebKit](https://malu-gani.github.io/portfolio/reporte/playwright-report-webkit/) · [mobile](https://malu-gani.github.io/portfolio/reporte/playwright-report-mobile/)
+
+## Qué hay en el sitio
+
+La home reúne en una página: presentación, Sobre mí, Proyectos, el tablero de QA y backlog en vivo, Stack, Formación, Contacto y "Reportar un problema".
+
+QA pesa más que desarrollo, a propósito: el listado de proyectos arranca filtrado en QA, y desarrollo muestra que además de probar puedo escribir el código que se prueba.
+
+| Español | Inglés | Contenido |
+|---|---|---|
+| `/es/` | `/en/` | Home |
+| `/es/proyectos` | `/en/projects` | Casos de QA (también `…/dev` y, para ver todo, `/es/proyectos/todos` y `/en/projects/all`) |
+| `/es/qa/<slug>` | `/en/qa/<slug>` | Detalle de un caso de QA |
+| `/es/dev/<slug>` | `/en/dev/<slug>` | Detalle de un proyecto de desarrollo |
+| `/es/sobre-mi` | `/en/about` | Sobre mí |
+| `/es/contacto` | `/en/contact` | Contacto y CV |
+
+`/es/qa`, `/es/dev` y sus pares en inglés redirigen a los listados.
 
 ## Stack
 
-Astro 7 (`output: 'static'`) · React 19 solo en islands puntuales (el toggle de tema y el botón de copiar email en Contacto) · Tailwind 4 con configuración CSS-first · TypeScript strict · Playwright · axe-core · Vitest · Lighthouse. Node 22.19+.
+Astro 7 (salida estática) · React 19 solo en dos islands · Tailwind 4 · TypeScript estricto · MDX · Playwright · axe-core · Vitest · Lighthouse · GitHub Actions · Vercel. Node 22.19 o superior.
 
 ## Cómo está verificado
 
-Esto es lo que distingue este repo de un portfolio estático cualquiera: viene con su propia suite de calidad, corrida en CI en cada push y cada pull request a `main` (ver el badge arriba y `.github/workflows/ci.yml`).
+| Qué | Comando | Qué cubre |
+|---|---|---|
+| Tipos | `npm run check` | Astro Check. `astro build` no verifica los tipos de los `.tsx`, por eso es un paso aparte. |
+| Unitarios | `npm run test:unit` | Lógica de datos, paridad del contenido entre idiomas y textos escritos a mano que tienden a quedar viejos (CV, cifras de los casos, este README). |
+| End-to-end | `npm run test:e2e` | Playwright con Page Object Model en Chromium, Firefox, WebKit y un perfil mobile (Pixel 7): navegación, idioma, tema, filtros, detalles, contacto y descarga del CV, reporte de problemas, tablero de QA y enlaces. |
+| Accesibilidad | dentro de la suite E2E | axe-core con las reglas WCAG 2.0 y 2.1 A y AA en todas las rutas, en tema claro y oscuro, más el orden de encabezados y la navegación por teclado. |
+| Regresión visual | dentro de la suite E2E | Capturas de las páginas principales en ambos temas, solo en Chromium y solo en local. |
+| Lighthouse | `npm run test:lighthouse` | Sobre el build, en la home y el listado en español: rendimiento, buenas prácticas y SEO desde 90, accesibilidad en 100. |
+| Contenido | `npm run check:listo` | Falla si queda contenido de ejemplo. |
 
-- **Tipos:** `npm run check` (Astro Check) — 0 errores, 0 warnings sobre 76 archivos `.astro`/`.ts`/`.tsx` al momento de escribir esto. Es el gate real de tipos: `astro build` no chequea los `.tsx`, por eso este comando existe como paso separado.
-- **Unitarios:** `npm run test:unit` (Vitest) — 34 tests en 4 archivos, todos verdes.
-- **Build:** `npm run build` genera todas las páginas estáticas del sitio (ambos idiomas, ambos carriles, derivadas del filesystem — ver `tests/e2e/utils/rutas.ts`) sin errores.
-- **End-to-end:** `npm run test:e2e` (Playwright), suite propia de 120 tests que cubre navegación, cambio de idioma, tema claro/oscuro, contenido de los carriles QA y Dev, integridad de enlaces internos (los externos también, pero se saltan en CI para no depender de la red) con `rel="noopener"` en los que abren pestaña nueva, y los componentes de dominio QA (reporte de bug, matriz de casos, métricas). Corre en 4 proyectos de navegador: Chromium, Firefox, WebKit y un perfil mobile (Pixel 7).
-- **Accesibilidad:** `axe-core` integrado en la suite E2E — cero violaciones WCAG AA en todas las rutas del sitio, en tema claro y en tema oscuro, en los 4 navegadores.
-- **Regresión visual:** capturas de referencia por página y tema, generadas y comparadas solo en el proyecto `chromium`. Es un gate **local**, no de CI: las capturas versionadas quedan atadas a la plataforma donde se generaron (Playwright las nombra con el sufijo del sistema operativo, ej. `-win32`), así que compararlas en el runner Linux de CI produciría un falso fallo en la primera corrida y un falso verde en el reintento, no una señal real. `tests/e2e/visual.spec.ts` se salta explícitamente cuando `process.env.CI` está presente.
-- **Lighthouse:** `npm run test:lighthouse` corre en CI sobre el build de producción.
+Las rutas que recorren las pruebas de accesibilidad y de enlaces salen del filesystem ([`tests/e2e/utils/rutas.ts`](tests/e2e/utils/rutas.ts)): una página o un caso nuevo queda cubierto sin tocar la suite.
 
-**Limitación conocida y aceptada, no escondida:** en la configuración de fábrica de Safari (con "Full Keyboard Access" apagado, que es el default para la mayoría de usuarios), los enlaces del sitio no son alcanzables tabulando con el teclado — es el comportamiento por defecto del motor WebKit, no un defecto del markup. El skip-link sí se hizo explícitamente alcanzable (`tabindex="0"`), porque ahí la excepción está justificada: un skip-link que no se puede alcanzar con teclado no cumple su función.
+La regresión visual no corre en CI porque las capturas quedan atadas al sistema operativo donde se generaron (sufijo `-win32`): en el runner Linux no hay referencia válida contra la que comparar. Los enlaces externos también se saltan en CI, porque dependen de servicios de terceros.
 
-**Un bug de plataforma que sí se diagnosticó y se resolvió:** la navegación cliente-a-cliente de Astro entre el listado de `/dev` y el detalle de un proyecto disparaba un crash real del proceso de render en WebKit (el crash está reproducido; la causa es consistente con el bug documentado en `withastro/astro#15727` sobre la View Transitions API nativa de Safari — no era contenido ni markup del sitio). Se corrigió agregando `data-astro-reload` al enlace de la tarjeta de proyecto (`ProyectoCard.astro`), que fuerza navegación de página completa para ese link puntual en vez de la transición animada. El costo es perder esa transición al entrar al detalle desde `/dev` — aceptable frente a la alternativa, que era un crash real para usuarios de Safari. El test que reproduce el flujo (`tests/e2e/dev.spec.ts`) pasa hoy en los 4 navegadores, sin `test.skip`.
+### En CI
 
-El detalle completo de ambos diagnósticos, con la evidencia, las alternativas consideradas y la resolución aplicada, está en [`docs/cross-browser-diagnostico.md`](docs/cross-browser-diagnostico.md).
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre en cada pull request a `main` y en cada push a `main`:
+
+1. Un job con tipos, unitarios, build, Lighthouse y control de contenido.
+2. Si pasa, un job por navegador con `--workers=1`.
+3. En `main`, la publicación de los cuatro reportes en GitHub Pages.
+
+## Diagnósticos que vale la pena leer
+
+El detalle, con la evidencia y las alternativas descartadas, está en [`docs/cross-browser-diagnostico.md`](docs/cross-browser-diagnostico.md).
+
+**Un crash de WebKit que diagnostiqué mal la primera vez.** Al navegar de un listado al detalle, el proceso de render de WebKit se caía. Primero lo atribuí a un par de rutas puntual y lo tapé forzando la recarga completa en ese enlace. La causa real apareció después en otro listado: se cae cuando la transición va de una página que no es contenedor de scroll a una que sí lo es. El arreglo es `overflow-y: scroll` en `html`, la recarga forzada se quitó y [`tests/e2e/navegacion.spec.ts`](tests/e2e/navegacion.spec.ts) verifica esa condición en cada ruta.
+
+**Un "servidor saturado" que no lo estaba.** Los rechazos de conexión intermitentes de Firefox en local se debían a que, en Windows, el servidor de prueba escuchaba en una sola de las dos direcciones de `localhost`. La suite usa `127.0.0.1` y [`tests/unit/playwright-config.test.ts`](tests/unit/playwright-config.test.ts) fija que servidor y pruebas coincidan.
+
+**Una limitación conocida y aceptada.** Con la configuración de fábrica de Safari, los enlaces no se alcanzan tabulando: es el comportamiento por defecto del navegador. Entre los enlaces, solo el de salto al contenido lleva `tabindex="0"`, porque inalcanzable por teclado no cumpliría su función.
 
 ## Decisiones técnicas
 
-**Astro y no Next.** El sitio es contenido mayormente estático — casos de QA, proyectos, una página "Sobre mí" — sin estado de cliente que justifique un framework de aplicación. Astro renderiza a HTML por defecto y solo envía JavaScript donde hay interactividad real (los dos islands de React del sitio: el toggle de tema y el botón de copiar email), lo que mantiene el sitio liviano y el TTI bajo sin esfuerzo extra. Next tiene sentido cuando hay rutas dinámicas con datos que cambian por request o un dashboard interactivo; acá no hay ninguna de las dos cosas.
+**Astro y no Next.** El sitio es contenido estático, sin datos que cambien por request ni un panel interactivo. Astro genera HTML y solo envía JavaScript donde hace falta.
 
-**El idioma vive en la URL (`/es/`, `/en/`), no en un toggle que reemplaza texto por JS.** Cada idioma es una ruta real, indexable por separado, con su propia etiqueta `hreflang` apuntando a la equivalente. Un toggle que sustituye el DOM del lado del cliente rompe el deep-linking (compartir un link no comparte el idioma), es peor para SEO, y obliga a duplicar todo el contenido en memoria del cliente en vez de dejar que el servidor (o el build estático, en este caso) resuelva qué versión servir.
+**El idioma vive en la URL (`/es/`, `/en/`).** Cada idioma es una ruta real, indexable, con su `hreflang`. Reemplazar textos en el cliente impediría compartir un enlace en un idioma determinado.
 
-**No hay React en el layout, solo en islands puntuales.** Hoy son dos: el toggle de tema y el botón de copiar email en Contacto (`CopyEmail.tsx`, con su propio manejo de error si la copia falla). Son los únicos dos componentes que necesitan estado de cliente e interactividad real; todo lo demás — navegación, tarjetas de casos, layout de detalle — es HTML estático de Astro. Meter React en el árbol de render de páginas que no lo necesitan agrega hidratación, bundle y superficie de bugs sin ningún beneficio: la regla del proyecto es "React solo donde hay una razón concreta para pagar su costo", y que sean dos islands acotados sobre todas las páginas estáticas del sitio es la prueba de que la regla se aplicó con criterio, no por defecto.
+**React solo en dos islands:** el cambio de tema (`ThemeToggle.tsx`) y el botón de copiar el email (`CopyEmail.tsx`). El resto es HTML de Astro, con scripts sin framework para los filtros, el resaltado del menú y la aparición de las secciones.
 
-**No hay formulario de contacto.** Un formulario implica un backend (o un servicio de terceros) para recibir los envíos, superficie para spam, y una promesa implícita de respuesta rápida que compite con la búsqueda laboral activa que este sitio representa. La página de contacto muestra el email (copiable con un botón, con aviso si falla la copia), LinkedIn y GitHub — canales que ya uso y reviso, sin intermediario ni mantenimiento adicional.
+**Sin formulario de contacto.** Necesitaría un backend o un tercero, y puede fallar en silencio. En su lugar: email copiable, LinkedIn y GitHub. Para reportar un problema del sitio, un enlace a una plantilla de Issue de GitHub y la misma plantilla para copiar.
 
 ## Cómo correrlo
 
 ```bash
 npm install
-cp .env.example .env.local   # completar NOTION_TOKEN antes de seguir
+cp .env.example .env.local
 npm run dev
 ```
 
-El servidor de desarrollo queda en `http://localhost:4321`. La sección "QA Board & Backlog Live" de la home consulta Notion en build time, así que `npm run dev` y `npm run build` fallan sin un `NOTION_TOKEN` válido en el entorno (ver `.env.example`).
+El servidor de desarrollo queda en `http://localhost:4321`.
 
-## Cómo correr los tests
+Antes de compilar hay que completar `NOTION_TOKEN` en `.env.local`: el tablero de QA consulta Notion durante el build, con un token que tenga acceso a las bases de este portfolio. Sin él, el build falla, y también la suite E2E, que compila antes de probar.
+
+## Cómo correr las pruebas
 
 ```bash
-npm run check        # tipos (Astro Check) — el gate real, no el build
-npm run test:unit    # Vitest
-npm run test:e2e      # Playwright, los 4 navegadores
-npm run test:e2e -- --project=chromium   # una sola corrida, más rápida para iterar
-npm run test:e2e -- --ui                  # modo interactivo
+npx playwright install                      # la primera vez
+npm run check
+npm run test:unit
+npm run test:e2e                            # los cuatro navegadores
+npm run test:e2e -- --project=chromium      # uno solo, para iterar
+npm run build                               # Lighthouse mide sobre el build
+npm run test:lighthouse
 ```
+
+Conviene cerrar `npm run dev` antes de la suite E2E: Playwright reusa lo que esté escuchando en el puerto 4321 y probaría el servidor de desarrollo en lugar del build.
 
 ## Cómo agregar un caso
 
-Un caso de QA nuevo son **dos archivos con el mismo slug**, uno por idioma:
+Un caso de QA son **dos archivos con el mismo slug**, uno por idioma:
 
-- `src/content/casos-qa/es/<slug>.md` (o `.mdx` si necesita componentes, como `suite-e2e-portfolio.mdx`)
+- `src/content/casos-qa/es/<slug>.md` (o `.mdx` si usa componentes, como `suite-e2e-portfolio.mdx`)
 - `src/content/casos-qa/en/<slug>.md`
 
-Los slugs tienen que ser idénticos entre ambos idiomas — hay un test que lo verifica (`tests/e2e/casos.spec.ts`, "el cambio de idioma preserva el caso abierto").
+[`tests/unit/contenido.test.ts`](tests/unit/contenido.test.ts) falla si falta una de las dos versiones o si sus métricas difieren.
 
-Frontmatter (ver `src/content.config.ts` para el schema completo):
+Frontmatter (el esquema completo está en [`src/content.config.ts`](src/content.config.ts)):
 
 | Campo | Qué es |
 |---|---|
-| `titulo` | Título del caso, string no vacío. |
-| `resumen` | Bajada de 20 a 200 caracteres — se usa en tarjetas de listado. |
-| `tags` | Array de al menos un valor, limitado a un enum fijo (`manual`, `automation`, `e2e`, `api`, `exploratorio`, `regresion`, `accesibilidad`, `performance`, `mobile`). |
-| `stack` | Array de strings libres con las herramientas usadas. |
-| `fecha` | Fecha del caso (se coacciona a `Date`). |
-| `destacado` | Booleano; si es `true`, aparece en la home. Default `false`. |
+| `titulo` | Título del caso. |
+| `resumen` | Bajada de 20 a 200 caracteres, la que muestran las tarjetas. |
+| `tags` | Al menos uno de: `manual`, `automation`, `e2e`, `api`, `exploratorio`, `regresion`, `accesibilidad`, `performance`, `mobile`. |
+| `stack` | Herramientas usadas, al menos una. |
+| `fecha` | Fecha del caso. Se muestra en UTC. |
+| `destacado` | Los destacados van primero en los listados. Por defecto `false`. |
 | `estado` | `completo` o `en-progreso`. |
-| `ejemplo` | Booleano; `true` mientras el contenido sea de muestra — dispara el banner de aviso. Default `false`. |
+| `ejemplo` | `true` mientras el contenido sea de muestra: muestra un aviso y bloquea el CI. Por defecto `false`. |
+| `metricas` | Opcional, hasta tres pares `etiqueta` y `valor`. |
 | `repo` / `demo` | URLs opcionales. |
 
-El cuerpo tiene seis bloques fijos, en este orden (ver cualquier caso existente en `src/content/casos-qa/` como referencia):
+El cuerpo sigue seis bloques: **Contexto**, **Estrategia de prueba**, **Ejecución**, **Hallazgos**, **Automatización** y **Resultado y aprendizajes**.
 
-1. **Contexto** — quién pidió qué y bajo qué restricciones.
-2. **Estrategia de prueba** — qué se priorizó, qué se descartó y por qué.
-3. **Ejecución** — cómo se llevó a cabo.
-4. **Hallazgos** — qué se encontró (bugs, riesgos, evidencia).
-5. **Automatización** — qué se automatizó, o por qué conscientemente no.
-6. **Resultado y aprendizajes** — cómo terminó y qué se aprendió.
+Un proyecto de desarrollo va en `src/content/proyectos/` con el mismo criterio de dos idiomas y sin `tags` ni `estado`.
 
-Un proyecto del carril `/dev` sigue el mismo patrón (mismo slug en `src/content/proyectos/es/` y `en/`), con un frontmatter más chico (sin `tags` ni `estado`) y tres bloques: Descripción, Motivación, Estado actual.
+### Qué actualizar junto con el contenido
 
-## Antes de publicar
+- La cantidad de casos y proyectos que fijan [`tests/e2e/home.spec.ts`](tests/e2e/home.spec.ts) y [`tests/e2e/proyectos.spec.ts`](tests/e2e/proyectos.spec.ts).
+- La cantidad de rutas que declara el caso de la suite del portfolio (una prueba unitaria lo exige).
+- Las capturas de las páginas que cambiaron, solo esas y revisando la diferencia:
 
-**Ya hecho:**
+```bash
+npx playwright test tests/e2e/visual.spec.ts --project=chromium -g "es/proyectos en tema" --update-snapshots=all
+```
 
-- ✅ CV real en `public/cv/`, generado desde `scripts/cv/*.html` con `node scripts/gen-cv-pdfs.cjs`.
-- ✅ `npm run check:listo` da verde, y desde entonces es un gate bloqueante del CI (sin `continue-on-error`).
-- ✅ Casos de QA reales (`suite-e2e-portfolio`, `gestor-operaciones`).
-- ✅ Proyecto real en el carril `/dev`.
-- ✅ Texto real de "Sobre mí", sin banner de ejemplo.
-- ✅ URLs de LinkedIn y GitHub verificadas en `ContactContent.astro` y `Footer.astro`.
-- ✅ `site` en `astro.config.mjs` apunta a la URL real de despliegue.
-- ✅ Conteos de casos y proyectos en los tests actualizados al contenido real.
-- ✅ Capturas de referencia de la regresión visual regeneradas sobre el contenido real.
+Sin `=all`, un cambio que queda bajo el margen de tolerancia no reescribe la captura y la referencia queda vieja.
 
-**A tener en cuenta al seguir editando contenido:** hay tests que fijan la cantidad de casos y proyectos (`casos.spec.ts`, `home.spec.ts`, `dev.spec.ts`) y capturas de referencia que congelan el layout. Agregar o quitar un caso obliga a actualizar ambos — regenerar las capturas con `npx playwright test tests/e2e/visual.spec.ts --project=chromium --update-snapshots`.
+## CV
+
+Los PDF de `public/cv/` se generan desde `scripts/cv/` con `node scripts/gen-cv-pdfs.cjs`. [`tests/unit/cv.test.ts`](tests/unit/cv.test.ts) comprueba que el CV no contradiga al sitio.
 
 ## Método de trabajo
 
-Este repo se construyó con spec y plan escritos antes de tocar código, con criterios de verificación explícitos por tarea:
+El proyecto arrancó con especificación y plan escritos antes del código, con criterios de verificación por tarea:
 
-- **Spec:** [`docs/superpowers/specs/2026-07-27-portfolio-qa-design.md`](docs/superpowers/specs/2026-07-27-portfolio-qa-design.md) — qué se construye y por qué.
-- **Plan:** [`docs/superpowers/plans/2026-07-27-portfolio-qa.md`](docs/superpowers/plans/2026-07-27-portfolio-qa.md) — 14 tareas, cada una con su código y sus tests.
+- [Especificación inicial](docs/superpowers/specs/2026-07-27-portfolio-qa-design.md) y [plan inicial](docs/superpowers/plans/2026-07-27-portfolio-qa.md).
+- Los tramos siguientes, en [`docs/superpowers/specs/`](docs/superpowers/specs/) y [`docs/superpowers/plans/`](docs/superpowers/plans/).
 
-Quedan públicos a propósito: son una muestra de método de trabajo, no solo de resultado.
+Esos documentos reflejan lo que se sabía en su momento; el estado actual es el del código y este README. Quedan públicos como muestra de método.
 
 ## Despliegue
 
-El sitio está pensado para desplegarse en Vercel como sitio estático (`vercel.json` en la raíz define `buildCommand`, `outputDirectory: dist` y el framework). El despliegue en sí y la actualización del dominio en `astro.config.mjs` (`site`, usado por el sitemap y las etiquetas `hreflang`) quedan pendientes de un paso manual fuera de este repo.
+Vercel publica `main` en producción y genera una vista previa por pull request. [`vercel.json`](vercel.json) define las redirecciones y las cabeceras de seguridad; la URL del sitio se declara en [`astro.config.mjs`](astro.config.mjs).
