@@ -7,8 +7,6 @@
 Portfolio bilingüe (ES/EN) de **Juan Manuel Malugani**, carta de presentación para una búsqueda laboral activa en QA. Sitio estático construido con Astro, con dos carriles: `/qa` es el principal, `/dev` es secundario y deliberadamente más chico — muestra que además de testear puedo escribir el código que se testea, sin competir con el carril principal.
 
 > **Estado del contenido:** todo el contenido escrito del sitio es real — los dos casos de QA, el proyecto de `/dev` y la sección "Sobre mí". Ya no queda nada marcado con `ejemplo: true`, y `npm run check:listo` da verde; es un gate bloqueante del CI, así que reintroducir contenido de ejemplo pone el pipeline en rojo.
->
-> **Falta una sola cosa antes de linkearlo desde un CV:** los PDFs de `public/cv/` siguen siendo placeholders (contienen el texto "CV de ejemplo — reemplazar"). `check:listo` no los alcanza, porque solo inspecciona el frontmatter de las colecciones. Ver "Antes de publicar".
 
 ## Stack
 
@@ -98,12 +96,9 @@ Un proyecto del carril `/dev` sigue el mismo patrón (mismo slug en `src/content
 
 ## Antes de publicar
 
-**Pendiente — bloquea publicar:**
-
-1. **Reemplazar `public/cv/cv-es.pdf` y `public/cv/cv-en.pdf` por el CV real.** Los archivos actuales son placeholders generados: el PDF dice "CV de ejemplo — reemplazar". El botón de descarga del sitio ya funciona y entrega ese archivo, así que hoy un visitante se baja el placeholder. Ningún gate automático lo detecta: `check:listo` solo inspecciona el frontmatter de las colecciones, y el test E2E de descarga verifica el nombre del archivo, no su contenido.
-
 **Ya hecho:**
 
+- ✅ CV real en `public/cv/`, generado desde `scripts/cv/*.html` con `node scripts/gen-cv-pdfs.cjs`.
 - ✅ `npm run check:listo` da verde, y desde entonces es un gate bloqueante del CI (sin `continue-on-error`).
 - ✅ Casos de QA reales (`suite-e2e-portfolio`, `gestor-operaciones`).
 - ✅ Proyecto real en el carril `/dev`.

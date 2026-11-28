@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ui } from '../../src/i18n/ui';
 
@@ -15,6 +15,8 @@ type Idioma = (typeof IDIOMAS)[number];
 const leer = (...partes: string[]) => readFileSync(join(...partes), 'utf8');
 const htmlCv = (lang: Idioma) => leer('scripts', 'cv', `cv-${lang}.html`);
 const casoQa = (lang: Idioma) => leer('src', 'content', 'casos-qa', lang, 'gestor-operaciones.md');
+// Con nombre y apellido: es lo que queda en las descargas de quien lo recibe.
+const nombrePdf = (lang: Idioma) => `Juan-Manuel-Malugani-CV-${lang.toUpperCase()}.pdf`;
 
 /** El texto que lee una persona: sin estilos, sin etiquetas, espacios colapsados. */
 const textoCv = (lang: Idioma) =>
@@ -60,11 +62,26 @@ describe.each(IDIOMAS)('CV en %s', (lang) => {
     }
   });
 
+  it('se publica solo con el nombre y apellido en el archivo', () => {
+    expect(existsSync(join('public', 'cv', nombrePdf(lang)))).toBe(true);
+    expect(existsSync(join('public', 'cv', `cv-${lang}.pdf`))).toBe(false);
+  });
+
+  // La dirección anterior ya circuló en enlaces compartidos.
+  it('la dirección anterior redirige al archivo nuevo', () => {
+    const { redirects } = JSON.parse(leer('vercel.json'));
+    expect(redirects).toContainEqual({
+      source: `/cv/cv-${lang}.pdf`,
+      destination: `/cv/${nombrePdf(lang)}`,
+      permanent: true,
+    });
+  });
+
   // El PDF es un binario versionado: editar el HTML no lo cambia hasta correr
   // `node scripts/gen-cv-pdfs.cjs`. Las anotaciones de enlace quedan sin
   // comprimir, así que sirven de testigo de que se regeneró.
   it('el PDF publicado lleva esos enlaces', () => {
-    const pdf = readFileSync(join('public', 'cv', `cv-${lang}.pdf`), 'latin1');
+    const pdf = readFileSync(join('public', 'cv', nombrePdf(lang)), 'latin1');
     for (const url of enlacesDelEncabezado(lang)) {
       expect(pdf).toContain(`/URI (${url})`);
     }
