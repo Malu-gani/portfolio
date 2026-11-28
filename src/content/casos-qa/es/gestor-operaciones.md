@@ -22,7 +22,7 @@ FolioTracker es una aplicación web propia para registrar operaciones de trading
 
 Es una app financiera personal: no maneja dinero de terceros, pero sí calcula los números con los que después se decide operar. Un cálculo mal hecho que se muestra con confianza es peor que un error visible, porque nadie lo va a cuestionar.
 
-**El plan de pruebas que sigue se publicó antes de escribir el primer test.** Ahora están las dos mitades: la estrategia con la que decidí atacar la app, y lo que pasó al ejecutarla — 275 pruebas en el cierre de julio, 10 defectos encontrados y arreglados, y tres severidades que había estimado mal. El repositorio es público, así que todo lo que digo acá se puede contrastar contra el código, los tests y los commits que los arreglaron.
+**El plan de pruebas que sigue se publicó antes de escribir el primer test.** Ahora están las dos mitades: la estrategia con la que decidí atacar la app, y lo que pasó al ejecutarla — 275 pruebas en el cierre de julio, 10 defectos encontrados y arreglados, y lo que había estimado mal. El repositorio es público, así que todo lo que digo acá se puede contrastar contra el código, los tests y los commits que los arreglaron.
 
 ## Estrategia de prueba
 
@@ -35,7 +35,7 @@ Prioricé por consecuencia de la falla, no por dificultad de implementación. En
 | **P2** | La interfaz muestra mal algo correcto, o deja cargar algo inválido. | Validación de formularios, paginación, filtros |
 | **P3** | Cosmético: color, espaciado, tema. | Fuera del alcance automatizado |
 
-Regla operativa: **ningún test P2 se escribe mientras quede un camino P0 sin cubrir.** Eso decidió la forma de la suite antes que cualquier preferencia de herramienta — base ancha en pruebas unitarias y de base de datos, y solo cinco flujos end-to-end.
+Regla operativa: **ningún test P2 se escribe mientras quede un camino P0 sin cubrir.** Eso decidió la forma de la suite antes que cualquier preferencia de herramienta — base ancha en pruebas unitarias y de base de datos, y un end-to-end deliberadamente chico. Hoy esa regla tiene deudas: al revisar los tests en noviembre aparecieron caminos P0 sin prueba (por ejemplo, que un usuario no pueda leer los plazos fijos de otro), y quedaron anotados como huecos conocidos en el repositorio.
 
 **Una herramienta que descarté, y por qué.** pgTAP es lo que suele recomendarse para probar PostgreSQL, y no lo usé: corre las pruebas desde adentro del motor, con permisos elevados. Eso significa que Row Level Security nunca se ejercita, que era justo la capa que tenía que verificar. Las pruebas de base de datos las escribí desde afuera, con un cliente autenticado como un usuario real.
 
@@ -44,11 +44,12 @@ Regla operativa: **ningún test P2 se escribe mientras quede un camino P0 sin cu
 | Qué | Por qué |
 |---|---|
 | Las APIs de mercado reales | Son de terceros, con límite de peticiones y valores que cambian por definición. Ningún test toca la red: pruebo cómo reacciona la app cuando esa respuesta no llega o llega mal. |
-| El renderizado de los gráficos | Pruebo las funciones puras que arman los datos. El SVG es código de terceros y la aserción es frágil. |
+| El renderizado de los gráficos | El SVG es código de terceros y la aserción es frágil. Las funciones propias que los acompañan tampoco tienen pruebas todavía: eso no es una decisión, es un hueco pendiente. |
 | El proveedor de autenticación por dentro | Código de terceros. Pruebo que la app reaccione bien a sus resultados, no su implementación. |
 | Estilos, tema y regresión visual | P3, alto costo de mantenimiento y el look cambia seguido. |
-| El crash al traducir con el navegador | No se puede automatizar de forma honesta: depende de que el traductor reescriba el DOM. Queda como caso manual con pasos de reproducción. |
-| Concurrencia real entre dos sesiones sobre la misma cuenta | Las funciones que mueven saldo toman bloqueo de fila, así que la garantía existe a nivel del motor. Lo que no automatizo es *demostrar* la carrera: exige orquestar dos sesiones simultáneas, y el escenario que la produciría —la misma persona operando desde dos pestañas a la vez— es poco frecuente frente a ese costo. Riesgo aceptado y documentado. |
+| El crash al traducir con el navegador | No se puede automatizar de forma honesta: depende de que el traductor reescriba el DOM. Queda como caso manual, todavía sin pasos de reproducción escritos. |
+
+**Un riesgo que había aceptado, y que no era como creía.** La concurrencia entre dos sesiones estaba en esa lista, apoyada en que las funciones que mueven saldo bloqueaban la fila. Al revisarlo en noviembre vi que no valía para todas: cerrar una operación y liquidar un plazo fijo no bloqueaban el registro. Escribí las pruebas, fallaron, y con la migración 023 pasan. En las otras tres funciones el bloqueo está, pero todavía ninguna prueba lo ejercita.
 
 ## Ejecución
 
@@ -64,7 +65,7 @@ El primer cierre, en julio, dejó la suite en **275 pruebas**: 186 unitarias, 18
 
 ## Hallazgos
 
-La suite encontró **10 defectos**. Los 10 están arreglados, y cada uno tiene su prueba escrita contra el comportamiento correcto y la migración que lo corrige, en el repositorio.
+La suite encontró **10 defectos**. Los 10 están arreglados: cada arreglo —una migración o un cambio en el código de la app— está en el repositorio, junto con las pruebas escritas contra el comportamiento correcto.
 
 **Dos de ellos permitían crear dinero.**
 
@@ -88,11 +89,11 @@ Los otros ocho defectos, ordenados por severidad:
 | Un stop loss en `0` se leía como "sin stop loss" | Las métricas de riesgo no se calculaban en la operación más arriesgada posible |
 | Un error crudo de Postgres se filtraba a la interfaz | Cosmético, pero deja ver el interior del sistema |
 
-**Lo que la ejecución le corrigió a la estimación.** Los 10 defectos los deduje leyendo el código, antes de escribir un solo test. Correrlos contra una base real cambió tres cosas: uno que había clasificado como crítico resultó P3, porque una restricción de columna ya lo frenaba; otro resultó peor de lo que había descrito; y el de los permisos faltantes **no se podía ver leyendo** — apareció recién al recrear la base desde cero.
+**Lo que la ejecución le corrigió a la estimación.** Nueve de los 10 defectos los deduje leyendo el código, antes de escribir un solo test. Correrlos contra una base real cambió tres cosas: uno que había clasificado como crítico resultó P3, porque una restricción de columna ya lo frenaba; otro resultó peor de lo que había descrito; y apareció el décimo, el de los permisos faltantes, que **no se podía ver leyendo** — salió recién al recrear la base desde cero.
 
 Y al revés: de los cinco casos borde que anticipé como los más peligrosos, **cuatro ya estaban correctamente implementados**. La entrada igual al stop loss lanzaba un error controlado, el stop del lado equivocado se rechazaba, los umbrales del semáforo respetaban el límite inclusive y el cierre parcial acreditaba solo la porción. Solo el quinto rozó un defecto real.
 
-La conclusión me sirvió más que los propios defectos: **el análisis estático acierta el dónde y falla el cuánto.** Leer el código me llevó a las funciones correctas, y se equivocó en casi todas las severidades. Es el argumento para escribir la suite en una línea: sin ejecutarla, habría priorizado mal el trabajo de arreglo.
+La conclusión me sirvió más que los propios defectos: **el análisis estático acierta el dónde y falla el cuánto.** Leer el código me llevó a las funciones correctas, pero no alcanzó para saber cuánto daño hacía cada falla. Es el argumento para escribir la suite en una línea: sin ejecutarla, habría priorizado mal el trabajo de arreglo.
 
 **Un defecto que ningún usuario podría haber reportado.** Al automatizar la confirmación por email apareció que el enlace del mail nunca completaba la sesión: las cookies se escribían donde no sobrevivían a la redirección, y la URL de retorno se armaba con un origen que en producción resolvía a `localhost`. Nadie iba a reportarlo, porque el único afectado era alguien que todavía no podía entrar.
 
@@ -100,7 +101,7 @@ La conclusión me sirvió más que los propios defectos: **el análisis estátic
 
 **Qué corre, cuándo y con qué costo.** La integración continua tiene dos trabajos separados justamente por costo. Uno rápido, en cada push: verificación de tipos, análisis estático y pruebas unitarias, todo sin dependencias externas. Uno completo, solo en los pull requests: levanta su propia base de datos en Docker dentro del runner, aplica las migraciones y corre las pruebas de integración y las end-to-end. Separarlos evita la trampa habitual — una suite tan lenta que se termina salteando.
 
-**La cobertura se reporta, pero no bloquea.** Poner un mínimo de cobertura premia escribir pruebas de relleno para llegar al número. El criterio real es la priorización por consecuencia de la falla: prefiero 60% de cobertura donde está el dinero que 90% repartido parejo.
+**No mido cobertura.** No hay herramienta configurada ni umbral: un mínimo de cobertura premia escribir pruebas de relleno para llegar al número. El criterio real es la priorización por consecuencia de la falla: prefiero cubrir bien donde está el dinero que repartir pruebas parejo por todo el código.
 
 **Las pruebas de un defecto conocido nacen en rojo.** Cuando la suite encontraba un defecto, escribía la prueba contra el comportamiento *correcto*, no contra el que tenía la app, y la dejaba marcada como fallo esperado. Una suite que nace en verde sobre un bug lo convierte en especificación. El arreglo va en un cambio aparte, y ahí la prueba pasa a verde en el mismo movimiento que lo corrige.
 
@@ -112,8 +113,8 @@ Publiqué el plan de pruebas antes de escribir la primera prueba, y eso me oblig
 
 Lo incómodo de haberlo publicado antes es que ahora también se ve dónde me equivoqué, y prefiero que se vea. **Dos cosas haría distinto:**
 
-**Ejecutar contra una base real mucho antes de fijar severidades.** Tres de las diez clasificaciones estaban mal, y una de ellas hizo que casi priorizara un arreglo P3 por encima de uno que dejaba el saldo en negativo. Un puñado de pruebas corriendo contra la base al segundo día habría reordenado el trabajo de arreglo entero.
+**Ejecutar contra una base real mucho antes de fijar severidades.** Uno de los tres defectos que había clasificado como críticos resultó P3, y por esa clasificación casi priorizo su arreglo por encima de uno que dejaba el saldo en negativo. Un puñado de pruebas corriendo contra la base al segundo día habría reordenado el trabajo de arreglo entero.
 
-**Recrear el entorno desde cero como primer paso, no como consecuencia.** El defecto de los permisos faltantes era invisible leyendo el código y llevaba meses ahí: la app funcionaba en la nube porque heredaba permisos del entorno, no porque el repositorio los definiera. Apareció solo, sin buscarlo, al levantar la base desde las migraciones. Levantar un proyecto desde cero es una prueba en sí misma, y no la había pensado como tal.
+**Recrear el entorno desde cero como primer paso, no como consecuencia.** El defecto de los permisos faltantes era invisible leyendo el código y estaba ahí desde las primeras migraciones: la app funcionaba en la nube porque heredaba permisos del entorno, no porque el repositorio los definiera. Apareció solo, sin buscarlo, al levantar la base desde las migraciones. Levantar un proyecto desde cero es una prueba en sí misma, y no la había pensado como tal.
 
 Lo que me llevo del conjunto: un plan de pruebas sirve aunque se equivoque, **siempre que después se lo confronte**. El valor no estuvo en acertar, estuvo en tener algo escrito contra qué comparar.
