@@ -31,7 +31,7 @@ Isolation between users lives in the database, with Row Level Security on every 
 
 Under active development. The trades, per-account balances, multi-portfolio and fixed-term deposit flows are implemented; the alerts module is in the data model but not built yet.
 
-It has an automated test suite and runs in continuous integration. The design of that suite, the defects it found, and what was deliberately left untested are covered in the case on this portfolio's QA track.
+It has an automated test suite and runs in continuous integration. The design of that suite, the defects it found, and what was deliberately left untested are covered in FolioTracker's QA case, within this portfolio.
 
 ## Deployment and operation
 
