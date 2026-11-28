@@ -66,7 +66,7 @@ Accessibility with `axe-core` (WCAG 2.0/2.1 A and AA) across the site's 22 real 
 On GitHub Actions, each of the 4 Playwright projects runs in its own matrix job, with `--workers=1`. That setup came from an intermittent `NS_ERROR_CONNECTION_REFUSED` on local runs, on a different route each time: since it stopped showing up with a single worker, I concluded that parallel runs were saturating the `npm run preview` server. The diagnosis was wrong. In November the cause turned up: on Windows that server was listening on only one of the two addresses `localhost` resolves to, and Firefox sometimes tried the other one; Chromium and WebKit retried on their own. The fix was to use `127.0.0.1` explicitly in the server and in the tests, with a unit test that keeps them matching. In CI I kept one job per browser. Reports from all 4 runs get published to GitHub Pages on every push to `main`.
 
 <Metricas items={[
-  { etiqueta: 'Unit', valor: '140+' }, { etiqueta: 'E2E × 4', valor: '250+' },
+  { etiqueta: 'Unit', valor: '140+' }, { etiqueta: 'E2E × 4', valor: '240+' },
   { etiqueta: 'A11y routes', valor: '22 × 2' }, { etiqueta: 'Real bugs', valor: '3' },
 ]} />
 
