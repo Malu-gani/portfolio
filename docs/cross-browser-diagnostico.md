@@ -12,7 +12,9 @@ Corriendo la suite completa (`npx playwright test`, 4 proyectos) contra un `npm 
 | `tests/e2e/a11y.spec.ts` | `el foco siempre es visible` | webkit |
 | `tests/e2e/dev.spec.ts` | `se navega al detalle del proyecto` | webkit |
 
-Los otros navegadores mostraron, en corridas con varios workers en paralelo, `NS_ERROR_CONNECTION_REFUSED` intermitente en rutas distintas cada vez. Aislado con `--workers=1` (un proyecto a la vez, sin concurrencia interna), el error no reaparece: es saturación del `npm run preview` local bajo carga de varios workers, no un bug de accesibilidad ni de contenido. Es la razón por la que CI corre cada proyecto de Playwright en su propio job con `--workers=1` (ver `.github/workflows/ci.yml`).
+Los otros navegadores mostraron, en corridas con varios workers en paralelo, `NS_ERROR_CONNECTION_REFUSED` intermitente en rutas distintas cada vez. Como aislado con `--workers=1` (un proyecto a la vez, sin concurrencia interna) el error no reaparecía, en ese momento se atribuyó a saturación del `npm run preview` local. De ahí salió que CI corra cada proyecto de Playwright en su propio job con `--workers=1` (ver `.github/workflows/ci.yml`).
+
+**Ese diagnóstico estaba mal (corregido el 24/11/2026, PORT-US-20).** En Windows, `astro preview` escuchaba en una sola de las direcciones de `localhost` (`[::1]`), y Firefox a veces resolvía a la otra (`127.0.0.1`) y recibía la conexión rechazada; Chromium y WebKit reintentaban con la otra dirección. El servidor de prueba, `baseURL` y la URL de espera usan ahora `127.0.0.1`, y `tests/unit/playwright-config.test.ts` fija que coincidan. La configuración de CI se mantiene.
 
 Los 4 tests `skipped` de `contacto.spec.ts` (portapapeles, restringidos a Chromium) están escritos correctamente y no requieren acción.
 

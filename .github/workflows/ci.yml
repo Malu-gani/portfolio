@@ -69,20 +69,12 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Tests E2E y de accesibilidad (${{ matrix.project }})
-        # --workers=1: correr los 4 proyectos de Playwright en paralelo (o un
-        # solo proyecto con sus workers por defecto) contra un único
-        # `npm run preview` local satura ese servidor y produce
-        # NS_ERROR_CONNECTION_REFUSED de forma intermitente en una ruta
-        # distinta cada vez -- diagnosticado y reproducido en
-        # docs/cross-browser-diagnostico.md.
-        # Cada proyecto ya corre aislado en su propio job de esta matriz (cada
-        # uno con su propio runner y su propio `npm run preview`), lo que
-        # elimina la contención ENTRE proyectos; --workers=1 elimina también
-        # la contención DENTRO de un mismo proyecto, que es la que de hecho
-        # disparó el error en el diagnóstico (firefox solo, con sus 3 workers
-        # por defecto, ya lo reproducía). Es una decisión conservadora --
-        # cambia paralelismo por estabilidad -- y no está probada en un
-        # runner de CI real, solo en local.
+        # --workers=1: se adoptó cuando el NS_ERROR_CONNECTION_REFUSED
+        # intermitente en local se atribuyó a saturación del `npm run preview`.
+        # La causa real era la resolución de `localhost` (PORT-US-20, ver
+        # docs/cross-browser-diagnostico.md). La configuración se mantiene:
+        # cada proyecto corre en su propio job, con su runner y su servidor, y
+        # cambia paralelismo por estabilidad.
         #
         # No se excluyen "enlaces externos" ni la regresión visual acá: ambos
         # describes ya se saltan solos con `test.skip(!!process.env.CI, ...)`

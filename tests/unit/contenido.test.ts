@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { rutasDelSitio } from '../e2e/utils/rutas';
 
 const colecciones = ['casos-qa', 'proyectos'];
 
@@ -76,6 +77,28 @@ describe('Integridad del contenido', () => {
           `${archivo}: los valores de las métricas difieren entre idiomas`)
           .toEqual(enEs.map((m) => m.valor));
       }
+    });
+  }
+});
+
+// El caso de la suite de este sitio publica cuántas rutas recorre el barrido de
+// accesibilidad y enlaces. Ese número sale del filesystem (`rutasDelSitio`),
+// así que cambia solo al sumar una página o un caso, y el texto se queda atrás
+// sin que nada más lo note.
+describe('Caso de la suite del portfolio', () => {
+  const casos = [
+    { lang: 'es', etiqueta: 'Rutas a11y', frase: (n: number) => [`las ${n} rutas`, `las mismas ${n} rutas`] },
+    { lang: 'en', etiqueta: 'A11y routes', frase: (n: number) => [`${n} real routes`, `same ${n} routes`] },
+  ];
+
+  for (const { lang, etiqueta, frase } of casos) {
+    it(`declara la cantidad real de rutas del sitio (${lang})`, () => {
+      const total = rutasDelSitio().length;
+      const texto = readFileSync(
+        join('src', 'content', 'casos-qa', lang, 'suite-e2e-portfolio.mdx'), 'utf8');
+
+      expect(texto).toContain(`{ etiqueta: '${etiqueta}', valor: '${total} × 2' }`);
+      for (const esperada of frase(total)) expect(texto).toContain(esperada);
     });
   }
 });

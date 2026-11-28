@@ -31,7 +31,7 @@ El aislamiento entre usuarios está en la base de datos, con Row Level Security 
 
 En desarrollo activo. Los flujos de operaciones, saldos por cuenta, multi-portafolio y plazos fijos están implementados; el módulo de alertas está en el modelo de datos pero todavía no construido.
 
-Tiene suite de pruebas automatizada y corre en integración continua. El diseño de esa suite, los defectos que encontró y qué se decidió no probar están en el caso del carril de QA de este portfolio.
+Tiene suite de pruebas automatizada y corre en integración continua. El diseño de esa suite, los defectos que encontró y qué se decidió no probar están en el caso de QA de FolioTracker, dentro de este portfolio.
 
 ## Despliegue y operación
 

@@ -22,7 +22,7 @@ FolioTracker is a web application I built to log trading operations (crypto and 
 
 It's a personal financial app: it doesn't handle anyone else's money, but it does calculate the numbers used to decide whether to trade. A wrong calculation displayed with confidence is worse than a visible error, because nobody questions it.
 
-**The test plan below was published before I wrote the first test.** Now both halves exist: the strategy I chose to attack the app with, and what happened when I executed it — 275 tests at the July close, 10 defects found and fixed, and three severities I had estimated wrong. The repository is public, so everything I claim here can be checked against the code, the tests, and the commits that fixed them.
+**The test plan below was published before I wrote the first test.** Now both halves exist: the strategy I chose to attack the app with, and what happened when I executed it — 275 tests at the July close, 10 defects found and fixed, and what I had estimated wrong. The repository is public, so everything I claim here can be checked against the code, the tests, and the commits that fixed them.
 
 ## Test strategy
 
@@ -35,7 +35,7 @@ I prioritized by consequence of failure, not by ease of implementation. In a ris
 | **P2** | The interface displays something correct incorrectly, or accepts invalid input. | Form validation, pagination, filters |
 | **P3** | Cosmetic: color, spacing, theme. | Outside the automated scope |
 
-Operating rule: **no P2 test gets written while a P0 path remains uncovered.** That decided the shape of the suite before any tool preference did — a wide base of unit and database tests, and only five end-to-end flows.
+Operating rule: **no P2 test gets written while a P0 path remains uncovered.** That decided the shape of the suite before any tool preference did — a wide base of unit and database tests, and a deliberately small end-to-end layer. Today that rule has debts: reviewing the tests in November turned up untested P0 paths (for example, that one user can't read another's fixed deposits), and they're recorded as known gaps in the repository.
 
 **A tool I ruled out, and why.** pgTAP is the usual recommendation for testing PostgreSQL, and I didn't use it: it runs tests from inside the engine, with elevated privileges. That means Row Level Security is never exercised — precisely the layer I needed to verify. I wrote the database tests from the outside, with a client authenticated as a real user.
 
@@ -44,15 +44,16 @@ Operating rule: **no P2 test gets written while a P0 path remains uncovered.** T
 | What | Why |
 |---|---|
 | The real market data APIs | Third-party, rate-limited, and returning values that change by definition. No test touches the network: I test how the app reacts when that response doesn't arrive or arrives malformed. |
-| Chart rendering | I test the pure functions that build the data. The SVG is third-party code and the assertion is brittle. |
+| Chart rendering | The SVG is third-party code and the assertion is brittle. The app's own functions around the charts aren't tested yet either: that isn't a decision, it's a pending gap. |
 | The authentication provider's internals | Third-party code. I test that the app reacts correctly to its results, not its implementation. |
 | Styles, theme and visual regression | P3, high maintenance cost, and the look changes often. |
-| The crash when translating with the browser | It can't be automated honestly: it depends on the translator rewriting the DOM. It stays as a manual case with reproduction steps. |
-| Real concurrency between two sessions on the same account | The balance-moving functions take a row lock, so the guarantee exists at the engine level. What I don't automate is *demonstrating* the race: it requires orchestrating two simultaneous sessions, and the scenario that would produce it —the same person operating from two tabs at once— is infrequent relative to that cost. Accepted and documented risk. |
+| The crash when translating with the browser | It can't be automated honestly: it depends on the translator rewriting the DOM. It stays as a manual case, with no written reproduction steps yet. |
+
+**A risk I had accepted, and that wasn't what I thought.** Concurrency between two sessions was on that list, resting on the balance-moving functions locking the row. Reviewing it in November, I found that didn't hold for all of them: closing a position and settling a fixed deposit didn't lock the record. I wrote the tests, they failed, and with migration 023 they pass. In the other three functions the lock is there, but no test exercises it yet.
 
 ## Execution
 
-The first close, in July, left the suite at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. It has grown with the application since: the full continuous-integration run on November 25, 2026 passed **428 tests** — 258 unit and component, 161 integration, and 9 end-to-end. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
+The first close, in July, left the suite at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. It has grown with the application since: the full continuous-integration run on November 28, 2026 passed **433 tests** — 258 unit and component, 166 integration, and 9 end-to-end. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
 
 **The database is tested for real, not simulated.** I spin up a local, ephemeral Postgres in Docker, with migrations applied in order by a script, and the integration tests run against that. It lets me exercise Row Level Security with a real user session, which was the point: a simulated isolation policy proves nothing.
 
@@ -64,7 +65,7 @@ The first close, in July, left the suite at **275 tests**: 186 unit, 18 componen
 
 ## Findings
 
-The suite found **10 defects**. All 10 are fixed, and each one has its test written against the correct behavior and the migration that corrects it, in the repository.
+The suite found **10 defects**. All 10 are fixed: each fix —a migration or a change in the app code— is in the repository, along with the tests written against the correct behavior.
 
 **Two of them allowed money to be created.**
 
@@ -88,11 +89,11 @@ The other eight defects, ordered by severity:
 | A stop loss of `0` was read as "no stop loss" | Risk metrics weren't calculated on the riskiest possible position |
 | A raw Postgres error leaked to the interface | Cosmetic, but it exposes the system's internals |
 
-**What execution corrected in my estimates.** I deduced all 10 defects by reading the code, before writing a single test. Running them against a real database changed three things: one I had classified as critical turned out to be P3, because a column constraint already stopped it; another turned out worse than I had described; and the missing-permissions one **couldn't be seen by reading** — it only appeared when rebuilding the database from scratch.
+**What execution corrected in my estimates.** I deduced nine of the 10 defects by reading the code, before writing a single test. Running them against a real database changed three things: one I had classified as critical turned out to be P3, because a column constraint already stopped it; another turned out worse than I had described; and the tenth showed up, the missing-permissions one, which **couldn't be seen by reading** — it only appeared when rebuilding the database from scratch.
 
 And the other way around: of the five edge cases I anticipated as the most dangerous, **four were already correctly implemented**. An entry price equal to the stop loss threw a controlled error, a stop on the wrong side was rejected, the traffic-light thresholds respected their inclusive upper bound, and a partial close credited only the closed portion. Only the fifth grazed a real defect.
 
-The conclusion was worth more to me than the defects themselves: **static analysis gets the *where* right and the *how much* wrong.** Reading the code led me to the right functions, and got almost every severity wrong. That's the argument for writing the suite in one line: without executing it, I would have prioritized the fix work badly.
+The conclusion was worth more to me than the defects themselves: **static analysis gets the *where* right and the *how much* wrong.** Reading the code led me to the right functions, but wasn't enough to know how much damage each fault did. That's the argument for writing the suite in one line: without executing it, I would have prioritized the fix work badly.
 
 **A defect no user could ever have reported.** While automating email confirmation, it turned out the link in the email never completed the session: cookies were written where they didn't survive the redirect, and the return URL was built from an origin that resolved to `localhost` in production. Nobody was going to report it, because the only person affected was someone who couldn't get in yet.
 
@@ -100,7 +101,7 @@ The conclusion was worth more to me than the defects themselves: **static analys
 
 **What runs, when, and at what cost.** Continuous integration has two jobs separated precisely by cost. A fast one, on every push: type checking, static analysis and unit tests, all without external dependencies. A full one, only on pull requests: it spins up its own database in Docker inside the runner, applies the migrations, and runs the integration and end-to-end tests. Separating them avoids the usual trap — a suite so slow that people start skipping it.
 
-**Coverage is reported, but doesn't block.** Setting a coverage minimum rewards writing filler tests to reach the number. The real criterion is prioritization by consequence of failure: I'd rather have 60% coverage where the money is than 90% spread evenly.
+**I don't measure coverage.** There's no tool configured and no threshold: a coverage minimum rewards writing filler tests to reach the number. The real criterion is prioritization by consequence of failure: I'd rather cover well where the money is than spread tests evenly across all the code.
 
 **Tests for a known defect are born red.** When the suite found a defect, I wrote the test against the *correct* behavior, not the one the app had, and marked it as an expected failure. A suite born green on top of a bug turns that bug into the specification. The fix goes in a separate change, and there the test turns green in the same move that corrects it.
 
@@ -112,8 +113,8 @@ I published the test plan before writing the first test, and that forced me to d
 
 The uncomfortable part of having published it first is that now you can also see where I got it wrong, and I'd rather that be visible. **Two things I'd do differently:**
 
-**Execute against a real database long before fixing severities.** Three of the ten classifications were wrong, and one of them nearly made me prioritize a P3 fix over one that left the balance negative. A handful of tests running against the database on day two would have reordered the entire fix effort.
+**Execute against a real database long before fixing severities.** One of the three defects I had classified as critical turned out to be P3, and because of that classification I nearly prioritized its fix over one that left the balance negative. A handful of tests running against the database on day two would have reordered the entire fix effort.
 
-**Rebuild the environment from scratch as a first step, not as a consequence.** The missing-permissions defect was invisible in the code and had been there for months: the app worked in the cloud because it inherited permissions from the environment, not because the repository defined them. It surfaced on its own, unsought, when bringing the database up from the migrations. Standing a project up from zero is a test in itself, and I hadn't thought of it as one.
+**Rebuild the environment from scratch as a first step, not as a consequence.** The missing-permissions defect was invisible in the code and had been there since the first migrations: the app worked in the cloud because it inherited permissions from the environment, not because the repository defined them. It surfaced on its own, unsought, when bringing the database up from the migrations. Standing a project up from zero is a test in itself, and I hadn't thought of it as one.
 
 What I take from all of it: a test plan is worth writing even when it's wrong, **as long as you confront it afterwards**. The value wasn't in being right, it was in having something written to compare against.
