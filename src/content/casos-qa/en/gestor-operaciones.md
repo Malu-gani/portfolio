@@ -53,7 +53,7 @@ Operating rule: **no P2 test gets written while a P0 path remains uncovered.** T
 
 ## Execution
 
-The first close, in July, left the suite at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. It has grown with the application since: the full continuous-integration run on November 25, 2026 passed **428 tests** — 258 unit and component, 161 integration, and 9 end-to-end. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
+The first close, in July, left the suite at **275 tests**: 186 unit, 18 component, 66 integration against Postgres, and 5 end-to-end flows, which became 9 after adding email verification. It has grown with the application since: the full continuous-integration run on November 28, 2026 passed **433 tests** — 258 unit and component, 166 integration, and 9 end-to-end. The shape isn't accidental: the risk calculations are pure functions and test in milliseconds, so that's where the base is; end-to-end is the most expensive level to maintain and was reserved for the paths whose value lies in the pieces working together.
 
 **The database is tested for real, not simulated.** I spin up a local, ephemeral Postgres in Docker, with migrations applied in order by a script, and the integration tests run against that. It lets me exercise Row Level Security with a real user session, which was the point: a simulated isolation policy proves nothing.
 

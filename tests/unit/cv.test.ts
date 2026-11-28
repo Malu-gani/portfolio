@@ -95,11 +95,11 @@ describe.each(IDIOMAS)('caso de QA de FolioTracker en %s', (lang) => {
     expect(texto.match(/^resumen: "(.*)"$/m)![1]).toContain('400');
   });
 
-  // Cifras de la corrida completa de CI de FolioTracker del 25/11/2026. Las 275
+  // Cifras de la corrida completa de CI de FolioTracker del 28/11/2026. Las 275
   // quedan en el relato como lo que fueron: el cierre de julio.
   it('explica en el detalle la cifra actual y su composición', () => {
     const detalle = casoQa(lang).split(/^---$/m)[2];
-    for (const cifra of ['275', '428', '258', '161']) {
+    for (const cifra of ['275', '433', '258', '166']) {
       expect(detalle).toContain(cifra);
     }
   });
