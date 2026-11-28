@@ -15,8 +15,8 @@ type Idioma = (typeof IDIOMAS)[number];
 const leer = (...partes: string[]) => readFileSync(join(...partes), 'utf8');
 const htmlCv = (lang: Idioma) => leer('scripts', 'cv', `cv-${lang}.html`);
 const casoQa = (lang: Idioma) => leer('src', 'content', 'casos-qa', lang, 'gestor-operaciones.md');
-// Con nombre y apellido: es lo que queda en las descargas de quien lo recibe.
-const nombrePdf = (lang: Idioma) => `Juan-Manuel-Malugani-CV-${lang.toUpperCase()}.pdf`;
+// Con nombre, apellido y puesto: es lo que queda en las descargas de quien lo recibe.
+const nombrePdf = (lang: Idioma) => `Juan-Manuel-Malugani-QA-Engineer-CV-${lang.toUpperCase()}.pdf`;
 
 /** El texto que lee una persona: sin estilos, sin etiquetas, espacios colapsados. */
 const textoCv = (lang: Idioma) =>
@@ -62,7 +62,7 @@ describe.each(IDIOMAS)('CV en %s', (lang) => {
     }
   });
 
-  it('se publica solo con el nombre y apellido en el archivo', () => {
+  it('se publica solo con nombre, apellido y puesto en el archivo', () => {
     expect(existsSync(join('public', 'cv', nombrePdf(lang)))).toBe(true);
     expect(existsSync(join('public', 'cv', `cv-${lang}.pdf`))).toBe(false);
   });

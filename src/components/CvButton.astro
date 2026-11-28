@@ -6,5 +6,5 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
-<AccionBoton href={`/cv/Juan-Manuel-Malugani-CV-${lang.toUpperCase()}.pdf`} download testid="cv-descargar"
+<AccionBoton href={`/cv/Juan-Manuel-Malugani-QA-Engineer-CV-${lang.toUpperCase()}.pdf`} download testid="cv-descargar"
   variante="descargar" tono="acento" tamano="grande" texto={t('cv.descargar')} />

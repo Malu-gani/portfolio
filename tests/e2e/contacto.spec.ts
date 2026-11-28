@@ -55,7 +55,7 @@ test.describe('Contacto y CV', () => {
       page.waitForEvent('download'),
       page.getByTestId('cv-descargar').click(),
     ]);
-    expect(descarga.suggestedFilename()).toBe('Juan-Manuel-Malugani-CV-ES.pdf');
+    expect(descarga.suggestedFilename()).toBe('Juan-Manuel-Malugani-QA-Engineer-CV-ES.pdf');
   });
 
   test('el CV en inglés se descarga', async ({ page }) => {
@@ -64,6 +64,6 @@ test.describe('Contacto y CV', () => {
       page.waitForEvent('download'),
       page.getByTestId('cv-descargar').click(),
     ]);
-    expect(descarga.suggestedFilename()).toBe('Juan-Manuel-Malugani-CV-EN.pdf');
+    expect(descarga.suggestedFilename()).toBe('Juan-Manuel-Malugani-QA-Engineer-CV-EN.pdf');
   });
 });
