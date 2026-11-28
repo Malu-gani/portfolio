@@ -5,6 +5,7 @@ import EjemploBanner from '../components/EjemploBanner.astro';
 import AccionBoton from '../components/AccionBoton.astro';
 import { useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
+import { formatearFecha } from '../data/fecha';
 
 interface Props {
   lang: Lang;
@@ -27,7 +28,7 @@ const t = useTranslations(lang);
       <p data-testid="caso-estado" class="mt-2 text-sm text-muted">
         {datos.estado && <>{datos.estado === 'completo' ? t('caso.completo') : t('caso.enProgreso')} · </>}
         <time datetime={datos.fecha.toISOString()}>
-            {datos.fecha.toLocaleDateString(lang === 'es' ? 'es-AR' : 'en-US')}
+            {formatearFecha(datos.fecha, lang)}
           </time>
       </p>
       <p class="mt-3 max-w-prose text-lg text-muted">{datos.resumen}</p>
