@@ -42,8 +42,8 @@ jobs:
         # ya no aplica, y dejarlo informativo significaría que un `ejemplo:
         # true` reintroducido pase inadvertido hasta que alguien lea el log.
         # Falla si vuelve a aparecer contenido de ejemplo en cualquier
-        # colección. `tests/e2e/casos.spec.ts` cubre el mismo invariante desde
-        # el lado del sitio renderizado.
+        # colección. `tests/e2e/proyectos.spec.ts` cubre el mismo invariante
+        # desde el lado del sitio renderizado.
         run: npm run check:listo
 
   e2e:
