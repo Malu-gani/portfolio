@@ -1,4 +1,4 @@
-// Genera public/cv/cv-es.pdf y public/cv/cv-en.pdf a partir de scripts/cv/*.html
+// Genera public/cv/Juan-Manuel-Malugani-QA-Engineer-CV-{ES,EN}.pdf a partir de scripts/cv/*.html
 // usando Chromium (via Playwright, ya presente como devDependency del proyecto).
 const path = require('path');
 const fs = require('fs');
@@ -8,8 +8,8 @@ const outDir = path.join(__dirname, '..', 'public', 'cv');
 fs.mkdirSync(outDir, { recursive: true });
 
 const paginas = [
-  { html: 'cv-es.html', pdf: 'cv-es.pdf' },
-  { html: 'cv-en.html', pdf: 'cv-en.pdf' },
+  { html: 'cv-es.html', pdf: 'Juan-Manuel-Malugani-QA-Engineer-CV-ES.pdf' },
+  { html: 'cv-en.html', pdf: 'Juan-Manuel-Malugani-QA-Engineer-CV-EN.pdf' },
 ];
 
 (async () => {
